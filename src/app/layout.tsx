@@ -12,10 +12,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const descricao =
+  "Centralize Google Ads, Meta Ads e e-commerce em um painel único. Veja qual canal realmente gerou cada venda e pare de perder tempo com relatórios manuais.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://getdashia.com.br"),
   title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
-  description:
-    "Centralize Google Ads, Meta Ads e e-commerce em um painel único. Veja qual canal realmente gerou cada venda e pare de perder tempo com relatórios manuais.",
+  description: descricao,
+  openGraph: {
+    title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
+    description: descricao,
+    url: "https://getdashia.com.br",
+    siteName: "GetDashia",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
+    description: descricao,
+  },
 };
 
 export default function RootLayout({

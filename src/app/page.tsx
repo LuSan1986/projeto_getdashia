@@ -6,6 +6,8 @@ import Funcionalidades from "@/components/landing/funcionalidades";
 import ProvaSocial from "@/components/landing/prova-social";
 import Planos from "@/components/landing/planos";
 import FAQ from "@/components/landing/faq";
+import CtaFinal from "@/components/landing/cta-final";
+import Footer from "@/components/landing/footer";
 
 export default function Page() {
   return (
@@ -19,7 +21,9 @@ export default function Page() {
         <ProvaSocial />
         <Planos />
         <FAQ />
+        <CtaFinal />
       </main>
+      <Footer />
     </>
   );
 }
