@@ -30,102 +30,87 @@
 - **E-mail transacional:** Resend
 
 ### Estrutura de pastas obrigatória
-```
+
 src/
-  components/
-  lib/
-    db/
-    integrations/
-  types/
-```
+components/
+lib/
+db/
+integrations/
+types/
 
 ---
 
 ## 3. DOCUMENTAÇÃO DO PRODUTO
 
-O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório. Contém:
-- Problema, solução e proposta de valor
-- Personas (gestor de tráfego, dono de e-commerce)
-- Roadmap dividido em 3 fases
-- 10 diretrizes de desenvolvimento
+O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 
 ---
 
 ## 4. ESTADO ATUAL
 
-**Última atualização:** 2026-05-03
+**Última atualização:** 2026-05-04
 
 ### Concluído
 
-**Fase 1 / Passos 0–4 — Landing v1 completa**
-- Infraestrutura: Git local, GitHub privado, Next.js 16 com diretório `src/`, shadcn/ui inicializado.
-- Landing page com 10 seções: Header, Hero, Problema, Como Funciona, Funcionalidades, Prova Social, Planos, FAQ, CTA Final, Footer.
+**Fase 1 — Landing v1 completa**
+- Infraestrutura: Git local, GitHub privado, Next.js 16, shadcn/ui.
+- Landing page com 10 seções completas.
 - OG image, `sitemap.ts`, `robots.ts` implementados.
-- Build local limpo (`npm run build` sem erros).
-- Tudo commitado e pushado para o GitHub.
+- Deploy na Vercel: `www.getdashia.com.br` com SSL ativo ✅
 
-**Deploy na Vercel — concluído**
-- Projeto `projeto-getdashia` deployado no plano Hobby.
-- URL provisória ativa: `projeto-getdashia.vercel.app` ✅
-- DNS configurado no Hostinger: `A @ → 216.198.79.1` e `CNAME www → cname.vercel-dns.com` ✅
-- `www.getdashia.com.br` conectado e SSL sendo gerado ✅
+**Fase 2 — Waitlist (concluído)**
+- Projeto `getdashia` criado no Supabase (região São Paulo) ✅
+- Tabela `waitlist` com RLS e policy de inserção pública ✅
+- `src/lib/supabase.ts` com cliente usando chaves legadas ✅
+- API route `src/app/api/waitlist/route.ts` implementada ✅
+- Variáveis de ambiente na Vercel corrigidas e funcionando ✅
+- Formulário testado: dados chegando no Supabase ✅
 
 ### Em andamento
 
-- **Propagação DNS do domínio raiz:** `getdashia.com.br` ainda mostra "Invalid Configuration" na Vercel — aguardando propagação (pode levar até 30 min).
+- Nada no momento.
 
 ### Pendente (ordem planejada)
 
-1. Confirmar que `getdashia.com.br` ficou verde na Vercel (Refresh após propagação DNS)
-2. Testar `https://getdashia.com.br` no navegador
-3. **Fase 2:** Supabase (auth + banco), OAuth Google Ads, dashboard básico, captura de e-mails da waitlist em banco real
+1. Fase 2: autenticação de usuários (Supabase Auth)
+2. Fase 2: dashboard básico
 
 ---
 
 ## 5. CONTEXTO PESSOAL
 
 - **Quem sou:** Luciano (LuSan1986) — estou aprendendo programação na prática usando IA, não sou dev profissional.
-- **Ferramentas:** uso o Claude Code dentro do VS Code (PowerShell) para construir o código.
-- **Papel do chat:** o assistente neste chat é mentor estratégico — revisa planos antes da execução, explica o "porquê" das coisas, orienta passo-a-passo no Windows.
-- **Tom preferido:** passo-a-passo simples, explicar conceitos antes de comandos, sem jargão não definido, como se ensinasse alguém de 16 anos curioso e motivado.
-- **Honestidade:** sem números inventados, sem depoimentos falsos — o produto deve refletir seu estado real.
-- **Respostas curtas** sempre que possível para economizar o limite de contexto do chat.
+- **Ferramentas:** uso o Claude Code dentro do VS Code (PowerShell).
+- **Papel do chat:** mentor estratégico — revisa planos antes da execução, explica o "porquê", orienta passo-a-passo no Windows.
+- **Tom preferido:** passo-a-passo simples, sem jargão, como se ensinasse alguém de 16 anos curioso e motivado.
+- **Honestidade:** sem números inventados, sem depoimentos falsos.
+- **Respostas curtas** sempre que possível.
 
 ---
 
 ## 6. DIRETRIZES TÉCNICAS (as 10 regras do projeto)
 
-1. **Stack obrigatória** — sem alternativas: Next.js 16+ App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase, Stripe, Vercel, Resend.
+1. **Stack obrigatória** — Next.js 16+ App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase, Stripe, Vercel, Resend.
 2. **Estrutura de pastas** — `src/components/`, `src/lib/db/`, `src/lib/integrations/`, `src/types/`.
 3. **Multi-tenancy** — todas as queries ao Supabase filtram por `organization_id`.
-4. **Segurança** — chaves e secrets nunca em código; sempre `process.env`. Arquivo `.env` protegido pelo `.gitignore`.
-5. **Mobile-first** — layout pensado primeiro para telas pequenas, expandido com breakpoints Tailwind.
-6. **Português brasileiro** — toda interface voltada ao usuário final escrita em pt-BR.
-7. **Foco no MVP da Fase 1** — não antecipar funcionalidades das Fases 2 ou 3.
-8. **Commits semânticos** — formato `tipo(escopo): descrição em inglês`. Ex.: `feat(landing): add hero section`.
-9. **Build local antes do push** — rodar `npm run build` sem erros antes de qualquer `git push`.
+4. **Segurança** — chaves e secrets nunca em código; sempre `process.env`.
+5. **Mobile-first** — layout pensado primeiro para telas pequenas.
+6. **Português brasileiro** — toda interface voltada ao usuário final em pt-BR.
+7. **Foco no MVP** — não antecipar funcionalidades futuras.
+8. **Commits semânticos** — `tipo(escopo): descrição em inglês`.
+9. **Build local antes do push** — `npm run build` sem erros antes do `git push`.
 10. **Dark-first** — paleta zinc/indigo, tema escuro como padrão.
 
 ---
 
 ## 7. PRÓXIMO PASSO IMEDIATO
 
-Aguardar propagação DNS (15–30 min) e clicar em **Refresh** ao lado de `getdashia.com.br` na Vercel (Settings → Domains).
-
-Quando ficar verde, testar `https://getdashia.com.br` no navegador.
-Em seguida, iniciar a **Fase 2** com Supabase.
+Iniciar autenticação de usuários com Supabase Auth: criar fluxo de cadastro e login (e-mail + senha), proteger rotas do dashboard.
 
 ---
 
 ## 8. COMO USAR ESTE ARQUIVO
 
-1. **Antes de migrar de chat:** atualize a seção **4. ESTADO ATUAL** — mova o que foi concluído para "Concluído", atualize "Em andamento" e "Pendente", e escreva o próximo passo concreto na seção **7. PRÓXIMO PASSO IMEDIATO**.
-2. **Ao abrir um chat novo:** copie o conteúdo completo deste arquivo e cole como primeira mensagem.
-3. **Versionamento:** commite este arquivo sempre que atualizar, para manter o histórico de progresso no Git.
-
-```powershell
-# Após atualizar o arquivo:
-git add docs/handoff-chat.md
-git commit -m "docs: update handoff with current project state"
-git push
-```
+1. **Antes de migrar de chat:** atualize a seção **4. ESTADO ATUAL**.
+2. **Ao abrir um chat novo:** cole o conteúdo completo como primeira mensagem.
+3. **Versionamento:** commite sempre que atualizar.
