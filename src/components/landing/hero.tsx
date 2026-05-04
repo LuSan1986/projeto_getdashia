@@ -8,11 +8,30 @@ import { Badge } from "@/components/ui/badge";
 export default function Hero() {
   const [email, setEmail] = useState("");
   const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("Waitlist:", email);
-    setEnviado(true);
+    setCarregando(true);
+    setErro("");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErro(data.error || "Erro ao cadastrar. Tente novamente.");
+      } else {
+        setEnviado(true);
+      }
+    } catch {
+      setErro("Erro de conexão. Tente novamente.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -69,22 +88,27 @@ export default function Hero() {
         </p>
 
         {!enviado ? (
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-3 sm:flex-row"
-          >
-            <Input
-              type="email"
-              required
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-10 flex-1 border-zinc-700 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-            />
-            <Button type="submit" className="h-10 whitespace-nowrap">
-              Garantir meu lugar
-            </Button>
-          </form>
+          <>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-3 sm:flex-row"
+            >
+              <Input
+                type="email"
+                required
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-10 flex-1 border-zinc-700 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              />
+              <Button type="submit" className="h-10 whitespace-nowrap" disabled={carregando}>
+                {carregando ? "Enviando..." : "Garantir meu lugar"}
+              </Button>
+            </form>
+            {erro && (
+              <p className="mt-2 text-xs text-red-400">{erro}</p>
+            )}
+          </>
         ) : (
           <div className="rounded-lg border border-emerald-800/50 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-400">
             Recebemos seu e-mail. Avisaremos quando o beta abrir!
