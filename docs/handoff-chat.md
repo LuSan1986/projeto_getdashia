@@ -28,12 +28,14 @@
 - **Pagamentos:** Stripe
 - **Deploy:** Vercel
 - **E-mail transacional:** Resend
+- **Gráficos:** Recharts
 
 ### Estrutura de pastas obrigatória
 
 ```
 src/
   components/
+    dashboard/
   lib/
     db/
     integrations/
@@ -63,7 +65,6 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 **Fase 2 — Waitlist (concluído)**
 - Projeto `getdashia` criado no Supabase (região São Paulo) ✅
 - Tabela `waitlist` com RLS e policy de inserção pública ✅
-- `src/lib/supabase.ts` com cliente usando chaves legadas ✅
 - API route `src/app/api/waitlist/route.ts` implementada ✅
 - Variáveis de ambiente na Vercel corrigidas e funcionando ✅
 - Formulário testado: dados chegando no Supabase ✅
@@ -77,10 +78,17 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 - `src/app/cadastro/page.tsx` — página de cadastro com `emailRedirectTo` ✅
 - `src/app/auth/confirm/route.ts` — rota de confirmação de e-mail ✅
 - `src/app/auth/callback/route.ts` — rota de callback ✅
-- `src/app/dashboard/page.tsx` — dashboard básico protegido ✅
 - Supabase: Site URL e Redirect URLs configurados para produção ✅
 - Template de e-mail atualizado para usar `/auth/confirm` ✅
 - Fluxo completo testado em produção: cadastro → e-mail → confirmação → dashboard ✅
+
+**Fase 2 — Dashboard v1 (concluído)**
+- `src/app/dashboard/page.tsx` — header, sidebar e cards de métricas ✅
+- `src/components/dashboard/Charts.tsx` — 3 gráficos com Recharts ✅
+- Gráfico de Área: Receita Total últimos 7 dias ✅
+- Gráfico de Barras: Cliques por Canal (Google Ads vs Meta Ads) ✅
+- Gráfico de Pizza (donut): Conversões por Fonte ✅
+- Layout responsivo testado em produção ✅
 
 ### Em andamento
 
@@ -88,8 +96,8 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 
 ### Pendente (ordem planejada)
 
-1. Melhorar o dashboard: layout, sidebar, métricas placeholder
-2. Configurar Resend para e-mails transacionais em produção
+1. Configurar Resend para e-mails transacionais em produção
+2. Criar tabelas no Supabase para dados reais (organizações, usuários, métricas)
 3. Fase 3: integrações com Google Ads e Meta Ads
 
 ---
@@ -122,7 +130,7 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 
 ## 7. PRÓXIMO PASSO IMEDIATO
 
-Melhorar o dashboard: adicionar sidebar de navegação, header com nome do usuário e cards de métricas placeholder (receita, cliques, conversões).
+Configurar Resend para envio de e-mails transacionais em produção (substituir o serviço de e-mail padrão do Supabase).
 
 ---
 
