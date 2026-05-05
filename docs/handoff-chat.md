@@ -31,12 +31,14 @@
 
 ### Estrutura de pastas obrigatória
 
+```
 src/
-components/
-lib/
-db/
-integrations/
-types/
+  components/
+  lib/
+    db/
+    integrations/
+  types/
+```
 
 ---
 
@@ -66,21 +68,36 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 - Variáveis de ambiente na Vercel corrigidas e funcionando ✅
 - Formulário testado: dados chegando no Supabase ✅
 
+**Fase 2 — Autenticação (concluído)**
+- Pacote `@supabase/ssr` instalado ✅
+- `src/lib/supabase-client.ts` — cliente browser ✅
+- `src/lib/supabase-server.ts` — cliente server ✅
+- `middleware.ts` — protege rotas `/dashboard` ✅
+- `src/app/login/page.tsx` — página de login ✅
+- `src/app/cadastro/page.tsx` — página de cadastro com `emailRedirectTo` ✅
+- `src/app/auth/confirm/route.ts` — rota de confirmação de e-mail ✅
+- `src/app/auth/callback/route.ts` — rota de callback ✅
+- `src/app/dashboard/page.tsx` — dashboard básico protegido ✅
+- Supabase: Site URL e Redirect URLs configurados para produção ✅
+- Template de e-mail atualizado para usar `/auth/confirm` ✅
+- Fluxo completo testado em produção: cadastro → e-mail → confirmação → dashboard ✅
+
 ### Em andamento
 
 - Nada no momento.
 
 ### Pendente (ordem planejada)
 
-1. Fase 2: autenticação de usuários (Supabase Auth)
-2. Fase 2: dashboard básico
+1. Melhorar o dashboard: layout, sidebar, métricas placeholder
+2. Configurar Resend para e-mails transacionais em produção
+3. Fase 3: integrações com Google Ads e Meta Ads
 
 ---
 
 ## 5. CONTEXTO PESSOAL
 
 - **Quem sou:** Luciano (LuSan1986) — estou aprendendo programação na prática usando IA, não sou dev profissional.
-- **Ferramentas:** uso o Claude Code dentro do VS Code (PowerShell).
+- **Ferramentas:** uso o Claude Code dentro do VS Code (PowerShell) para grandes tarefas; o chat como mentor estratégico para planejar e revisar.
 - **Papel do chat:** mentor estratégico — revisa planos antes da execução, explica o "porquê", orienta passo-a-passo no Windows.
 - **Tom preferido:** passo-a-passo simples, sem jargão, como se ensinasse alguém de 16 anos curioso e motivado.
 - **Honestidade:** sem números inventados, sem depoimentos falsos.
@@ -105,7 +122,7 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 
 ## 7. PRÓXIMO PASSO IMEDIATO
 
-Iniciar autenticação de usuários com Supabase Auth: criar fluxo de cadastro e login (e-mail + senha), proteger rotas do dashboard.
+Melhorar o dashboard: adicionar sidebar de navegação, header com nome do usuário e cards de métricas placeholder (receita, cliques, conversões).
 
 ---
 
