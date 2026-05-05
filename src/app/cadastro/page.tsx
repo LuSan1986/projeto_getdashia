@@ -19,7 +19,13 @@ export default function CadastroPage() {
     setErro('')
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password: senha })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: senha,
+      options: {
+        emailRedirectTo: `https://www.getdashia.com.br/auth/callback`,
+      },
+    })
 
     if (error) {
       setErro('Erro ao criar conta. Tente novamente.')
