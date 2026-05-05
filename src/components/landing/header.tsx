@@ -33,9 +33,17 @@ export default function Header() {
           </a>
         </nav>
 
-        <Button asChild>
-          <a href="#waitlist">Garantir meu lugar</a>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/login"
+            className="rounded-md border border-indigo-500 bg-transparent px-4 py-2 text-sm font-medium text-indigo-400 transition-colors hover:bg-indigo-600 hover:text-white"
+          >
+            Entrar
+          </Link>
+          <Button asChild>
+            <a href="#waitlist">Garantir meu lugar</a>
+          </Button>
+        </div>
       </div>
     </header>
   );
