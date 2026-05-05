@@ -61,6 +61,7 @@ O PRD completo está em **`docs/PRD_GetDashia.md`** no repositório.
 - Landing page com 10 seções completas.
 - OG image, `sitemap.ts`, `robots.ts` implementados.
 - Deploy na Vercel: `www.getdashia.com.br` com SSL ativo ✅
+- Botão "Entrar" no header da landing page → leva para `/login` ✅
 
 **Fase 2 — Waitlist (concluído)**
 - Projeto `getdashia` criado no Supabase (região São Paulo) ✅
