@@ -69,7 +69,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-zinc-500 text-sm mt-6 text-center">
+        <p className="text-zinc-500 text-sm mt-4 text-center">
+          <Link href="/esqueci-senha" className="text-indigo-400 hover:underline">
+            Esqueceu sua senha?
+          </Link>
+        </p>
+
+        <p className="text-zinc-500 text-sm mt-3 text-center">
           Não tem conta?{' '}
           <Link href="/cadastro" className="text-indigo-400 hover:underline">
             Cadastre-se
