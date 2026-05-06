@@ -31,7 +31,7 @@ src/
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
 
 4. ESTADO ATUAL
-Última atualização: 2026-05-05
+Última atualização: 2026-05-05 (noite)
 Concluído
 Fase 1 — Landing v1 completa
 
@@ -77,6 +77,7 @@ Fase 2 — Resend + Esqueci minha senha (concluído)
 Conta Resend criada (login via GitHub) ✅
 Domínio getdashia.com.br adicionado no Resend (região São Paulo) ✅
 Registros DNS adicionados na Hostinger (DKIM, MX, SPF TXT) ✅
+Domínio Verified no Resend — todos os registros DKIM, MX e SPF verificados ✅
 API key getdashia-supabase criada no Resend ✅
 SMTP personalizado configurado no Supabase:
 
@@ -88,16 +89,18 @@ Remetente: noreply@getdashia.com.br / GetDashia ✅
 src/app/esqueci-senha/page.tsx — formulário de e-mail criado ✅
 src/app/auth/reset-password/page.tsx — formulário de nova senha criado ✅
 src/app/login/page.tsx — link "Esqueceu sua senha?" adicionado ✅
-Deploy feito e páginas visíveis em produção ✅
+Variável NEXT_PUBLIC_SITE_URL=https://www.getdashia.com.br adicionada na Vercel (Production) ✅
+E-mail de redefinição chegando corretamente via Resend (remetente: GetDashia) ✅
+Redirecionamento para /auth/reset-password funcionando ✅
+Deploy feito e fluxo completo funcionando em produção ✅
 
 Em andamento
 
-Verificação do domínio no Resend: SPF e MX já verificados ✅, DKIM ainda pendente (registro corrigido na Hostinger — aguardando propagação DNS). Quando propagar, clicar em Restart no painel do Resend para concluir.
+Nada no momento.
 
 Pendente (ordem planejada)
 
-⚠️ Confirmar verificação DKIM no Resend (clicar Restart após propagação DNS)
-Testar fluxo completo de "Esqueci minha senha" em produção
+Traduzir template de e-mail de redefinição de senha para português no Supabase (Authentication → E-mail → Redefinir senha)
 Criar tabelas no Supabase para dados reais (organizações, usuários, métricas)
 Fase 3: integrações com Google Ads e Meta Ads
 
@@ -128,10 +131,13 @@ Dark-first — paleta zinc/indigo, tema escuro como padrão.
 
 7. PRÓXIMO PASSO IMEDIATO
 
-Aguardar propagação DNS do registro DKIM na Hostinger
-Clicar em Restart no painel do Resend (Domains → getdashia.com.br)
-Confirmar status Verified para todos os registros
-Testar fluxo completo: /esqueci-senha → receber e-mail → /auth/reset-password → nova senha → /login
+Traduzir o template de e-mail de redefinição de senha para português no Supabase:
+
+Authentication → E-mail → Redefinir senha → editar template
+
+
+Criar tabelas no Supabase para dados reais (organizações, usuários, métricas)
+Fase 3: integrações com Google Ads e Meta Ads
 
 
 8. COMO USAR ESTE ARQUIVO
