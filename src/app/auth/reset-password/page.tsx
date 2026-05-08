@@ -18,22 +18,12 @@ export default function ResetPasswordPage() {
   const [carregando, setCarregando] = useState(false)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-
-    if (!code) {
-      setEstado('invalido')
-      return
-    }
-
     const supabase = createClient()
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) {
-        setEstado('invalido')
-      } else {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
         setEstado('valido')
-        // Remove o code da URL sem recarregar a página
-        window.history.replaceState({}, '', '/auth/reset-password')
+      } else {
+        setEstado('invalido')
       }
     })
   }, [])
@@ -71,7 +61,7 @@ export default function ResetPasswordPage() {
         <CardHeader>
           <CardTitle className="text-2xl text-white">Criar nova senha</CardTitle>
           <CardDescription className="text-zinc-400">
-            {estado === 'carregando' && 'Verificando link...'}
+            {estado === 'carregando' && 'Verificando sessão...'}
             {estado === 'valido' && 'Escolha uma senha segura para sua conta GetDashia.'}
             {estado === 'invalido' && 'Link inválido ou expirado.'}
           </CardDescription>
