@@ -23,24 +23,34 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Valida e renova a sessão a partir dos cookies.
-  // Não faz queries ao banco — apenas verifica o JWT.
-  const { data: { user } } = await supabase.auth.getUser()
-
   const pathname = request.nextUrl.pathname
 
-  // Sem sessão ativa: bloqueia /dashboard e /onboarding
-  if (!user && (pathname.startsWith('/dashboard') || pathname === '/onboarding')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // getUser() faz chamada à rede para validar o JWT com o servidor do Supabase.
+  // O try-catch garante fail-closed: se falhar por qualquer motivo
+  // (env ausente, timeout, erro de rede), trata como não autenticado.
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    user = null
   }
 
-  // A checagem de organização fica a cargo das próprias páginas
-  // (dashboard/page.tsx e onboarding/page.tsx), que rodam no servidor
-  // com acesso completo ao banco via supabase-server.
+  const rotaProtegida =
+    pathname === '/dashboard' ||
+    pathname.startsWith('/dashboard/') ||
+    pathname === '/onboarding'
+
+  if (!user && rotaProtegida) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/onboarding'],
+  // Matcher duplo para /dashboard: o ':path+' não cobre o caminho raiz exato.
+  // '/dashboard'       → cobre GET /dashboard
+  // '/dashboard/:path+' → cobre GET /dashboard/qualquer/coisa
+  matcher: ['/dashboard', '/dashboard/:path+', '/onboarding'],
 }
