@@ -23,34 +23,20 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // Valida e renova a sessão a partir dos cookies.
+  // Não faz queries ao banco — apenas verifica o JWT.
   const { data: { user } } = await supabase.auth.getUser()
+
   const pathname = request.nextUrl.pathname
 
-  // Sem sessão: bloqueia rotas protegidas
-  if (!user) {
-    if (pathname.startsWith('/dashboard') || pathname === '/onboarding') {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-    return response
+  // Sem sessão ativa: bloqueia /dashboard e /onboarding
+  if (!user && (pathname.startsWith('/dashboard') || pathname === '/onboarding')) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Com sessão: verifica se o usuário tem alguma organização
-  const { count } = await supabase
-    .from('organization_members')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-
-  const temOrg = (count ?? 0) > 0
-
-  // No /dashboard sem org → vai para onboarding
-  if (pathname.startsWith('/dashboard') && !temOrg) {
-    return NextResponse.redirect(new URL('/onboarding', request.url))
-  }
-
-  // No /onboarding com org já criada → vai para dashboard
-  if (pathname === '/onboarding' && temOrg) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  // A checagem de organização fica a cargo das próprias páginas
+  // (dashboard/page.tsx e onboarding/page.tsx), que rodam no servidor
+  // com acesso completo ao banco via supabase-server.
 
   return response
 }
