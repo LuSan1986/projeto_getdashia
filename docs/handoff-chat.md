@@ -31,7 +31,8 @@ src/
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
 
 4. ESTADO ATUAL
-Última atualização: 2026-05-05 (noite)
+Última atualização: 2026-05-07
+
 Concluído
 Fase 1 — Landing v1 completa
 
@@ -54,7 +55,7 @@ Fase 2 — Autenticação (concluído)
 Pacote @supabase/ssr instalado ✅
 src/lib/supabase-client.ts — cliente browser ✅
 src/lib/supabase-server.ts — cliente server ✅
-middleware.ts — protege rotas /dashboard ✅
+middleware.ts — protege rotas /dashboard e /onboarding ✅
 src/app/login/page.tsx — página de login ✅
 src/app/cadastro/page.tsx — página de cadastro com emailRedirectTo ✅
 src/app/auth/confirm/route.ts — rota de confirmação de e-mail ✅
@@ -71,28 +72,38 @@ Gráfico de Área: Receita Total últimos 7 dias ✅
 Gráfico de Barras: Cliques por Canal (Google Ads vs Meta Ads) ✅
 Gráfico de Pizza (donut): Conversões por Fonte ✅
 Layout responsivo testado em produção ✅
+Dashboard exibe nome da organização do usuário logado ✅
 
 Fase 2 — Resend + Esqueci minha senha (concluído)
 
-Conta Resend criada (login via GitHub) ✅
-Domínio getdashia.com.br adicionado no Resend (região São Paulo) ✅
-Registros DNS adicionados na Hostinger (DKIM, MX, SPF TXT) ✅
-Domínio Verified no Resend — todos os registros DKIM, MX e SPF verificados ✅
-API key getdashia-supabase criada no Resend ✅
-SMTP personalizado configurado no Supabase:
+Conta Resend criada, domínio verificado, DNS configurado ✅
+SMTP personalizado configurado no Supabase ✅
+src/app/esqueci-senha/page.tsx ✅
+src/app/auth/reset-password/page.tsx — usa getSession() para verificar sessão estabelecida pelo confirm route ✅
+src/app/auth/confirm/route.ts — redireciona para /auth/reset-password quando type === 'recovery' ✅
+Mensagem de erro específica quando nova senha é igual à atual ✅
+Template de e-mail de redefinição traduzido para pt-BR no Supabase ✅
+Fluxo completo funcionando em produção ✅
 
-Host: smtp.resend.com, Porta: 465
-Usuário: resend, Senha: API key do Resend
-Remetente: noreply@getdashia.com.br / GetDashia ✅
+Fase 2 — Banco de dados (concluído)
 
+supabase/migrations/001_initial_schema.sql criado ✅
+5 tabelas criadas no Supabase: profiles, organizations, organization_members, integrations, metrics_daily ✅
+RLS ativado em todas as tabelas ✅
+Multi-tenancy por organization_id ✅
+Trigger automático: cria profile quando usuário se cadastra ✅
+Trigger automático: insere criador como owner em organization_members ✅
+CPA e ROAS calculados automaticamente (colunas GENERATED ALWAYS AS) ✅
 
-src/app/esqueci-senha/page.tsx — formulário de e-mail criado ✅
-src/app/auth/reset-password/page.tsx — formulário de nova senha criado ✅
-src/app/login/page.tsx — link "Esqueceu sua senha?" adicionado ✅
-Variável NEXT_PUBLIC_SITE_URL=https://www.getdashia.com.br adicionada na Vercel (Production) ✅
-E-mail de redefinição chegando corretamente via Resend (remetente: GetDashia) ✅
-Redirecionamento para /auth/reset-password funcionando ✅
-Deploy feito e fluxo completo funcionando em produção ✅
+Fase 2 — Onboarding (concluído)
+
+src/app/onboarding/page.tsx — server component que verifica se já tem org ✅
+src/app/onboarding/OnboardingForm.tsx — formulário client component ✅
+Slug gerado automaticamente a partir do nome da empresa ✅
+Após criar organização: redireciona para /dashboard ✅
+middleware.ts corrigido: matcher duplo (/dashboard e /dashboard/:path+) ✅
+Fail-closed: qualquer erro no getUser() trata como não autenticado ✅
+Fluxo testado em produção: aba anônima → /dashboard → /login → dashboard ✅
 
 Em andamento
 
@@ -100,9 +111,10 @@ Nada no momento.
 
 Pendente (ordem planejada)
 
-Traduzir template de e-mail de redefinição de senha para português no Supabase (Authentication → E-mail → Redefinir senha)
-Criar tabelas no Supabase para dados reais (organizações, usuários, métricas)
 Fase 3: integrações com Google Ads e Meta Ads
+Criar página de Configurações (perfil do usuário, nome da organização)
+Substituir dados mock do dashboard por dados reais do banco
+Stripe: planos e cobrança
 
 
 5. CONTEXTO PESSOAL
@@ -131,13 +143,12 @@ Dark-first — paleta zinc/indigo, tema escuro como padrão.
 
 7. PRÓXIMO PASSO IMEDIATO
 
-Traduzir o template de e-mail de redefinição de senha para português no Supabase:
-
-Authentication → E-mail → Redefinir senha → editar template
-
-
-Criar tabelas no Supabase para dados reais (organizações, usuários, métricas)
-Fase 3: integrações com Google Ads e Meta Ads
+Fase 3 — Integrações com Google Ads e Meta Ads:
+Criar página de Integrações no dashboard (/dashboard/integracoes)
+Implementar OAuth com Google Ads API
+Implementar OAuth com Meta Ads API
+Salvar tokens na tabela integrations (criptografados)
+Iniciar sincronização de métricas reais para metrics_daily
 
 
 8. COMO USAR ESTE ARQUIVO
