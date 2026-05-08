@@ -20,6 +20,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('session:', JSON.stringify(session))
       if (session) {
         setEstado('valido')
       } else {
@@ -47,6 +48,7 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password: senha })
 
     if (error) {
+      console.error('updateUser error:', JSON.stringify(error))
       setErro('Não foi possível redefinir a senha. Tente solicitar um novo link.')
       setCarregando(false)
       return
