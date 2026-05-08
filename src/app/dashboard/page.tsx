@@ -39,6 +39,17 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login')
 
+  const { data: membership } = await supabase
+    .from('organization_members')
+    .select('organizations(name)')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  const orgName = (membership?.organizations as unknown as { name: string } | null)?.name ?? null
+
+  if (!orgName) redirect('/onboarding')
+
   async function logout() {
     'use server'
     const supabase = await createClient()
@@ -56,9 +67,10 @@ export default async function DashboardPage() {
         </span>
 
         <div className="flex items-center gap-3">
-          <span className="hidden sm:block text-zinc-400 text-sm">
-            {user.email}
-          </span>
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-white text-sm font-medium">{orgName}</span>
+            <span className="text-zinc-500 text-xs">{user.email}</span>
+          </div>
           <form action={logout}>
             <button
               type="submit"
