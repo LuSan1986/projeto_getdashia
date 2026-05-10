@@ -1,18 +1,14 @@
-import { Check, Minus } from "lucide-react";
+import Link from "next/link";
+import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-interface Feature {
-  texto: string;
-  incluso: boolean;
-}
 
 interface Plano {
   nome: string;
   preco: string;
   descricao: string;
-  features: Feature[];
+  features: string[];
   cta: string;
   destaque: boolean;
 }
@@ -20,53 +16,45 @@ interface Plano {
 const planos: Plano[] = [
   {
     nome: "Starter",
-    preco: "R$97",
+    preco: "R$ 59,90",
     descricao: "Para gestores que estão começando a profissionalizar os relatórios.",
     destaque: false,
     cta: "Começar no Starter",
     features: [
-      { texto: "1 cliente ativo", incluso: true },
-      { texto: "3 contas conectadas", incluso: true },
-      { texto: "Google Ads + Meta Ads", incluso: true },
-      { texto: "Dashboard CPA e ROAS", incluso: true },
-      { texto: "Exportação em PDF", incluso: true },
-      { texto: "Google Analytics 4", incluso: false },
-      { texto: "Relatório agendado", incluso: false },
-      { texto: "White-label", incluso: false },
+      "1 integração (Google Ads ou Meta Ads)",
+      "Dashboard básico com métricas de campanha",
+      "Dados dos últimos 30 dias",
+      "1 organização",
+      "7 dias grátis para testar",
     ],
   },
   {
     nome: "Pro",
-    preco: "R$197",
+    preco: "R$ 97,00",
     descricao: "Para gestores com carteira de clientes que precisam escalar.",
     destaque: true,
     cta: "Começar no Pro",
     features: [
-      { texto: "Até 5 clientes ativos", incluso: true },
-      { texto: "10 contas conectadas", incluso: true },
-      { texto: "Google Ads + Meta Ads", incluso: true },
-      { texto: "Dashboard CPA e ROAS", incluso: true },
-      { texto: "Exportação em PDF", incluso: true },
-      { texto: "Google Analytics 4", incluso: true },
-      { texto: "Relatório agendado", incluso: true },
-      { texto: "White-label", incluso: false },
+      "Google Ads + Meta Ads conectados",
+      "Dashboard completo com CPA e ROAS",
+      "Dados dos últimos 90 dias",
+      "1 organização",
+      "7 dias grátis para testar",
     ],
   },
   {
-    nome: "Agência",
-    preco: "R$497",
-    descricao: "Para agências com múltiplos colaboradores e clientes.",
+    nome: "Business",
+    preco: "R$ 197,00",
+    descricao: "Para agências e times com múltiplos clientes e alto volume.",
     destaque: false,
-    cta: "Falar sobre Agência",
+    cta: "Começar no Business",
     features: [
-      { texto: "Até 30 clientes ativos", incluso: true },
-      { texto: "50 contas conectadas", incluso: true },
-      { texto: "Google Ads + Meta Ads", incluso: true },
-      { texto: "Dashboard CPA e ROAS", incluso: true },
-      { texto: "Exportação em PDF", incluso: true },
-      { texto: "Google Analytics 4", incluso: true },
-      { texto: "Relatório agendado", incluso: true },
-      { texto: "White-label (sua marca)", incluso: true },
+      "Google Ads + Meta Ads conectados",
+      "Dashboard completo com CPA e ROAS",
+      "Histórico completo de dados",
+      "Múltiplas organizações",
+      "Suporte prioritário",
+      "7 dias grátis para testar",
     ],
   },
 ];
@@ -117,21 +105,9 @@ export default function Planos() {
 
               <ul className="mb-6 flex-1 space-y-3">
                 {plano.features.map((feature) => (
-                  <li key={feature.texto} className="flex items-center gap-3">
-                    {feature.incluso ? (
-                      <Check className="size-4 shrink-0 text-indigo-400" />
-                    ) : (
-                      <Minus className="size-4 shrink-0 text-zinc-600" />
-                    )}
-                    <span
-                      className={
-                        feature.incluso
-                          ? "text-sm text-zinc-300"
-                          : "text-sm text-zinc-600"
-                      }
-                    >
-                      {feature.texto}
-                    </span>
+                  <li key={feature} className="flex items-center gap-3">
+                    <Check className="size-4 shrink-0 text-indigo-400" />
+                    <span className="text-sm text-zinc-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -145,15 +121,14 @@ export default function Planos() {
                     : "w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
                 }
               >
-                <a href="#waitlist">{plano.cta}</a>
+                <Link href="/precos">{plano.cta}</Link>
               </Button>
             </Card>
           ))}
         </div>
 
         <p className="mt-8 text-center text-sm text-zinc-600">
-          Preços estimados para o lançamento. Usuários da lista de espera terão
-          condições especiais.
+          Sem taxa de setup. Cancele quando quiser.
         </p>
       </div>
     </section>
