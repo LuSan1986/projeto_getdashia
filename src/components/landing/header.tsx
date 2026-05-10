@@ -19,12 +19,12 @@ export default function Header() {
           >
             Recursos
           </a>
-          <a
-            href="#planos"
+          <Link
+            href="/precos"
             className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
           >
             Preços
-          </a>
+          </Link>
           <a
             href="#faq"
             className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
