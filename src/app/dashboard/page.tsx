@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { LayoutDashboard, BarChart3, Plug, Settings, TrendingUp } from 'lucide-react'
 import Charts from '@/components/dashboard/Charts'
+import ChannelsSection from '@/components/dashboard/ChannelsSection'
 
 const navItems = [
   { label: 'Visão Geral', icon: LayoutDashboard, active: true },
@@ -126,6 +127,7 @@ export default async function DashboardPage() {
             ))}
           </div>
 
+          <ChannelsSection />
           <Charts />
         </div>
       </main>

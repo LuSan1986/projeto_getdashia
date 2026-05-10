@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import { SiGoogleads, SiMeta } from 'react-icons/si'
 
 const revenueData = [
   { dia: '28/abr', receita: 5200 },
@@ -59,6 +60,25 @@ const axisProps = {
   tick: { fill: '#71717a', fontSize: 11 },
   axisLine: { stroke: '#27272a' },
   tickLine: false as const,
+}
+
+const barLegendIcons: Record<string, React.ReactNode> = {
+  'Google Ads': <SiGoogleads color="#4285F4" size={12} />,
+  'Meta Ads': <SiMeta color="#0082FB" size={12} />,
+}
+
+function BarLegend({ payload }: { payload?: Array<{ value: string }> }) {
+  if (!payload?.length) return null
+  return (
+    <div className="flex gap-4 justify-center pt-2">
+      {payload.map(({ value }) => (
+        <span key={value} className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+          {barLegendIcons[value]}
+          {value}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -130,11 +150,9 @@ export default function Charts() {
                 return [num.toLocaleString('pt-BR'), label]
               }}
             />
-            <Legend
-              wrapperStyle={{ fontSize: '11px', color: '#a1a1aa', paddingTop: '8px' }}
-            />
-            <Bar dataKey="Google Ads" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Meta Ads" fill="#818cf8" radius={[4, 4, 0, 0]} />
+            <Legend content={(props) => <BarLegend payload={props.payload as Array<{ value: string }>} />} />
+            <Bar dataKey="Google Ads" fill="#4285F4" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Meta Ads" fill="#0082FB" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
