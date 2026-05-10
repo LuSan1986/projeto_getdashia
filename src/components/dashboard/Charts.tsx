@@ -15,7 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { SiGoogleads, SiMeta } from 'react-icons/si'
+import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 
 const revenueData = [
   { dia: '28/abr', receita: 5200 },
@@ -74,6 +74,30 @@ function BarLegend({ payload }: { payload?: Array<{ value: string }> }) {
       {payload.map(({ value }) => (
         <span key={value} className="flex items-center gap-1.5 text-[11px] text-zinc-400">
           {barLegendIcons[value]}
+          {value}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+const pieLegendBrandIcons: Record<string, React.ReactNode> = {
+  'Google Ads': <SiGoogleads color="#4285F4" size={12} />,
+  'Meta Ads':   <SiMeta      color="#0082FB" size={12} />,
+  'Facebook':   <SiFacebook  color="#1877F2" size={12} />,
+}
+
+function PieLegend({ payload }: { payload?: Array<{ value: string; color: string }> }) {
+  if (!payload?.length) return null
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center pt-2">
+      {payload.map(({ value, color }) => (
+        <span key={value} className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+          {pieLegendBrandIcons[value] ?? (
+            <svg width="8" height="8" viewBox="0 0 8 8">
+              <circle cx="4" cy="4" r="4" fill={color} />
+            </svg>
+          )}
           {value}
         </span>
       ))}
@@ -182,9 +206,7 @@ export default function Charts() {
                 return [num.toLocaleString('pt-BR'), label]
               }}
             />
-            <Legend
-              wrapperStyle={{ fontSize: '11px', color: '#a1a1aa', paddingTop: '8px' }}
-            />
+            <Legend content={(props) => <PieLegend payload={props.payload as Array<{ value: string; color: string }>} />} />
           </PieChart>
         </ResponsiveContainer>
       </ChartCard>
