@@ -8,6 +8,7 @@ import Planos from "@/components/landing/planos";
 import FAQ from "@/components/landing/faq";
 import CtaFinal from "@/components/landing/cta-final";
 import Footer from "@/components/landing/footer";
+import AboutSection from "@/components/AboutSection";
 
 export default function Page() {
   return (
@@ -22,6 +23,7 @@ export default function Page() {
         <Planos />
         <FAQ />
         <CtaFinal />
+        <AboutSection />
       </main>
       <Footer />
     </>
