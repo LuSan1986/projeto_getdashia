@@ -8,7 +8,7 @@ const navItems = [
   { label: 'Visão Geral',    icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Relatórios',     icon: BarChart3,        href: '/dashboard/relatorios' },
   { label: 'Integrações',    icon: Plug,             href: '#' },
-  { label: 'Configurações',  icon: Settings,         href: '#' },
+  { label: 'Configurações',  icon: Settings,         href: '/dashboard/configuracoes' },
 ]
 
 export default function DashboardSidebar() {
