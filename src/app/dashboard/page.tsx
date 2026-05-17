@@ -140,7 +140,7 @@ export default async function DashboardPage() {
       </div>
 
       <ChannelsSection />
-      <Charts />
+      <Charts isLive={hasIntegration} />
     </div>
   )
 }

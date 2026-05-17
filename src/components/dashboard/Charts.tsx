@@ -17,7 +17,7 @@ import {
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 
-const revenueData = [
+const DEMO_REVENUE_DATA = [
   { dia: '28/abr', receita: 5200 },
   { dia: '29/abr', receita: 6800 },
   { dia: '30/abr', receita: 4900 },
@@ -27,7 +27,17 @@ const revenueData = [
   { dia: '04/mai', receita: 9400 },
 ]
 
-const clicksData = [
+const ZERO_REVENUE_DATA = [
+  { dia: '28/abr', receita: 0 },
+  { dia: '29/abr', receita: 0 },
+  { dia: '30/abr', receita: 0 },
+  { dia: '01/mai', receita: 0 },
+  { dia: '02/mai', receita: 0 },
+  { dia: '03/mai', receita: 0 },
+  { dia: '04/mai', receita: 0 },
+]
+
+const DEMO_CLICKS_DATA = [
   { mes: 'Nov', 'Google Ads': 18200, 'Meta Ads': 14500 },
   { mes: 'Dez', 'Google Ads': 22100, 'Meta Ads': 17800 },
   { mes: 'Jan', 'Google Ads': 19500, 'Meta Ads': 16200 },
@@ -36,11 +46,27 @@ const clicksData = [
   { mes: 'Abr', 'Google Ads': 28900, 'Meta Ads': 23600 },
 ]
 
-const conversionData = [
+const ZERO_CLICKS_DATA = [
+  { mes: 'Nov', 'Google Ads': 0, 'Meta Ads': 0 },
+  { mes: 'Dez', 'Google Ads': 0, 'Meta Ads': 0 },
+  { mes: 'Jan', 'Google Ads': 0, 'Meta Ads': 0 },
+  { mes: 'Fev', 'Google Ads': 0, 'Meta Ads': 0 },
+  { mes: 'Mar', 'Google Ads': 0, 'Meta Ads': 0 },
+  { mes: 'Abr', 'Google Ads': 0, 'Meta Ads': 0 },
+]
+
+const DEMO_CONVERSION_DATA = [
   { name: 'Google Ads', value: 1240 },
   { name: 'Meta Ads', value: 890 },
   { name: 'Orgânico', value: 640 },
   { name: 'Direto', value: 440 },
+]
+
+const ZERO_CONVERSION_DATA = [
+  { name: 'Google Ads', value: 0 },
+  { name: 'Meta Ads', value: 0 },
+  { name: 'Orgânico', value: 0 },
+  { name: 'Direto', value: 0 },
 ]
 
 const PIE_COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc']
@@ -114,7 +140,11 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   )
 }
 
-export default function Charts() {
+export default function Charts({ isLive = false }: { isLive?: boolean }) {
+  const revenueData  = isLive ? ZERO_REVENUE_DATA    : DEMO_REVENUE_DATA
+  const clicksData   = isLive ? ZERO_CLICKS_DATA     : DEMO_CLICKS_DATA
+  const conversionData = isLive ? ZERO_CONVERSION_DATA : DEMO_CONVERSION_DATA
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
 
