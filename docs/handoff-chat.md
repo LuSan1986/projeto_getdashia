@@ -1,11 +1,7 @@
 GetDashia — Handoff de Chat
-
 Como usar: Antes de migrar para um novo chat, atualize a seção ESTADO ATUAL com o que foi feito e o próximo passo. Depois copie o conteúdo completo deste arquivo e cole como primeira mensagem no chat novo.
-
-
 1. IDENTIFICAÇÃO DO PROJETO
 CampoValorNomeGetDashiaDescriçãoSaaS brasileiro de atribuição multi-canal e dashboards para gestores de tráfego e donos de e-commerce — centraliza Google Ads, Meta Ads e e-commerce em um único painel.Domíniogetdashia.com.br (registrado na Hostinger)Repositóriogithub.com/LuSan1986/projeto_getdashia (privado)Pasta localC:\Users\Jéssica Cristina\projeto\projeto_getdashiaSistema OperacionalWindows 11 — terminal PowerShell, editor VS CodeUsuário GitHubLuSan1986
-
 2. STACK TÉCNICA COMPLETA
 
 Framework: Next.js 16 (App Router)
@@ -26,13 +22,10 @@ src/
     db/
     integrations/
   types/
-
 3. DOCUMENTAÇÃO DO PRODUTO
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
-
 4. ESTADO ATUAL
-Última atualização: 2026-05-07
-
+Última atualização: 2026-05-10 (sessão 2)
 Concluído
 Fase 1 — Landing v1 completa
 
@@ -79,10 +72,7 @@ Fase 2 — Resend + Esqueci minha senha (concluído)
 Conta Resend criada, domínio verificado, DNS configurado ✅
 SMTP personalizado configurado no Supabase ✅
 src/app/esqueci-senha/page.tsx ✅
-src/app/auth/reset-password/page.tsx — usa getSession() para verificar sessão estabelecida pelo confirm route ✅
-src/app/auth/confirm/route.ts — redireciona para /auth/reset-password quando type === 'recovery' ✅
-Mensagem de erro específica quando nova senha é igual à atual ✅
-Template de e-mail de redefinição traduzido para pt-BR no Supabase ✅
+src/app/auth/reset-password/page.tsx ✅
 Fluxo completo funcionando em produção ✅
 
 Fase 2 — Banco de dados (concluído)
@@ -97,27 +87,108 @@ CPA e ROAS calculados automaticamente (colunas GENERATED ALWAYS AS) ✅
 
 Fase 2 — Onboarding (concluído)
 
-src/app/onboarding/page.tsx — server component que verifica se já tem org ✅
-src/app/onboarding/OnboardingForm.tsx — formulário client component ✅
+src/app/onboarding/page.tsx ✅
+src/app/onboarding/OnboardingForm.tsx ✅
 Slug gerado automaticamente a partir do nome da empresa ✅
 Após criar organização: redireciona para /dashboard ✅
-middleware.ts corrigido: matcher duplo (/dashboard e /dashboard/:path+) ✅
-Fail-closed: qualquer erro no getUser() trata como não autenticado ✅
-Fluxo testado em produção: aba anônima → /dashboard → /login → dashboard ✅
+Fluxo testado em produção ✅
+
+Fase 2 — Páginas legais + Sobre Nós (concluído em 2026-05-10)
+
+E-mail corporativo luciano@getdashia.com.br criado na Hostinger ✅
+src/app/privacidade/page.tsx — Política de Privacidade LGPD compliant ✅
+src/app/termos/page.tsx — Termos de Uso do SaaS ✅
+src/components/AboutSection.tsx — Seção Sobre Nós com endereço físico ✅
+Links no footer para /privacidade e /termos ✅
+Tudo no ar em produção ✅
+
+Dashboard — Logos de plataformas (concluído em 2026-05-10)
+
+src/components/dashboard/ChannelsSection.tsx — seção "Canais" com logos oficiais ✅
+
+Google Ads e Meta Ads: badge verde "Ativo"
+Facebook, Instagram e TikTok: badge cinza "Em breve" com opacity
+
+
+Legenda do gráfico de barras atualizada com ícones SiGoogleads e SiMeta ✅
+Legenda do gráfico de donut atualizada com ícones de marca ✅
+Cores das barras atualizadas para cores oficiais das plataformas ✅
+Pacote react-icons instalado ✅
+
+Dashboard — Página de Relatórios (concluído em 2026-05-10)
+
+src/app/dashboard/layout.tsx — layout centralizado para todas as rotas /dashboard/* ✅
+src/components/dashboard/DashboardSidebar.tsx — sidebar com usePathname() para item ativo ✅
+src/app/dashboard/relatorios/page.tsx — página de relatórios ✅
+src/components/dashboard/RelatoriosClient.tsx — client component com: ✅
+
+Filtros de período (7/30/90 dias) e canal (Todos/Google Ads/Meta Ads)
+4 cards: Investimento Total, Receita Gerada, ROAS Médio, CPA Médio
+Gráfico de linha: Evolução do ROAS (últimos 30 dias)
+Tabela de 6 campanhas com ícones de plataforma, badges de status e ROAS colorido por faixa
+
+
+Link "Relatórios" na sidebar aponta para /dashboard/relatorios ✅
+
+Fase 2 — Stripe (concluído em 2026-05-10)
+
+Conta Stripe criada com luciano@getdashia.com.br ✅
+3 planos criados no Stripe (modo teste): ✅
+
+Starter: R$ 59,90/mês (lookup key: starter_mensal)
+Pro: R$ 97,00/mês (lookup key: pro_mensal)
+Business: R$ 197,00/mês (lookup key: business_mensal)
+Todos com trial de 7 dias
+
+
+src/lib/stripe.ts — cliente Stripe configurado ✅
+src/app/api/stripe/checkout/route.ts — cria Checkout Session ✅
+src/app/api/stripe/portal/route.ts — portal do cliente ✅
+src/app/api/stripe/webhook/route.ts — handler de webhook ✅
+src/app/precos/page.tsx — página de preços no ar ✅
+src/app/precos/CheckoutButton.tsx — botão de checkout ✅
+Webhook configurado no Stripe → https://www.getdashia.com.br/api/stripe/webhook ✅
+Eventos monitorados: checkout.session.completed, customer.subscription.* , invoice.payment_* ✅
+supabase/migrations/002_stripe_fields.sql rodado no Supabase ✅
+
+Colunas adicionadas em profiles: stripe_customer_id, stripe_subscription_id, subscription_status, subscription_plan
+
+
+Variáveis na Vercel: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET ✅
+Checkout testado com cartão de teste 4242 4242 4242 4242 ✅
 
 Em andamento
+Google Ads API
 
-Nada no momento.
+Candidatura enviada em 2026-05-10 pela conta MCC "MCC de Automações Luciano" (453-482-8300) ✅
+E-mail de contato: luciano@getdashia.com.br ✅
+Documento de design PDF anexado ✅
+Aguardando aprovação (prazo: até 3 dias úteis)
+
+Meta Ads API
+
+Acesso ao developers.facebook.com iniciado mas não concluído
+Problema: verificação por SMS não chegou no número (11) 94320-4940
+Pendente: resolver verificação e criar o app de desenvolvedor
 
 Pendente (ordem planejada)
 
+Aguardar aprovação Google Ads API
+Resolver acesso Meta Ads API (developers.facebook.com)
+Stripe: migrar para modo produção (verificar empresa no Stripe)
+Página de Configurações (perfil do usuário, nome da organização)
 Fase 3: integrações com Google Ads e Meta Ads
-Criar página de Configurações (perfil do usuário, nome da organização)
 Substituir dados mock do dashboard por dados reais do banco
-Stripe: planos e cobrança
 
+5. CREDENCIAIS E CONTAS IMPORTANTES
 
-5. CONTEXTO PESSOAL
+E-mail corporativo: luciano@getdashia.com.br (Hostinger)
+Stripe: dashboard.stripe.com — conta em modo teste
+Google Ads MCC: 453-482-8300 (MCC de Automações Luciano)
+Supabase: projeto getdashia, região São Paulo
+Vercel: projeto projeto-getdashia
+
+6. CONTEXTO PESSOAL
 
 Quem sou: Luciano (LuSan1986) — estou aprendendo programação na prática usando IA, não sou dev profissional.
 Ferramentas: uso o Claude Code dentro do VS Code (PowerShell) para grandes tarefas; o chat como mentor estratégico para planejar e revisar.
@@ -126,8 +197,7 @@ Tom preferido: passo-a-passo simples, sem jargão, como se ensinasse alguém de 
 Honestidade: sem números inventados, sem depoimentos falsos.
 Respostas curtas sempre que possível.
 
-
-6. DIRETRIZES TÉCNICAS (as 10 regras do projeto)
+7. DIRETRIZES TÉCNICAS (as 10 regras do projeto)
 
 Stack obrigatória — Next.js 16+ App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase, Stripe, Vercel, Resend.
 Estrutura de pastas — src/components/, src/lib/db/, src/lib/integrations/, src/types/.
@@ -140,19 +210,11 @@ Commits semânticos — tipo(escopo): descrição em inglês.
 Build local antes do push — npm run build sem erros antes do git push.
 Dark-first — paleta zinc/indigo, tema escuro como padrão.
 
+8. PRÓXIMO PASSO IMEDIATO
 
-7. PRÓXIMO PASSO IMEDIATO
-
-Fase 3 — Integrações com Google Ads e Meta Ads:
-Criar página de Integrações no dashboard (/dashboard/integracoes)
-Implementar OAuth com Google Ads API
-Implementar OAuth com Meta Ads API
-Salvar tokens na tabela integrations (criptografados)
-Iniciar sincronização de métricas reais para metrics_daily
-
-
-8. COMO USAR ESTE ARQUIVO
-
-Antes de migrar de chat: atualize a seção 4. ESTADO ATUAL.
-Ao abrir um chat novo: cole o conteúdo completo como primeira mensagem.
-Versionamento: commite sempre que atualizar.
+Verificar e-mail luciano@getdashia.com.br para resposta do Google Ads API
+Resolver verificação SMS no developers.facebook.com para criar app Meta Ads
+Quando Google Ads aprovar: iniciar Fase 3 — integração com Google Ads API
+Verificar empresa no Stripe para migrar para modo produção
+Página de Configurações (perfil do usuário, nome da organização)
+Substituir dados mock do dashboard e relatórios por dados reais do banco
