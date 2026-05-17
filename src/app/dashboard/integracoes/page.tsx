@@ -10,7 +10,7 @@ export default async function IntegracoesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let googleStatus: 'active' | 'inactive' | null = null
+  let googleStatus: 'connected' | 'pending' | 'inactive' | null = null
   let googleAccountId: string | null = null
   let googleConnectedAt: string | null = null
 
@@ -32,9 +32,17 @@ export default async function IntegracoesPage() {
         .single()
 
       if (integration) {
-        googleStatus = integration.status as 'active' | 'inactive'
         googleAccountId = integration.account_id ?? null
         googleConnectedAt = integration.created_at ?? null
+
+        const rawStatus = integration.status as string
+        if (rawStatus === 'inactive') {
+          googleStatus = 'inactive'
+        } else if (googleAccountId === 'pending') {
+          googleStatus = 'pending'
+        } else {
+          googleStatus = 'connected'
+        }
       }
     }
   }

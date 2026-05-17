@@ -192,18 +192,7 @@ function ComingSoonCard({ channel }: { channel: Channel }) {
 }
 
 export default function IntegracoesClient({ google }: Props) {
-  const googleStatus: ChannelStatus =
-    google.status === 'active' || (google.status === null && google.accountId && google.accountId !== 'pending')
-      ? 'connected'
-      : google.status === null && google.accountId === 'pending'
-      ? 'pending'
-      : google.accountId === 'pending'
-      ? 'pending'
-      : google.status === 'inactive'
-      ? 'inactive'
-      : google.status === null
-      ? 'inactive'
-      : 'connected'
+  const googleStatus: ChannelStatus = google.status ?? 'inactive'
 
   const channels: Channel[] = [
     {
