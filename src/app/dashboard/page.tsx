@@ -2,6 +2,7 @@ import { TrendingUp } from 'lucide-react'
 import Charts from '@/components/dashboard/Charts'
 import ChannelsSection from '@/components/dashboard/ChannelsSection'
 import PendingAccountBanner from '@/components/dashboard/PendingAccountBanner'
+import AIConsultant from '@/components/dashboard/AIConsultant'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt } from '@/lib/crypto'
 import { fetchGoogleAdsData, type GoogleAdsMetrics } from '@/lib/integrations/google-ads'
@@ -54,6 +55,7 @@ export default async function DashboardPage() {
   let dataLabel = 'valores de demonstração'
   let noCampaigns = false
   let connectedAccountId = ''
+  let aiMetrics = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
   if (user) {
     const { data: membership } = await supabase
@@ -95,6 +97,15 @@ export default async function DashboardPage() {
 
         metrics = buildMetrics(adsData)
         noCampaigns = adsData.clicks === 0 && adsData.impressions === 0 && adsData.cost === 0
+        aiMetrics = {
+          cost: adsData.cost,
+          revenue: 0,
+          roas: 0,
+          cpa: adsData.conversions > 0 ? adsData.cost / adsData.conversions : 0,
+          clicks: adsData.clicks,
+          conversions: adsData.conversions,
+          impressions: adsData.impressions,
+        }
       }
     }
   }
@@ -149,6 +160,7 @@ export default async function DashboardPage() {
 
       <ChannelsSection />
       <Charts isLive={hasIntegration} />
+      <AIConsultant metrics={aiMetrics} />
     </div>
   )
 }
