@@ -42,11 +42,11 @@ export async function GET(request: NextRequest) {
   // Step 2 — set credentials immediately so the client uses them for subsequent calls
   oauth2Client.setCredentials(tokens)
 
-  // Step 3 — fetch Google Ads customer ID
-  let accountId: string
+  // Step 3 — fetch Google Ads customer ID (best-effort; falls back to 'pending')
+  let accountId = 'pending'
   try {
-    const res = await fetch(
-      'https://googleads.googleapis.com/v17/customers:listAccessibleCustomers',
+    const response = await fetch(
+      'https://googleads.googleapis.com/v19/customers:listAccessibleCustomers',
       {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
@@ -54,21 +54,22 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    const body = await res.json()
-    console.log('[google/callback] listAccessibleCustomers status:', res.status, JSON.stringify(body))
+    const text = await response.text()
+    console.log('[google/callback] listAccessibleCustomers status:', response.status)
 
-    if (!res.ok) {
-      throw new Error(`listAccessibleCustomers ${res.status}: ${JSON.stringify(body)}`)
+    if (!response.ok) {
+      console.error('[google/callback] response body:', text.substring(0, 500))
+      throw new Error(`listAccessibleCustomers ${response.status}`)
     }
 
+    const body = JSON.parse(text)
     const firstResource: string | undefined = body.resourceNames?.[0]
     if (!firstResource) throw new Error('No accessible Google Ads customers found')
 
     accountId = firstResource.replace('customers/', '')
     console.log('[google/callback] resolved account_id:', accountId)
   } catch (err) {
-    console.error('[google/callback] failed to fetch customer ID:', err)
-    return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)
+    console.error('[google/callback] failed to fetch customer ID, saving as pending:', err)
   }
 
   // Step 4 — get Supabase user from session cookie
@@ -111,11 +112,15 @@ export async function GET(request: NextRequest) {
       throw new Error(upsertError.message)
     }
 
-    console.log('[google/callback] integration saved successfully for org:', membership.organization_id)
+    console.log('[google/callback] integration saved for org:', membership.organization_id, '| account_id:', accountId)
   } catch (err) {
     console.error('[google/callback] failed to save integration:', err)
     return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)
   }
 
-  return NextResponse.redirect(`${BASE}/dashboard`)
+  const redirectUrl = accountId === 'pending'
+    ? `${BASE}/dashboard?setup=pending`
+    : `${BASE}/dashboard`
+
+  return NextResponse.redirect(redirectUrl)
 }
