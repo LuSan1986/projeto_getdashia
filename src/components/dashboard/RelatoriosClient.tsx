@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { SiGoogleads, SiMeta } from 'react-icons/si'
+import AIConsultant from '@/components/dashboard/AIConsultant'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,16 @@ export default function RelatoriosClient() {
 
   const periodLabel = periodOptions.find((o) => o.value === period)?.label ?? ''
 
+  const aiMetrics = {
+    cost:        summary.investment,
+    revenue:     summary.revenue,
+    roas:        summary.roas,
+    cpa:         summary.cpa,
+    clicks:      campaigns.reduce((s, c) => s + c.clicks,      0),
+    conversions: campaigns.reduce((s, c) => s + c.conversions, 0),
+    impressions: campaigns.reduce((s, c) => s + c.impressions, 0),
+  }
+
   return (
     <div className="p-6 md:p-8">
 
@@ -299,6 +310,8 @@ export default function RelatoriosClient() {
           </table>
         </div>
       </div>
+
+      <AIConsultant metrics={aiMetrics} />
 
     </div>
   )
