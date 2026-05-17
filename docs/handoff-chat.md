@@ -25,7 +25,7 @@ src/
 3. DOCUMENTAÇÃO DO PRODUTO
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
 4. ESTADO ATUAL
-Última atualização: 2026-05-10 (sessão 2)
+Última atualização: 2026-05-17 (sessão 3)
 Concluído
 Fase 1 — Landing v1 completa
 
@@ -61,9 +61,12 @@ Fase 2 — Dashboard v1 (concluído)
 
 src/app/dashboard/page.tsx — header, sidebar e cards de métricas ✅
 src/components/dashboard/Charts.tsx — 3 gráficos com Recharts ✅
+
 Gráfico de Área: Receita Total últimos 7 dias ✅
 Gráfico de Barras: Cliques por Canal (Google Ads vs Meta Ads) ✅
 Gráfico de Pizza (donut): Conversões por Fonte ✅
+
+
 Layout responsivo testado em produção ✅
 Dashboard exibe nome da organização do usuário logado ✅
 
@@ -148,7 +151,7 @@ src/app/api/stripe/webhook/route.ts — handler de webhook ✅
 src/app/precos/page.tsx — página de preços no ar ✅
 src/app/precos/CheckoutButton.tsx — botão de checkout ✅
 Webhook configurado no Stripe → https://www.getdashia.com.br/api/stripe/webhook ✅
-Eventos monitorados: checkout.session.completed, customer.subscription.* , invoice.payment_* ✅
+Eventos monitorados: checkout.session.completed, customer.subscription., invoice.payment_ ✅
 supabase/migrations/002_stripe_fields.sql rodado no Supabase ✅
 
 Colunas adicionadas em profiles: stripe_customer_id, stripe_subscription_id, subscription_status, subscription_plan
@@ -157,36 +160,86 @@ Colunas adicionadas em profiles: stripe_customer_id, stripe_subscription_id, sub
 Variáveis na Vercel: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET ✅
 Checkout testado com cartão de teste 4242 4242 4242 4242 ✅
 
+Fase 3 — Google Ads API (concluído em 2026-05-17)
+Arquivos criados:
+
+src/lib/crypto.ts — criptografia AES-256-GCM para tokens OAuth ✅
+src/lib/integrations/google-ads.ts — função fetchGoogleAdsData(accessToken, accountId) via GAQL ✅
+src/app/api/integrations/google/connect/route.ts — gera URL OAuth e redireciona para Google ✅
+src/app/api/integrations/google/callback/route.ts — recebe code, troca por tokens, salva no Supabase ✅
+
+Variáveis de ambiente adicionadas na Vercel:
+
+GOOGLE_CLIENT_ID ✅
+GOOGLE_CLIENT_SECRET ✅
+GOOGLE_ADS_DEVELOPER_TOKEN ✅
+TOKEN_ENCRYPTION_KEY (chave AES-256 de 64 hex chars) ✅
+
+Fluxo OAuth implementado:
+
+Usuário clica "Conectar Google Ads" → redireciona para Google
+Google redireciona para /api/integrations/google/callback com code
+Callback: getToken(code) → setCredentials(tokens) → busca Customer ID via listAccessibleCustomers v19
+Salva na tabela integrations com campos: platform, access_token_encrypted, refresh_token_encrypted, token_expires_at, account_id, organization_id
+Se Customer ID não encontrado: salva com account_id = 'pending' e redireciona para /dashboard?setup=pending
+
+Dashboard atualizado:
+
+Converte para async server component ✅
+Quando sem integração: mostra DEMO_METRICS + botão "Conectar Google Ads" ✅
+Quando com integração: busca dados reais via fetchGoogleAdsData() ✅
+Quando integração conectada mas sem campanhas: mostra zeros reais + aviso amarelo ✅
+Gráficos (Charts.tsx) recebem prop isLive={hasIntegration} — zeros quando conectado, demo quando não ✅
+
+Conta Google Ads conectada:
+
+Customer ID (MCC): 4534828300 (MCC de Automações Luciano)
+Conta não tem campanhas ativas → dashboard mostra zeros reais corretamente
+Token salvo na tabela integrations no Supabase ✅
+
+Observação importante: O Customer ID 4534828300 é uma conta MCC (Manager Account). Quando um cliente conectar uma conta com campanhas ativas, os dados reais vão aparecer automaticamente.
+Verificação do Google OAuth App (em andamento — 2026-05-17)
+
+App publicado em modo "Em produção" (não mais "Teste") ✅
+Logo 120x120px criado e enviado ✅
+Branding configurado: página inicial, política de privacidade, termos ✅
+Domínio getdashia.com.br verificado no Google Search Console ✅
+
+Registro TXT adicionado no DNS da Hostinger ✅
+
+
+Vídeo de demonstração gravado e publicado no YouTube (não listado): https://youtu.be/utnSgDH50m4 ✅
+Justificativa do escopo preenchida ✅
+App submetido para verificação do Google ✅ — aguardando análise (3-7 dias úteis)
+
+
 Em andamento
-Google Ads API
-
-Candidatura enviada em 2026-05-10 pela conta MCC "MCC de Automações Luciano" (453-482-8300) ✅
-E-mail de contato: luciano@getdashia.com.br ✅
-Documento de design PDF anexado ✅
-Aguardando aprovação (prazo: até 3 dias úteis)
-
 Meta Ads API
 
 Acesso ao developers.facebook.com iniciado mas não concluído
 Problema: verificação por SMS não chegou no número (11) 94320-4940
 Pendente: resolver verificação e criar o app de desenvolvedor
 
+
 Pendente (ordem planejada)
 
-Aguardar aprovação Google Ads API
+Aguardar aprovação da verificação Google OAuth (3-7 dias úteis) — email para lucianosantana48@gmail.com
 Resolver acesso Meta Ads API (developers.facebook.com)
+Tela de onboarding para o cliente informar Customer ID do Google Ads (quando account_id = 'pending')
 Stripe: migrar para modo produção (verificar empresa no Stripe)
 Página de Configurações (perfil do usuário, nome da organização)
-Fase 3: integrações com Google Ads e Meta Ads
-Substituir dados mock do dashboard por dados reais do banco
+Substituir dados mock do dashboard e relatórios por dados reais do banco
+Reconectar conta Google Ads do Luciano (foi deletada do Supabase para gravar vídeo demo)
 
 5. CREDENCIAIS E CONTAS IMPORTANTES
 
 E-mail corporativo: luciano@getdashia.com.br (Hostinger)
 Stripe: dashboard.stripe.com — conta em modo teste
-Google Ads MCC: 453-482-8300 (MCC de Automações Luciano)
+Google Ads MCC: 453-482-8300 (MCC de Automações Luciano) — Customer ID sem traços: 4534828300
+Google Cloud projeto: GetDashia (ID: getdashia)
 Supabase: projeto getdashia, região São Paulo
 Vercel: projeto projeto-getdashia
+YouTube vídeo demo OAuth: https://youtu.be/utnSgDH50m4
 
 6. CONTEXTO PESSOAL
 
@@ -212,9 +265,9 @@ Dark-first — paleta zinc/indigo, tema escuro como padrão.
 
 8. PRÓXIMO PASSO IMEDIATO
 
-Verificar e-mail luciano@getdashia.com.br para resposta do Google Ads API
+Aguardar e-mail de aprovação da verificação Google OAuth (lucianosantana48@gmail.com)
+Reconectar conta Google Ads do Luciano no dashboard (foi deletada para gravar vídeo)
 Resolver verificação SMS no developers.facebook.com para criar app Meta Ads
-Quando Google Ads aprovar: iniciar Fase 3 — integração com Google Ads API
-Verificar empresa no Stripe para migrar para modo produção
+Construir tela para cliente informar Customer ID do Google Ads (quando account_id = 'pending')
+Stripe: migrar para modo produção
 Página de Configurações (perfil do usuário, nome da organização)
-Substituir dados mock do dashboard e relatórios por dados reais do banco
