@@ -1,6 +1,7 @@
 import { TrendingUp } from 'lucide-react'
 import Charts from '@/components/dashboard/Charts'
 import ChannelsSection from '@/components/dashboard/ChannelsSection'
+import PendingAccountBanner from '@/components/dashboard/PendingAccountBanner'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt } from '@/lib/crypto'
 import { fetchGoogleAdsData, type GoogleAdsMetrics } from '@/lib/integrations/google-ads'
@@ -49,6 +50,7 @@ export default async function DashboardPage() {
 
   let metrics: MetricCard[] = DEMO_METRICS
   let hasIntegration = false
+  let isPending = false
   let dataLabel = 'valores de demonstração'
   let noCampaigns = false
   let connectedAccountId = ''
@@ -74,6 +76,10 @@ export default async function DashboardPage() {
       if (integration) {
         hasIntegration = true
         connectedAccountId = integration.account_id
+
+        if (integration.account_id === 'pending') {
+          isPending = true
+        }
 
         // Always show real data when connected — zeros included, never DEMO_METRICS
         let adsData: GoogleAdsMetrics = { clicks: 0, impressions: 0, cost: 0, conversions: 0 }
@@ -101,11 +107,13 @@ export default async function DashboardPage() {
           Dados do período atual — {dataLabel}
         </p>
 
-        {hasIntegration && noCampaigns && (
+        {hasIntegration && noCampaigns && !isPending && (
           <p className="mt-2 text-yellow-500 text-xs">
             Nenhuma campanha encontrada no período — conectado à conta {connectedAccountId}
           </p>
         )}
+
+        {isPending && <PendingAccountBanner />}
 
         {!hasIntegration && (
           <a

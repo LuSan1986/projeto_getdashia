@@ -10,7 +10,7 @@ interface Channel {
 
 const channels: Channel[] = [
   { name: 'Google Ads', icon: SiGoogleads, color: '#4285F4', active: true },
-  { name: 'Meta Ads',   icon: SiMeta,      color: '#0082FB', active: true },
+  { name: 'Meta Ads',   icon: SiMeta,      color: '#0082FB', active: false },
   { name: 'Facebook',   icon: SiFacebook,  color: '#1877F2', active: false },
   { name: 'Instagram',  icon: SiInstagram, color: '#E1306C', active: false },
   { name: 'TikTok',     icon: SiTiktok,    color: '#FF0050', active: false },
