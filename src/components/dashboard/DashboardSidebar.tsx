@@ -7,7 +7,7 @@ import { LayoutDashboard, BarChart3, Plug, Settings } from 'lucide-react'
 const navItems = [
   { label: 'Visão Geral',    icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Relatórios',     icon: BarChart3,        href: '/dashboard/relatorios' },
-  { label: 'Integrações',    icon: Plug,             href: '#' },
+  { label: 'Integrações',    icon: Plug,             href: '/dashboard/integracoes' },
   { label: 'Configurações',  icon: Settings,         href: '/dashboard/configuracoes' },
 ]
 
