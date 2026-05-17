@@ -50,6 +50,8 @@ export default async function DashboardPage() {
   let metrics: MetricCard[] = DEMO_METRICS
   let hasIntegration = false
   let dataLabel = 'valores de demonstração'
+  let noCampaigns = false
+  let connectedAccountId = ''
 
   if (user) {
     const { data: membership } = await supabase
@@ -71,15 +73,22 @@ export default async function DashboardPage() {
 
       if (integration) {
         hasIntegration = true
+        connectedAccountId = integration.account_id
+
+        // Always show real data when connected — zeros included, never DEMO_METRICS
+        let adsData: GoogleAdsMetrics = { clicks: 0, impressions: 0, cost: 0, conversions: 0 }
 
         try {
           const accessToken = decrypt(integration.access_token_encrypted!)
-          const adsData = await fetchGoogleAdsData(accessToken, integration.account_id)
-          metrics = buildMetrics(adsData)
+          adsData = await fetchGoogleAdsData(accessToken, integration.account_id)
           dataLabel = 'Google Ads — últimos 30 dias'
-        } catch {
-          dataLabel = 'Google Ads conectado — aguardando dados'
+        } catch (err) {
+          console.error('[dashboard] fetchGoogleAdsData failed:', err)
+          dataLabel = 'Google Ads conectado — erro ao buscar dados'
         }
+
+        metrics = buildMetrics(adsData)
+        noCampaigns = adsData.clicks === 0 && adsData.impressions === 0 && adsData.cost === 0
       }
     }
   }
@@ -91,6 +100,12 @@ export default async function DashboardPage() {
         <p className="text-zinc-500 text-sm mt-1">
           Dados do período atual — {dataLabel}
         </p>
+
+        {hasIntegration && noCampaigns && (
+          <p className="mt-2 text-yellow-500 text-xs">
+            Nenhuma campanha encontrada no período — conectado à conta {connectedAccountId}
+          </p>
+        )}
 
         {!hasIntegration && (
           <a

@@ -14,6 +14,8 @@ interface GaqlRow {
   }
 }
 
+const ZERO: GoogleAdsMetrics = { clicks: 0, impressions: 0, cost: 0, conversions: 0 }
+
 export async function fetchGoogleAdsData(
   accessToken: string,
   customerId: string
@@ -34,12 +36,13 @@ export async function fetchGoogleAdsData(
   `
 
   const res = await fetch(
-    `https://googleads.googleapis.com/v18/customers/${cleanCustomerId}/googleAds:search`,
+    `https://googleads.googleapis.com/v19/customers/${cleanCustomerId}/googleAds:search`,
     {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'developer-token': developerToken,
+        'login-customer-id': cleanCustomerId,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query }),
@@ -48,18 +51,25 @@ export async function fetchGoogleAdsData(
 
   if (!res.ok) {
     const body = await res.text()
-    throw new Error(`Google Ads API ${res.status}: ${body}`)
+    console.error(`[google-ads] API error ${res.status}:`, body)
+    throw new Error(`Google Ads API ${res.status}`)
   }
 
   const data = await res.json()
+  const rows: GaqlRow[] = data.results ?? []
 
-  return (data.results as GaqlRow[] ?? []).reduce<GoogleAdsMetrics>(
+  if (rows.length === 0) {
+    console.log('[google-ads] query returned 0 rows for customer:', cleanCustomerId)
+    return ZERO
+  }
+
+  return rows.reduce<GoogleAdsMetrics>(
     (acc, row) => ({
       clicks: acc.clicks + Number(row.metrics?.clicks ?? 0),
       impressions: acc.impressions + Number(row.metrics?.impressions ?? 0),
       cost: acc.cost + Number(row.metrics?.costMicros ?? 0) / 1_000_000,
       conversions: acc.conversions + Number(row.metrics?.conversions ?? 0),
     }),
-    { clicks: 0, impressions: 0, cost: 0, conversions: 0 }
+    { ...ZERO }
   )
 }
