@@ -1,59 +1,66 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase-server'
-import IntegracoesClient from '@/components/dashboard/IntegracoesClient'
+import IntegracoesClient, { type PlatformIntegration } from '@/components/dashboard/IntegracoesClient'
 
 export const metadata: Metadata = {
   title: 'Integrações | GetDashia',
+}
+
+async function fetchIntegration(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+  platform: string
+): Promise<PlatformIntegration> {
+  const { data } = await supabase
+    .from('integrations')
+    .select('status, account_id, created_at')
+    .eq('organization_id', organizationId)
+    .eq('platform', platform)
+    .limit(1)
+    .single()
+
+  if (!data) return { status: null, accountId: null, connectedAt: null }
+
+  const rawStatus = data.status as string
+  const accountId = data.account_id ?? null
+
+  let status: PlatformIntegration['status']
+  if (rawStatus === 'inactive') {
+    status = 'inactive'
+  } else if (accountId === 'pending') {
+    status = 'pending'
+  } else {
+    status = 'connected'
+  }
+
+  return { status, accountId, connectedAt: data.created_at ?? null }
 }
 
 export default async function IntegracoesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let googleStatus: 'connected' | 'pending' | 'inactive' | null = null
-  let googleAccountId: string | null = null
-  let googleConnectedAt: string | null = null
+  const empty: PlatformIntegration = { status: null, accountId: null, connectedAt: null }
 
-  if (user) {
-    const { data: membership } = await supabase
-      .from('organization_members')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (membership) {
-      const { data: integration } = await supabase
-        .from('integrations')
-        .select('status, account_id, created_at')
-        .eq('organization_id', membership.organization_id)
-        .eq('platform', 'google_ads')
-        .limit(1)
-        .single()
-
-      if (integration) {
-        googleAccountId = integration.account_id ?? null
-        googleConnectedAt = integration.created_at ?? null
-
-        const rawStatus = integration.status as string
-        if (rawStatus === 'inactive') {
-          googleStatus = 'inactive'
-        } else if (googleAccountId === 'pending') {
-          googleStatus = 'pending'
-        } else {
-          googleStatus = 'connected'
-        }
-      }
-    }
+  if (!user) {
+    return <IntegracoesClient google={empty} meta={empty} />
   }
 
-  return (
-    <IntegracoesClient
-      google={{
-        status: googleStatus,
-        accountId: googleAccountId,
-        connectedAt: googleConnectedAt,
-      }}
-    />
-  )
+  const { data: membership } = await supabase
+    .from('organization_members')
+    .select('organization_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (!membership) {
+    return <IntegracoesClient google={empty} meta={empty} />
+  }
+
+  const [google, meta] = await Promise.all([
+    fetchIntegration(supabase, membership.organization_id, 'google_ads'),
+    fetchIntegration(supabase, membership.organization_id, 'meta_ads'),
+  ])
+
+  return <IntegracoesClient google={google} meta={meta} />
 }
