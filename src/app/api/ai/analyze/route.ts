@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase-server'
 
 interface Metrics {
@@ -64,16 +64,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ semDados: true })
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'Chave da API não configurada' }, { status: 500 })
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-    const result = await model.generateContent(buildPrompt(metrics))
-    const raw = result.response.text()
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: buildPrompt(metrics) }],
+      temperature: 0.7,
+    })
+    const raw = completion.choices[0].message.content ?? ''
     const cleaned = stripMarkdown(raw)
 
     const analysis = JSON.parse(cleaned)
