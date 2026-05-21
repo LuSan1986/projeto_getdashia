@@ -23,7 +23,7 @@ export async function POST() {
 
     const { error } = await supabase
       .from('integrations')
-      .update({ status: 'inactive' })
+      .delete()
       .eq('organization_id', membership.organization_id)
       .eq('platform', 'google_ads')
 
