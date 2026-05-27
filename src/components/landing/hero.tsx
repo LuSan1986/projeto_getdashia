@@ -42,12 +42,12 @@ export default function Hero() {
         src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&q=80"
         alt=""
         fill
-        className="object-cover object-center -z-20 opacity-20"
+        className="object-cover object-center -z-20 opacity-35"
         priority
       />
 
       {/* Dark overlay */}
-      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-950/80 via-zinc-950/70 to-zinc-950/90" />
+      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-950/60 via-zinc-950/50 to-zinc-950/70" />
 
       {/* Indigo glow sutil no topo */}
       <div
