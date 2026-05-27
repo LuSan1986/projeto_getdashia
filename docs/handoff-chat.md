@@ -26,24 +26,15 @@ types/
 3. DOCUMENTAÇÃO DO PRODUTO
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
 4. ESTADO ATUAL
-Última atualização: 2026-05-21 (sessão 6)
+Sessão 7 — concluído em 2026-05-27
 
-Sessão 6 — concluído em 2026-05-21
-
-Bug Desconectar Google Ads corrigido ✅
-- Erro 500 na rota /api/integrations/google/disconnect
-- Causa: constraint no Supabase não aceitava status 'inactive'
-- Solução: trocado .update({ status: 'inactive' }) por .delete()
-
-Vídeo OAuth regravado e enviado ao Google ✅
-- Novo vídeo: https://youtu.be/U8G7KhkllN8
-- Mostra fluxo completo da tela de consentimento com "1 serviço" expandido
-- Respondido diretamente ao e-mail: api-oauth-dev-verification-reply+1ovn2l6p0lh5r1d@google.com
-
-Domínio getdashia.com.br no ar ✅
-- Nameservers trocados de dns-parking.com para Hostinger (via Kodee)
-- Registros DNS corrigidos: AAAA removido, A @ → 216.198.79.1, www CNAME → cname.vercel-dns.com
-- Site acessível em getdashia.com.br
+OAuth Google aprovado (escopo adwords) ✅
+Rota /api/google-ads/campaigns criada — dados reais, refresh de token automático, try-catch global ✅
+Mock data removido de RelatoriosClient — mostra dados reais ou "0 encontradas" ✅
+API version corrigida de v19 para v18 em todos os arquivos ✅
+Hero da landing page reformulado — layout 2 colunas com dashboard animado à direita ✅
+Card "Plano Grátis" adicionado na página de Preços (beta, tempo limitado) ✅
+Gestor de tráfego pode testar em: getdashia.com.br/cadastro (sem cartão)
 
 
 
@@ -135,8 +126,8 @@ Dark-first — paleta zinc/indigo, tema escuro como padrão.
 
 8. PRÓXIMO PASSO IMEDIATO
 
-Aguardar resposta do Google OAuth (enviado em 2026-05-21)
-Meta Ads → iniciar verificação como Provedor de Tecnologia (CNPJ necessário)
-Decidir CPF ou CNPJ → ativar Stripe modo produção
-Substituir dados mock de Relatórios por dados reais da Google Ads API
-Dados do Meta Ads via Marketing API (após verificação Provedor de Tecnologia)
+Aguardar feedback do gestor de tráfego após os testes
+Meta Ads → iniciar verificação como Provedor de Tecnologia (requer CNPJ)
+Stripe → migrar para produção (decidir CPF ou CNPJ)
+Após verificação Meta: buscar campanhas reais via Marketing API
+Remover card "Plano Grátis" após período de testes

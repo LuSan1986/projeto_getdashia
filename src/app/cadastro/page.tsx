@@ -28,7 +28,7 @@ export default function CadastroPage() {
     })
 
     if (error) {
-      setErro('Erro ao criar conta. Tente novamente.')
+      setErro(error.message)
       setCarregando(false)
       return
     }
