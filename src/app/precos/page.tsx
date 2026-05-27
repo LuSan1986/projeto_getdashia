@@ -100,7 +100,41 @@ export default function PrecosPage() {
         </div>
 
         {/* Cards */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-4">
+          {/* Plano Grátis */}
+          <div className="flex flex-col rounded-2xl border border-emerald-800/50 bg-emerald-950/20 p-6">
+            <span className="mb-4 inline-block w-fit rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-800/50">
+              Beta — tempo limitado
+            </span>
+            <p className="text-lg font-bold text-zinc-50">Grátis</p>
+            <div className="mt-2 flex items-end gap-1">
+              <span className="text-4xl font-bold text-zinc-50">R$ 0</span>
+              <span className="mb-1 text-sm text-zinc-400">/mês</span>
+            </div>
+            <p className="mt-2 text-sm text-zinc-500">Para testar a plataforma durante o período beta.</p>
+            <div className="my-6 border-t border-zinc-800" />
+            <ul className="mb-6 flex-1 space-y-3">
+              {[
+                "1 integração (Google Ads ou Meta Ads)",
+                "Dashboard com métricas de campanha",
+                "Dados dos últimos 30 dias",
+                "1 organização",
+                "Sem cartão de crédito",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-3">
+                  <Check className="size-4 shrink-0 text-emerald-400" />
+                  <span className="text-sm text-zinc-300">{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/cadastro"
+              className="w-full rounded-lg border border-emerald-700 py-2.5 text-sm font-semibold text-emerald-400 transition-colors hover:bg-emerald-900/40 text-center"
+            >
+              Criar conta grátis
+            </Link>
+          </div>
+
           {planos.map((plano) => (
             <div
               key={plano.nome}
