@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
 
   if (!campaignRes.ok) {
     console.error('[google-ads/campaigns] campaign query error:', JSON.stringify(campaignBody).substring(0, 500))
-    return NextResponse.json({ campaigns: [], roasData: [], connected: true })
+    return NextResponse.json({ connected: true, campaigns: [], roasData: [], apiError: true })
   }
 
   // Parse campaigns
