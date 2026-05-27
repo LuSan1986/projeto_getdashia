@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   let accountId = 'pending'
   try {
     const response = await fetch(
-      'https://googleads.googleapis.com/v19/customers:listAccessibleCustomers',
+      'https://googleads.googleapis.com/v18/customers:listAccessibleCustomers',
       {
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
