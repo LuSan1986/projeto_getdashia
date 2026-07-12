@@ -51,6 +51,16 @@ export default function Hero() {
           0% { transform: translateY(-100%); }
           100% { transform: translateY(400%); }
         }
+        @keyframes star-pulse {
+          0%, 100% {
+            opacity: 0.6;
+            text-shadow: 0 0 10px #06B6D4, 0 0 30px rgba(6,182,212,0.5), 0 0 60px rgba(6,182,212,0.2);
+          }
+          50% {
+            opacity: 1;
+            text-shadow: 0 0 20px #06B6D4, 0 0 50px rgba(6,182,212,0.8), 0 0 90px rgba(6,182,212,0.4), 0 0 120px rgba(124,58,237,0.3);
+          }
+        }
         .cyber-btn-primary {
           background: linear-gradient(135deg, #06B6D4 0%, #7C3AED 100%);
           box-shadow: 0 0 20px rgba(6,182,212,0.4), 0 0 40px rgba(124,58,237,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
@@ -76,30 +86,21 @@ export default function Hero() {
           box-shadow: 0 0 20px rgba(6,182,212,0.3), inset 0 0 20px rgba(6,182,212,0.08);
           color: #67E8F9;
         }
-        .circuit-corner::before,
-        .circuit-corner::after {
-          content: '';
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          border-color: rgba(6,182,212,0.5);
-          border-style: solid;
-        }
       `}</style>
 
       {/* ── Background grid/circuit pattern ── */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(6,182,212,0.06)" strokeWidth="0.5" />
+            <pattern id="grid-small" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(0,255,255,0.15)" strokeWidth="0.5" />
             </pattern>
-            <pattern id="grid-large" width="180" height="180" patternUnits="userSpaceOnUse">
-              <path d="M 180 0 L 0 0 0 180" fill="none" stroke="rgba(6,182,212,0.04)" strokeWidth="1" />
+            <pattern id="grid-mid" width="100" height="100" patternUnits="userSpaceOnUse">
+              <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(6,182,212,0.08)" strokeWidth="0.5" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-          <rect width="100%" height="100%" fill="url(#grid-large)" />
+          <rect width="100%" height="100%" fill="url(#grid-small)" />
+          <rect width="100%" height="100%" fill="url(#grid-mid)" />
         </svg>
       </div>
 
@@ -108,7 +109,7 @@ export default function Hero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,58,237,0.07) 0%, rgba(6,182,212,0.05) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,58,237,0.25) 0%, rgba(6,182,212,0.20) 40%, transparent 70%)",
         }}
       />
       {/* Top glow */}
@@ -116,7 +117,7 @@ export default function Hero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse 60% 40% at 50% -5%, rgba(6,182,212,0.1) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 60% 40% at 50% -5%, rgba(6,182,212,0.18) 0%, transparent 65%)",
         }}
       />
       {/* Right glow */}
@@ -124,29 +125,64 @@ export default function Hero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse 45% 60% at 90% 50%, rgba(124,58,237,0.08) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 45% 60% at 90% 50%, rgba(124,58,237,0.15) 0%, transparent 65%)",
         }}
       />
 
-      {/* ── Decorative circuit lines — SVG background elements ── */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 hidden lg:block">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          {/* Top-left circuit traces */}
-          <path d="M 0 80 L 60 80 L 60 140 L 120 140" stroke="rgba(6,182,212,0.12)" strokeWidth="1" fill="none" />
-          <circle cx="60" cy="80" r="3" fill="rgba(6,182,212,0.2)" />
-          <circle cx="120" cy="140" r="2" fill="rgba(6,182,212,0.15)" />
-          <path d="M 0 200 L 40 200 L 40 260" stroke="rgba(6,182,212,0.08)" strokeWidth="1" fill="none" />
+      {/* ── Full-coverage circuit line overlay ── */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ zIndex: 0 }}>
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          {/* Horizontal lines */}
+          <line x1="0" y1="12%" x2="100%" y2="12%" stroke="rgba(0,255,255,0.20)" strokeWidth="0.8" />
+          <line x1="0" y1="28%" x2="100%" y2="28%" stroke="rgba(0,255,255,0.12)" strokeWidth="0.6" />
+          <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(6,182,212,0.18)" strokeWidth="0.8" />
+          <line x1="0" y1="70%" x2="100%" y2="70%" stroke="rgba(0,255,255,0.12)" strokeWidth="0.6" />
+          <line x1="0" y1="88%" x2="100%" y2="88%" stroke="rgba(6,182,212,0.16)" strokeWidth="0.8" />
 
-          {/* Bottom-left */}
-          <path d="M 0 85% L 80 85% L 80 80%" stroke="rgba(124,58,237,0.1)" strokeWidth="1" fill="none" />
-          <circle cx="80" cy="80%" r="2" fill="rgba(124,58,237,0.2)" />
+          {/* Vertical lines */}
+          <line x1="8%"  y1="0" x2="8%"  y2="100%" stroke="rgba(0,255,255,0.15)" strokeWidth="0.7" />
+          <line x1="25%" y1="0" x2="25%" y2="100%" stroke="rgba(6,182,212,0.10)" strokeWidth="0.6" />
+          <line x1="50%" y1="0" x2="50%" y2="100%" stroke="rgba(0,255,255,0.13)" strokeWidth="0.7" />
+          <line x1="75%" y1="0" x2="75%" y2="100%" stroke="rgba(6,182,212,0.10)" strokeWidth="0.6" />
 
-          {/* Top-right */}
-          <path d="M 100% 100 L calc(100% - 80px) 100 L calc(100% - 80px) 160" stroke="rgba(6,182,212,0.1)" strokeWidth="1" fill="none" />
-          <circle cx="calc(100% - 80px)" cy="160" r="2" fill="rgba(6,182,212,0.2)" />
+          {/* Intersection dots */}
+          <circle cx="8%"  cy="12%" r="2.5" fill="rgba(0,255,255,0.30)" />
+          <circle cx="25%" cy="12%" r="2"   fill="rgba(0,255,255,0.25)" />
+          <circle cx="50%" cy="12%" r="2.5" fill="rgba(0,255,255,0.30)" />
+          <circle cx="75%" cy="12%" r="2"   fill="rgba(6,182,212,0.25)" />
+          <circle cx="8%"  cy="50%" r="2"   fill="rgba(0,255,255,0.25)" />
+          <circle cx="50%" cy="50%" r="3"   fill="rgba(0,255,255,0.35)" />
+          <circle cx="75%" cy="50%" r="2"   fill="rgba(124,58,237,0.30)" />
+          <circle cx="25%" cy="70%" r="2"   fill="rgba(0,255,255,0.25)" />
+          <circle cx="50%" cy="70%" r="2.5" fill="rgba(6,182,212,0.30)" />
+          <circle cx="75%" cy="88%" r="2"   fill="rgba(0,255,255,0.25)" />
+          <circle cx="8%"  cy="88%" r="2.5" fill="rgba(124,58,237,0.28)" />
 
-          {/* Bottom-right */}
-          <path d="M 100% 75% L calc(100% - 60px) 75% L calc(100% - 60px) 70% L calc(100% - 140px) 70%" stroke="rgba(124,58,237,0.08)" strokeWidth="1" fill="none" />
+          {/* L-shapes — top-left */}
+          <path d="M 0 60 L 0 0 L 60 0" stroke="#06B6D4" strokeWidth="1.5" fill="none" opacity="0.7" />
+          <circle cx="0"  cy="0"  r="4" fill="#06B6D4" opacity="0.6" />
+
+          {/* L-shape — top-right */}
+          <path d="M 100% 60 L 100% 0 L calc(100% - 60px) 0" stroke="#06B6D4" strokeWidth="1.5" fill="none" opacity="0.7" />
+          <circle cx="100%" cy="0" r="4" fill="#06B6D4" opacity="0.6" />
+
+          {/* L-shape — bottom-left */}
+          <path d="M 0 calc(100% - 60px) L 0 100% L 60 100%" stroke="rgba(124,58,237,0.8)" strokeWidth="1.5" fill="none" opacity="0.7" />
+          <circle cx="0" cy="100%" r="4" fill="rgba(124,58,237,0.7)" opacity="0.6" />
+
+          {/* L-shape — bottom-right */}
+          <path d="M calc(100% - 60px) 100% L 100% 100% L 100% calc(100% - 60px)" stroke="rgba(124,58,237,0.8)" strokeWidth="1.5" fill="none" opacity="0.7" />
+          <circle cx="100%" cy="100%" r="4" fill="rgba(124,58,237,0.7)" opacity="0.6" />
+
+          {/* Extra circuit traces — left side */}
+          <path d="M 0 35% L 5% 35% L 5% 42% L 12% 42%" stroke="rgba(0,255,255,0.25)" strokeWidth="1" fill="none" />
+          <circle cx="5%"  cy="35%" r="2" fill="rgba(0,255,255,0.35)" />
+          <circle cx="12%" cy="42%" r="2" fill="rgba(0,255,255,0.30)" />
+
+          {/* Extra circuit traces — right side */}
+          <path d="M 100% 60% L 92% 60% L 92% 65% L 85% 65%" stroke="rgba(124,58,237,0.25)" strokeWidth="1" fill="none" />
+          <circle cx="92%" cy="60%" r="2" fill="rgba(124,58,237,0.35)" />
+          <circle cx="85%" cy="65%" r="2" fill="rgba(124,58,237,0.30)" />
         </svg>
       </div>
 
@@ -159,10 +195,10 @@ export default function Hero() {
           <div
             className="mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium"
             style={{
-              border: "1px solid rgba(6,182,212,0.5)",
-              background: "rgba(6,182,212,0.05)",
+              border: "1px solid #06B6D4",
+              background: "rgba(6,182,212,0.07)",
               color: "#06B6D4",
-              boxShadow: "0 0 12px rgba(6,182,212,0.2), inset 0 0 12px rgba(6,182,212,0.05)",
+              boxShadow: "0 0 15px rgba(6,182,212,0.5), inset 0 0 12px rgba(6,182,212,0.08)",
               animation: "pulse-glow 3s ease-in-out infinite",
             }}
           >
@@ -305,8 +341,8 @@ export default function Hero() {
             className="rounded-2xl p-5 w-full max-w-lg backdrop-blur-sm relative overflow-hidden"
             style={{
               background: "#0A0F1E",
-              border: "1px solid rgba(6,182,212,0.25)",
-              boxShadow: "0 0 0 1px rgba(6,182,212,0.08), 0 0 40px rgba(6,182,212,0.15), 0 0 80px rgba(124,58,237,0.1), 0 25px 60px rgba(0,0,0,0.6)",
+              border: "1px solid rgba(6,182,212,0.35)",
+              boxShadow: "0 0 20px rgba(6,182,212,0.5), 0 0 60px rgba(6,182,212,0.3), 0 0 100px rgba(124,58,237,0.2)",
               transform: "perspective(1200px) rotateY(-6deg) rotateX(2deg)",
               animation: "float 4s ease-in-out infinite alternate",
             }}
@@ -454,6 +490,21 @@ export default function Hero() {
           </div>
         </div>
 
+      </div>
+
+      {/* ── Decorative star/diamond ── */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-8 right-8 hidden lg:block"
+        style={{
+          fontSize: "3rem",
+          color: "#06B6D4",
+          lineHeight: 1,
+          animation: "star-pulse 2.5s ease-in-out infinite",
+          zIndex: 1,
+        }}
+      >
+        ✦
       </div>
     </section>
   );
