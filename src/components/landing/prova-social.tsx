@@ -118,18 +118,27 @@ export default function ProvaSocial() {
           </div>
 
           {/* Cards — z-index 1 para cobrir as linhas internas */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="relative grid grid-cols-2 gap-6" style={{ zIndex: 1 }}>
             {plataformas.map(({ nome, logo }) => (
               <div key={nome} className="integ-card flex items-center gap-4 px-6 py-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logo}
-                  alt={nome}
-                  width={52}
-                  height={52}
-                  className="flex-shrink-0 object-contain"
-                />
+                <div style={{
+                  background: 'white',
+                  borderRadius: '10px',
+                  padding: '6px',
+                  width: '52px',
+                  height: '52px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logo}
+                    alt={nome}
+                    style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                  />
+                </div>
                 <span className="text-left font-semibold" style={{ color: "#F1F5F9", fontSize: "1.1rem" }}>
                   {nome}
                 </span>
