@@ -1,8 +1,8 @@
 const plataformas = [
-  { nome: "Google Ads",       logo: "/logos/google-ads.png" },
+  { nome: "Google Ads",       logo: "/logos/google-ads.jpeg" },
   { nome: "Meta Ads",         logo: "/logos/meta-ads.png" },
   { nome: "Google Analytics", logo: "/logos/google-analytics.png" },
-  { nome: "TikTok Ads",       logo: "/logos/tiktok-ads.png" },
+  { nome: "TikTok Ads",       logo: "/logos/tiktok-ads.webp" },
 ] as const;
 
 export default function ProvaSocial() {
