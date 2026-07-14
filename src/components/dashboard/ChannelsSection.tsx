@@ -30,20 +30,53 @@ interface Channel {
   id: ChannelId
   name: string
   renderIcon: () => ReactNode
-  available: boolean
+  metaChannel: boolean  // true = depende de Meta conectado
 }
 
 const channels: Channel[] = [
-  { id: 'google',    name: 'Google Ads', renderIcon: () => <SiGoogleads color="#4285F4" size={20} />, available: true  },
-  { id: 'instagram', name: 'Instagram',  renderIcon: () => <InstagramIcon />,                          available: false },
-  { id: 'facebook',  name: 'Facebook',   renderIcon: () => <SiFacebook  color="#1877F2" size={20} />, available: false },
-  { id: 'tiktok',   name: 'TikTok',     renderIcon: () => <SiTiktok    color="#FF0050" size={20} />, available: false },
+  { id: 'google',    name: 'Google Ads', renderIcon: () => <SiGoogleads color="#4285F4" size={20} />, metaChannel: false },
+  { id: 'instagram', name: 'Instagram',  renderIcon: () => <InstagramIcon />,                          metaChannel: true  },
+  { id: 'facebook',  name: 'Facebook',   renderIcon: () => <SiFacebook  color="#1877F2" size={20} />, metaChannel: true  },
+  { id: 'tiktok',   name: 'TikTok',     renderIcon: () => <SiTiktok    color="#FF0050" size={20} />, metaChannel: false },
 ]
 
-export default function ChannelsSection() {
+interface Props {
+  metaConnected?: boolean
+}
+
+export default function ChannelsSection({ metaConnected = false }: Props) {
   const [selected, setSelected] = useState<ChannelId>('google')
 
   const activeChannel = channels.find(c => c.id === selected)!
+
+  // Canal disponível para ver dados?
+  const isAvailable = (ch: Channel) => {
+    if (ch.id === 'google') return true
+    if (ch.metaChannel) return false  // Meta conectado mas dados ainda não implementados
+    return false
+  }
+
+  const available = isAvailable(activeChannel)
+
+  // Mensagem customizada por canal
+  function getMsg() {
+    if (activeChannel.metaChannel && metaConnected) {
+      return {
+        title: `${activeChannel.name} — conectado`,
+        sub: `Sua conta Meta está conectada. Os dados de ${activeChannel.name} estarão disponíveis em breve.`,
+        badge: 'Conectado',
+        badgeColor: 'text-green-400 bg-green-500/10 border-green-500/30',
+      }
+    }
+    return {
+      title: `${activeChannel.name} — integração em breve`,
+      sub: `Em breve você poderá visualizar campanhas do ${activeChannel.name} aqui.`,
+      badge: 'Em breve',
+      badgeColor: 'text-zinc-400 bg-zinc-800 border-zinc-700',
+    }
+  }
+
+  const msg = getMsg()
 
   return (
     <div className="mt-6">
@@ -67,15 +100,14 @@ export default function ChannelsSection() {
         ))}
       </div>
 
-      {/* Mensagem para canais sem integração */}
-      {!activeChannel.available && (
+      {/* Mensagem para canais sem dados */}
+      {!available && (
         <div className="mt-4 rounded-xl bg-zinc-900 border border-zinc-800 px-5 py-6 text-center">
-          <p className="text-zinc-400 text-sm font-medium mb-1">
-            {activeChannel.name} — integração em breve
-          </p>
-          <p className="text-zinc-600 text-xs">
-            Em breve você poderá visualizar campanhas do {activeChannel.name} aqui.
-          </p>
+          <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mb-3 ${msg.badgeColor}`}>
+            {msg.badge}
+          </span>
+          <p className="text-zinc-300 text-sm font-medium mb-1">{msg.title}</p>
+          <p className="text-zinc-500 text-xs">{msg.sub}</p>
         </div>
       )}
     </div>

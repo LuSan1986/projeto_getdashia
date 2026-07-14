@@ -55,6 +55,7 @@ export default async function DashboardPage() {
   let dataLabel = 'valores de demonstração'
   let noCampaigns = false
   let connectedAccountId = ''
+  let metaConnected = false
   let aiMetrics = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
   if (user) {
@@ -74,6 +75,18 @@ export default async function DashboardPage() {
         .eq('status', 'active')
         .limit(1)
         .single()
+
+      // Check Meta integration
+      const { data: metaIntegration } = await supabase
+        .from('integrations')
+        .select('id')
+        .eq('organization_id', membership.organization_id)
+        .eq('platform', 'meta_ads')
+        .eq('status', 'active')
+        .limit(1)
+        .single()
+
+      metaConnected = !!metaIntegration
 
       if (integration) {
         hasIntegration = true
@@ -158,7 +171,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <ChannelsSection />
+      <ChannelsSection metaConnected={metaConnected} />
       <Charts isLive={hasIntegration} />
       <AIConsultant metrics={aiMetrics} />
     </div>
