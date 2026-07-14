@@ -82,20 +82,27 @@ function IntegrationCard({
 }: IntegrationCardProps) {
   const [loading, setLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [disconnectError, setDisconnectError] = useState<string | null>(null)
   const router = useRouter()
 
   const isActive = status === 'connected' || status === 'pending'
 
   async function handleDisconnect() {
     setLoading(true)
+    setDisconnectError(null)
     try {
-      await fetch(disconnectApiRoute, { method: 'POST' })
+      const res = await fetch(disconnectApiRoute, { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setDisconnectError((body as { error?: string }).error ?? 'Erro ao desconectar')
+        return
+      }
+      setConfirmOpen(false)
       router.refresh()
     } catch {
-      // silently fail
+      setDisconnectError('Erro ao conectar ao servidor')
     } finally {
       setLoading(false)
-      setConfirmOpen(false)
     }
   }
 
@@ -147,20 +154,27 @@ function IntegrationCard({
             Conectar
           </a>
         ) : confirmOpen ? (
-          <div className="flex-1 flex gap-2">
-            <button
-              onClick={handleDisconnect}
-              disabled={loading}
-              className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
-            >
-              {loading ? 'Desconectando…' : 'Confirmar'}
-            </button>
-            <button
-              onClick={() => setConfirmOpen(false)}
-              className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
-            >
-              Cancelar
-            </button>
+          <div className="flex-1 flex flex-col gap-2">
+            {disconnectError && (
+              <p className="text-xs text-red-400 bg-red-500/10 rounded-xl px-3 py-2">
+                {disconnectError}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleDisconnect}
+                disabled={loading}
+                className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
+              >
+                {loading ? 'Desconectando…' : 'Confirmar'}
+              </button>
+              <button
+                onClick={() => { setConfirmOpen(false); setDisconnectError(null) }}
+                className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         ) : (
           <button

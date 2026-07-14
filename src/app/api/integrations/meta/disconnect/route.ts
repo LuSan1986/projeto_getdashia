@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase-server'
 
 export async function POST() {
@@ -30,5 +31,6 @@ export async function POST() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  revalidatePath('/dashboard/integracoes')
   return NextResponse.json({ ok: true })
 }
