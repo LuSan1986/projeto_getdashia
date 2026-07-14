@@ -42,9 +42,7 @@ export default function ChannelsSection() {
         {channels.map(({ name, renderIcon, active }) => (
           <div
             key={name}
-            className={`flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 transition ${
-              active ? '' : 'opacity-40'
-            }`}
+            className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 transition"
           >
             {renderIcon()}
             <span className="text-sm font-medium text-zinc-200">{name}</span>
