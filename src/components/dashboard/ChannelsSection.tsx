@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { SiGoogleads, SiFacebook, SiTiktok } from 'react-icons/si'
 import type { ReactNode } from 'react'
 
@@ -21,34 +24,60 @@ function InstagramIcon() {
   )
 }
 
+type ChannelId = 'google' | 'instagram' | 'facebook' | 'tiktok'
+
 interface Channel {
+  id: ChannelId
   name: string
   renderIcon: () => ReactNode
-  active: boolean
+  available: boolean
 }
 
 const channels: Channel[] = [
-  { name: 'Google Ads', renderIcon: () => <SiGoogleads color="#4285F4" size={20} />, active: true  },
-  { name: 'Instagram',  renderIcon: () => <InstagramIcon />,                          active: false },
-  { name: 'Facebook',   renderIcon: () => <SiFacebook  color="#1877F2" size={20} />, active: false },
-  { name: 'TikTok',     renderIcon: () => <SiTiktok    color="#FF0050" size={20} />, active: false },
+  { id: 'google',    name: 'Google Ads', renderIcon: () => <SiGoogleads color="#4285F4" size={20} />, available: true  },
+  { id: 'instagram', name: 'Instagram',  renderIcon: () => <InstagramIcon />,                          available: false },
+  { id: 'facebook',  name: 'Facebook',   renderIcon: () => <SiFacebook  color="#1877F2" size={20} />, available: false },
+  { id: 'tiktok',   name: 'TikTok',     renderIcon: () => <SiTiktok    color="#FF0050" size={20} />, available: false },
 ]
 
 export default function ChannelsSection() {
+  const [selected, setSelected] = useState<ChannelId>('google')
+
+  const activeChannel = channels.find(c => c.id === selected)!
+
   return (
     <div className="mt-6">
       <p className="text-sm font-medium text-zinc-300 mb-3">Canais</p>
+
+      {/* Tabs */}
       <div className="flex flex-wrap gap-3">
-        {channels.map(({ name, renderIcon, active }) => (
-          <div
-            key={name}
-            className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 transition"
+        {channels.map(({ id, name, renderIcon }) => (
+          <button
+            key={id}
+            onClick={() => setSelected(id)}
+            className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition border text-sm font-medium
+              ${selected === id
+                ? 'bg-indigo-600/20 border-indigo-500 text-white'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-zinc-600 hover:bg-zinc-800'
+              }`}
           >
             {renderIcon()}
-            <span className="text-sm font-medium text-zinc-200">{name}</span>
-          </div>
+            {name}
+          </button>
         ))}
       </div>
+
+      {/* Mensagem para canais sem integração */}
+      {!activeChannel.available && (
+        <div className="mt-4 rounded-xl bg-zinc-900 border border-zinc-800 px-5 py-6 text-center">
+          <p className="text-zinc-400 text-sm font-medium mb-1">
+            {activeChannel.name} — integração em breve
+          </p>
+          <p className="text-zinc-600 text-xs">
+            Em breve você poderá visualizar campanhas do {activeChannel.name} aqui.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
