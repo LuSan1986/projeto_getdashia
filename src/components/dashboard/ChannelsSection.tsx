@@ -42,26 +42,31 @@ const channels: Channel[] = [
 
 interface Props {
   metaConnected?: boolean
+  googleConnected?: boolean
 }
 
-export default function ChannelsSection({ metaConnected = false }: Props) {
+export default function ChannelsSection({ metaConnected = false, googleConnected = false }: Props) {
   const [selected, setSelected] = useState<ChannelId>('google')
 
   const activeChannel = channels.find(c => c.id === selected)!
 
-  // Canal disponível para ver dados?
-  const isAvailable = (ch: Channel) => {
-    if (ch.id === 'google') return true
-    if (ch.metaChannel) return false  // Meta conectado mas dados ainda não implementados
-    return false
-  }
-
-  const available = isAvailable(activeChannel)
-
   // Mensagem customizada por canal
   function getMsg() {
+    if (activeChannel.id === 'google' && googleConnected) {
+      return {
+        show: true,
+        title: 'Google Ads — conectado',
+        sub: 'Sua conta Google Ads está conectada. Os dados são exibidos acima.',
+        badge: 'Conectado',
+        badgeColor: 'text-green-400 bg-green-500/10 border-green-500/30',
+      }
+    }
+    if (activeChannel.id === 'google' && !googleConnected) {
+      return { show: false, title: '', sub: '', badge: '', badgeColor: '' }
+    }
     if (activeChannel.metaChannel && metaConnected) {
       return {
+        show: true,
         title: `${activeChannel.name} — conectado`,
         sub: `Sua conta Meta está conectada. Os dados de ${activeChannel.name} estarão disponíveis em breve.`,
         badge: 'Conectado',
@@ -69,6 +74,7 @@ export default function ChannelsSection({ metaConnected = false }: Props) {
       }
     }
     return {
+      show: true,
       title: `${activeChannel.name} — integração em breve`,
       sub: `Em breve você poderá visualizar campanhas do ${activeChannel.name} aqui.`,
       badge: 'Em breve',
@@ -77,6 +83,7 @@ export default function ChannelsSection({ metaConnected = false }: Props) {
   }
 
   const msg = getMsg()
+  const available = activeChannel.id === 'google'
 
   return (
     <div className="mt-6">
@@ -100,8 +107,8 @@ export default function ChannelsSection({ metaConnected = false }: Props) {
         ))}
       </div>
 
-      {/* Mensagem para canais sem dados */}
-      {!available && (
+      {/* Mensagem de status do canal */}
+      {msg.show && (
         <div className="mt-4 rounded-xl bg-zinc-900 border border-zinc-800 px-5 py-6 text-center">
           <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mb-3 ${msg.badgeColor}`}>
             {msg.badge}

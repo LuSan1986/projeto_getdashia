@@ -171,7 +171,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <ChannelsSection metaConnected={metaConnected} />
+      <ChannelsSection metaConnected={metaConnected} googleConnected={hasIntegration} />
       <Charts isLive={hasIntegration} />
       <AIConsultant metrics={aiMetrics} />
     </div>
