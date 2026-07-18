@@ -172,6 +172,46 @@ export default function Hero() {
             </filter>
           </defs>
 
+          {/* ── BRIDGE: traços que conectam texto → imagem ── */}
+          {/* Traço horizontal superior cruzando as colunas */}
+          <path d="M 560 180 H 760 V 140 H 980 V 200 H 1200 V 160 H 1380"
+                stroke="rgba(6,182,212,0.35)" strokeWidth="1" fill="none"/>
+          <circle cx="760"  cy="180" r="2.5" fill="rgba(6,182,212,0.65)"/>
+          <circle cx="760"  cy="140" r="2"   fill="rgba(6,182,212,0.55)"/>
+          <circle cx="980"  cy="140" r="3"   fill="rgba(6,182,212,0.70)" filter="url(#pcb-glow-cy)"/>
+          <circle cx="980"  cy="200" r="2"   fill="rgba(6,182,212,0.55)"/>
+          <circle cx="1200" cy="200" r="2.5" fill="rgba(6,182,212,0.60)"/>
+          <circle cx="1200" cy="160" r="2"   fill="rgba(6,182,212,0.50)"/>
+          {/* Traço horizontal meio cruzando as colunas */}
+          <path d="M 680 420 H 860 V 380 H 1060 V 440 H 1260 V 400 H 1440"
+                stroke="rgba(6,182,212,0.28)" strokeWidth="1" fill="none"/>
+          <circle cx="860"  cy="420" r="2.5" fill="rgba(6,182,212,0.58)"/>
+          <circle cx="860"  cy="380" r="2"   fill="rgba(6,182,212,0.50)"/>
+          <circle cx="1060" cy="380" r="3"   fill="rgba(6,182,212,0.65)" filter="url(#pcb-glow-cy)"/>
+          <circle cx="1060" cy="440" r="2"   fill="rgba(6,182,212,0.52)"/>
+          <circle cx="1260" cy="440" r="2.5" fill="rgba(6,182,212,0.55)"/>
+          {/* Traço magenta inferior cruzando as colunas */}
+          <path d="M 600 620 H 820 V 580 H 1020 V 640 H 1220 V 600 H 1440"
+                stroke="rgba(232,121,249,0.22)" strokeWidth="1" fill="none"/>
+          <circle cx="820"  cy="620" r="2.5" fill="rgba(232,121,249,0.50)"/>
+          <circle cx="820"  cy="580" r="2"   fill="rgba(232,121,249,0.42)"/>
+          <circle cx="1020" cy="580" r="3"   fill="rgba(232,121,249,0.58)" filter="url(#pcb-glow-ma)"/>
+          <circle cx="1020" cy="640" r="2"   fill="rgba(232,121,249,0.45)"/>
+          <circle cx="1220" cy="640" r="2.5" fill="rgba(232,121,249,0.48)"/>
+          {/* Dot pulsante no ponto de entrada da imagem */}
+          <circle cx="980" cy="140" r="5" fill="none" stroke="rgba(6,182,212,0.60)" strokeWidth="1">
+            <animate attributeName="r"       values="5;9;5"   dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.60;0;0.60" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="1060" cy="380" r="5" fill="none" stroke="rgba(6,182,212,0.55)" strokeWidth="1">
+            <animate attributeName="r"       values="5;8;5"   dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.55;0;0.55" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="1020" cy="580" r="5" fill="none" stroke="rgba(232,121,249,0.55)" strokeWidth="1">
+            <animate attributeName="r"       values="5;9;5"   dur="3.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.55;0;0.55" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+
           {/* ── CY-1: dashboard-left edge → ramo superior-esquerdo ── */}
           <path d="M 760 320 H 560 V 160 H 340 V 220 H 140"
                 stroke="rgba(6,182,212,0.38)" strokeWidth="1" fill="none"/>
