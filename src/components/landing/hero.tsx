@@ -437,9 +437,9 @@ export default function Hero() {
             style={{
               position: "relative",
               zIndex: 1,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
+              width: "110%",
+              maxWidth: "680px",
+              mixBlendMode: "screen",
               animation: "float 4s ease-in-out infinite alternate",
             }}
           />
