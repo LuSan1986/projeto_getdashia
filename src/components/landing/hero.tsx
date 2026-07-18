@@ -474,10 +474,11 @@ export default function Hero() {
           <div style={{
             position: "relative",
             zIndex: 1,
-            width: "100%",
-            maxWidth: "680px",
-            WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)",
-            maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)",
+            width: "130%",
+            maxWidth: "860px",
+            marginRight: "-15%",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 35%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 35%, transparent 100%)",
           }}>
             <img
               src="/hero-image.png.png"
