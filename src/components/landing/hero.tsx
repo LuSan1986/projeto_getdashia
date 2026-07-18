@@ -438,8 +438,8 @@ export default function Hero() {
               position: "relative",
               zIndex: 1,
               width: "100%",
-              maxWidth: "560px",
-              borderRadius: "20px",
+              height: "100%",
+              objectFit: "cover",
               animation: "float 4s ease-in-out infinite alternate",
             }}
           />
