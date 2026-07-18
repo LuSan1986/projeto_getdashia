@@ -432,7 +432,7 @@ export default function Hero() {
                }}/>
 
           <img
-            src="/hero-image.png"
+            src="/hero-image.png.png"
             alt="Plataformas integradas no GetDashia"
             style={{
               position: "relative",
