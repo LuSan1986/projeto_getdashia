@@ -422,189 +422,27 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* ── Coluna direita — dashboard animado ── */}
+        {/* ── Coluna direita — hero image ── */}
         <div className="hidden lg:flex justify-center items-center relative">
+          {/* Glow atrás da imagem */}
+          <div aria-hidden className="pointer-events-none absolute inset-0"
+               style={{
+                 background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(6,182,212,0.12) 0%, rgba(232,121,249,0.08) 50%, transparent 80%)",
+                 zIndex: 0,
+               }}/>
 
-          {/* Decorative circuit lines around panel */}
-          <svg
-            aria-hidden
-            className="pointer-events-none absolute"
-            width="110%"
-            height="110%"
-            viewBox="-40 -40 580 580"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ top: "-5%", left: "-5%" }}
-          >
-            {/* Corner accents */}
-            <path d="M 0 30 L 0 0 L 30 0" stroke="rgba(6,182,212,0.5)" strokeWidth="1.5" fill="none" />
-            <path d="M 470 0 L 500 0 L 500 30" stroke="rgba(6,182,212,0.5)" strokeWidth="1.5" fill="none" />
-            <path d="M 0 470 L 0 500 L 30 500" stroke="rgba(124,58,237,0.5)" strokeWidth="1.5" fill="none" />
-            <path d="M 470 500 L 500 500 L 500 470" stroke="rgba(124,58,237,0.5)" strokeWidth="1.5" fill="none" />
-            {/* Corner dots */}
-            <circle cx="0" cy="0" r="3" fill="rgba(6,182,212,0.4)" />
-            <circle cx="500" cy="0" r="3" fill="rgba(6,182,212,0.4)" />
-            <circle cx="0" cy="500" r="3" fill="rgba(124,58,237,0.4)" />
-            <circle cx="500" cy="500" r="3" fill="rgba(124,58,237,0.4)" />
-            {/* Side trace lines */}
-            <path d="M 0 160 L -30 160 L -30 200" stroke="rgba(6,182,212,0.25)" strokeWidth="1" fill="none" />
-            <circle cx="-30" cy="200" r="2" fill="rgba(6,182,212,0.3)" />
-            <path d="M 500 300 L 530 300 L 530 340" stroke="rgba(124,58,237,0.25)" strokeWidth="1" fill="none" />
-            <circle cx="530" cy="340" r="2" fill="rgba(124,58,237,0.3)" />
-            <path d="M 120 0 L 120 -25" stroke="rgba(6,182,212,0.2)" strokeWidth="1" fill="none" />
-            <path d="M 380 500 L 380 525" stroke="rgba(124,58,237,0.2)" strokeWidth="1" fill="none" />
-          </svg>
-
-          <div
-            className="rounded-2xl p-5 w-full max-w-lg backdrop-blur-sm relative overflow-hidden"
+          <img
+            src="/hero-image.png"
+            alt="Plataformas integradas no GetDashia"
             style={{
-              background: "#0A0F1E",
-              border: "1px solid rgba(6,182,212,0.35)",
-              boxShadow: "0 0 20px rgba(6,182,212,0.5), 0 0 60px rgba(6,182,212,0.3), 0 0 100px rgba(124,58,237,0.2)",
-              transform: "perspective(1200px) rotateY(-6deg) rotateX(2deg)",
+              position: "relative",
+              zIndex: 1,
+              width: "100%",
+              maxWidth: "560px",
+              borderRadius: "20px",
               animation: "float 4s ease-in-out infinite alternate",
             }}
-          >
-            {/* Subtle scan line effect */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute left-0 right-0 h-12 -z-0"
-              style={{
-                background: "linear-gradient(to bottom, transparent, rgba(6,182,212,0.03), transparent)",
-                animation: "scan-line 6s linear infinite",
-                top: 0,
-              }}
-            />
-
-            {/* Header */}
-            <div
-              className="flex justify-between items-center mb-4 pb-3"
-              style={{ borderBottom: "1px solid rgba(6,182,212,0.12)" }}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{
-                    background: "#06B6D4",
-                    boxShadow: "0 0 6px #06B6D4, 0 0 12px rgba(6,182,212,0.4)",
-                    animation: "pulse-glow 2s ease-in-out infinite",
-                  }}
-                />
-                <span className="text-sm font-semibold" style={{ color: "#E2E8F0" }}>GetDashia</span>
-              </div>
-              <span
-                className="text-xs px-2 py-1 rounded-md"
-                style={{
-                  background: "rgba(6,182,212,0.08)",
-                  border: "1px solid rgba(6,182,212,0.15)",
-                  color: "#06B6D4",
-                }}
-              >
-                Últimos 30 dias
-              </span>
-            </div>
-
-            {/* KPI cards */}
-            <div className="grid grid-cols-4 gap-2 mb-4">
-              {[
-                { label: "ROAS",       value: "4.8×",  color: "#06B6D4", glow: "rgba(6,182,212,0.3)" },
-                { label: "Receita",    value: "R$28k", color: "#10B981", glow: "rgba(16,185,129,0.3)" },
-                { label: "Conversões", value: "312",   color: "#7C3AED", glow: "rgba(124,58,237,0.3)" },
-                { label: "CPA",        value: "R$18",  color: "#1E40AF", glow: "rgba(30,64,175,0.3)" },
-              ].map(({ label, value, color, glow }) => (
-                <div
-                  key={label}
-                  className="rounded-xl p-3 text-center"
-                  style={{
-                    background: "rgba(6,182,212,0.04)",
-                    border: "1px solid rgba(6,182,212,0.1)",
-                  }}
-                >
-                  <p className="text-xs mb-1" style={{ color: "#475569" }}>{label}</p>
-                  <p
-                    className="font-bold text-lg"
-                    style={{ color, textShadow: `0 0 12px ${glow}` }}
-                  >
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Bar chart */}
-            <p className="text-xs mb-2" style={{ color: "#475569" }}>Receita mensal</p>
-            <svg width="100%" height="110" viewBox="0 0 380 110" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="cy-grad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06B6D4" />
-                  <stop offset="100%" stopColor="#0E7490" />
-                </linearGradient>
-                <linearGradient id="cy-grad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#7C3AED" />
-                  <stop offset="100%" stopColor="#5B21B6" />
-                </linearGradient>
-                <linearGradient id="cy-grad3" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1E40AF" />
-                  <stop offset="100%" stopColor="#1E3A8A" />
-                </linearGradient>
-                <linearGradient id="cy-grad4" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06B6D4" />
-                  <stop offset="100%" stopColor="#7C3AED" />
-                </linearGradient>
-                <filter id="bar-glow">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
-              </defs>
-              <line x1="0" y1="106" x2="380" y2="106" stroke="rgba(6,182,212,0.15)" strokeWidth="1" />
-              <rect x="10"  y="65" width="38" height="40" rx="3" fill="url(#cy-grad2)" filter="url(#bar-glow)" />
-              <rect x="58"  y="50" width="38" height="55" rx="3" fill="url(#cy-grad1)" filter="url(#bar-glow)" />
-              <rect x="106" y="70" width="38" height="35" rx="3" fill="url(#cy-grad3)" filter="url(#bar-glow)" />
-              <rect x="154" y="35" width="38" height="70" rx="3" fill="url(#cy-grad1)" filter="url(#bar-glow)" />
-              <rect x="202" y="45" width="38" height="60" rx="3" fill="url(#cy-grad2)" filter="url(#bar-glow)" />
-              <rect x="250" y="20" width="38" height="85" rx="3" fill="url(#cy-grad4)" filter="url(#bar-glow)" />
-              <rect x="298" y="33" width="38" height="72" rx="3" fill="url(#cy-grad1)" filter="url(#bar-glow)" />
-              <rect x="346" y="10" width="38" height="95" rx="3" fill="url(#cy-grad4)" filter="url(#bar-glow)" />
-              <text x="29"  y="108" fontSize="8" fill="#334155" textAnchor="middle">Jan</text>
-              <text x="77"  y="108" fontSize="8" fill="#334155" textAnchor="middle">Fev</text>
-              <text x="125" y="108" fontSize="8" fill="#334155" textAnchor="middle">Mar</text>
-              <text x="173" y="108" fontSize="8" fill="#334155" textAnchor="middle">Abr</text>
-              <text x="221" y="108" fontSize="8" fill="#334155" textAnchor="middle">Mai</text>
-              <text x="269" y="108" fontSize="8" fill="#334155" textAnchor="middle">Jun</text>
-              <text x="317" y="108" fontSize="8" fill="#334155" textAnchor="middle">Jul</text>
-              <text x="365" y="108" fontSize="8" fill="#334155" textAnchor="middle">Ago</text>
-            </svg>
-
-            <div className="my-4" style={{ borderTop: "1px solid rgba(6,182,212,0.1)" }} />
-
-            {/* Line chart */}
-            <p className="text-xs mb-2" style={{ color: "#475569" }}>Conversões</p>
-            <svg width="100%" height="60" viewBox="0 0 380 60" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="cy-area" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
-                </linearGradient>
-                <filter id="line-glow">
-                  <feGaussianBlur stdDeviation="1.5" result="blur" />
-                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
-              </defs>
-              <path
-                d="M0,50 L48,44 L96,46 L144,32 L192,28 L240,18 L288,14 L336,8 L380,4 L380,60 L0,60 Z"
-                fill="url(#cy-area)"
-              />
-              <polyline
-                points="0,50 48,44 96,46 144,32 192,28 240,18 288,14 336,8 380,4"
-                stroke="#06B6D4"
-                strokeWidth="2"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                filter="url(#line-glow)"
-              />
-              <circle cx="380" cy="4" r="3" fill="#06B6D4" style={{ filter: "drop-shadow(0 0 4px #06B6D4)" }} />
-            </svg>
-          </div>
+          />
         </div>
 
       </div>
