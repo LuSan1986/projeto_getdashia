@@ -2,6 +2,221 @@
 
 import { useState, type FormEvent } from "react";
 import { Input } from "@/components/ui/input";
+import { SiGoogleads, SiTiktok, SiFacebook } from 'react-icons/si';
+
+/* ──────────────────────────────────────────────────────────
+   HeroPlatforms — coluna direita feita 100% em código
+   Hexágonos com plataformas + gráficos + traços PCB neon
+────────────────────────────────────────────────────────── */
+function HeroPlatforms() {
+  // Flat-top hexagon polygon points (width=2r, height=r√3)
+  function hex(cx: number, cy: number, r: number): string {
+    const p = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`
+    return [
+      p(cx + r,       cy),
+      p(cx + r * 0.5, cy + r * 0.866),
+      p(cx - r * 0.5, cy + r * 0.866),
+      p(cx - r,       cy),
+      p(cx - r * 0.5, cy - r * 0.866),
+      p(cx + r * 0.5, cy - r * 0.866),
+    ].join(' ')
+  }
+
+  return (
+    <svg
+      viewBox="0 0 560 490"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        width: '100%',
+        maxWidth: '590px',
+        overflow: 'visible',
+        animation: 'float 4s ease-in-out infinite alternate',
+      }}
+    >
+      <defs>
+        <filter id="hp-cy" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="hp-ma" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* ─── Grid de hexágonos de fundo (muito sutil) ─── */}
+      {([
+        [270,60,40],[175,115,34],[375,108,34],
+        [480,150,30],[88,165,30],[492,385,32],
+        [58,398,28],[312,445,32],[170,442,26],[416,445,26],
+      ] as [number,number,number][]).map(([cx,cy,r],i) => (
+        <polygon key={i} points={hex(cx,cy,r)}
+                 fill="none" stroke="rgba(6,182,212,0.055)" strokeWidth="1"/>
+      ))}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* ═══════════  TRAÇOS PCB  ════════════════ */}
+      {/* ════════════════════════════════════════════ */}
+
+      {/* ① Centro → Google G  +  bifurcação ↓ Pie chart */}
+      <path d="M 188 205 H 146 V 108 H 168" stroke="rgba(6,182,212,0.44)" strokeWidth="1" fill="none"/>
+      <path d="M 146 205 V 262 H 100"       stroke="rgba(232,121,249,0.30)" strokeWidth="1" fill="none"/>
+      <circle cx="146" cy="205" r="2.5" fill="rgba(6,182,212,0.70)"/>
+      <circle cx="146" cy="108" r="2"   fill="rgba(6,182,212,0.65)"/>
+      <circle cx="168" cy="108" r="2.5" fill="rgba(6,182,212,0.60)"/>
+      <circle cx="146" cy="262" r="2"   fill="rgba(232,121,249,0.58)"/>
+      <circle cx="100" cy="262" r="2.5" fill="rgba(232,121,249,0.58)"/>
+
+      {/* ② Centro topo → Meta */}
+      <path d="M 270 134 V 80 H 363" stroke="rgba(6,182,212,0.38)" strokeWidth="1" fill="none"/>
+      <circle cx="270" cy="80" r="2"   fill="rgba(6,182,212,0.62)"/>
+      <circle cx="363" cy="80" r="2.5" fill="rgba(6,182,212,0.62)"/>
+
+      {/* ③ Centro direita → TikTok */}
+      <path d="M 352 205 H 390 V 220" stroke="rgba(6,182,212,0.35)" strokeWidth="1" fill="none"/>
+      <circle cx="390" cy="205" r="2"   fill="rgba(6,182,212,0.58)"/>
+      <circle cx="390" cy="220" r="2.5" fill="rgba(6,182,212,0.55)"/>
+
+      {/* ④ Centro baixo-esquerda → Instagram */}
+      <path d="M 229 276 V 316 H 148 V 300" stroke="rgba(232,121,249,0.38)" strokeWidth="1" fill="none"/>
+      <circle cx="229" cy="316" r="2"   fill="rgba(232,121,249,0.62)"/>
+      <circle cx="148" cy="316" r="2.5" fill="rgba(232,121,249,0.62)"/>
+
+      {/* ⑤ Centro baixo-direita → Facebook */}
+      <path d="M 311 276 V 312 H 426 V 308" stroke="rgba(24,119,242,0.32)" strokeWidth="1" fill="none"/>
+      <circle cx="311" cy="312" r="2"   fill="rgba(24,119,242,0.56)"/>
+      <circle cx="426" cy="312" r="2.5" fill="rgba(24,119,242,0.56)"/>
+
+      {/* ⑥ Centro baixo → Bar chart */}
+      <path d="M 270 287 V 330 H 305 V 335" stroke="rgba(6,182,212,0.30)" strokeWidth="1" fill="none"/>
+      <circle cx="270" cy="330" r="2"   fill="rgba(6,182,212,0.54)"/>
+      <circle cx="305" cy="330" r="2.5" fill="rgba(6,182,212,0.54)"/>
+
+      {/* ─── Dots pulsantes nas junções-chave ─── */}
+      <circle cx="146" cy="108" r="5" fill="none" stroke="rgba(6,182,212,0.60)" strokeWidth="1">
+        <animate attributeName="r"       values="5;9;5"       dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.60;0;0.60" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="363" cy="80" r="5" fill="none" stroke="rgba(6,182,212,0.55)" strokeWidth="1">
+        <animate attributeName="r"       values="5;8;5"       dur="3s"   repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.55;0;0.55" dur="3s"   repeatCount="indefinite"/>
+      </circle>
+      <circle cx="148" cy="316" r="5" fill="none" stroke="rgba(232,121,249,0.55)" strokeWidth="1">
+        <animate attributeName="r"       values="5;9;5"       dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.55;0;0.55" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="426" cy="312" r="5" fill="none" stroke="rgba(24,119,242,0.50)" strokeWidth="1">
+        <animate attributeName="r"       values="5;8;5"       dur="2.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.50;0;0.50" dur="2.8s" repeatCount="indefinite"/>
+      </circle>
+
+      {/* ════════════════════════════════════════════ */}
+      {/* ═══════════  TILES DE HEX  ════════════════ */}
+      {/* ════════════════════════════════════════════ */}
+
+      {/* ── 1. Google Ads — hub central, grande, com anel pulsante ── */}
+      <polygon points={hex(270, 205, 82)}
+               fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.55)" strokeWidth="1.5"/>
+      <polygon points={hex(270, 205, 74)}
+               fill="none" stroke="rgba(6,182,212,0.10)" strokeWidth="1"/>
+      {/* Anel de glow animado */}
+      <polygon points={hex(270, 205, 82)} fill="none" stroke="rgba(6,182,212,0.30)" strokeWidth="2.5">
+        <animate attributeName="opacity" values="0.40;1.0;0.40" dur="2s" repeatCount="indefinite"/>
+      </polygon>
+      {/* Ícone via foreignObject */}
+      <foreignObject x="234" y="168" width="72" height="72">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
+          <SiGoogleads size={52} color="#06B6D4"
+                       style={{filter:'drop-shadow(0 0 10px rgba(6,182,212,0.95))'}}/>
+        </div>
+      </foreignObject>
+      <text x="270" y="246" textAnchor="middle" fontSize="9"
+            fill="rgba(6,182,212,0.65)" fontWeight="600" letterSpacing="1.5">GOOGLE ADS</text>
+
+      {/* ── 2. Google G — topo-esquerda ── */}
+      <polygon points={hex(108, 88, 60)}
+               fill="rgba(66,133,244,0.08)" stroke="rgba(66,133,244,0.40)" strokeWidth="1.2"/>
+      <text x="108" y="88"
+            textAnchor="middle" dominantBaseline="central"
+            fontSize="52" fontWeight="700" fill="#4285F4"
+            style={{ filter: 'drop-shadow(0 0 10px rgba(66,133,244,0.85))' }}>G</text>
+
+      {/* ── 3. Meta ∞ — topo-direita ── */}
+      <polygon points={hex(420, 77, 57)}
+               fill="rgba(0,130,251,0.08)" stroke="rgba(0,130,251,0.40)" strokeWidth="1.2"/>
+      <text x="420" y="74"
+            textAnchor="middle" dominantBaseline="central"
+            fontSize="40" fill="#0082FB"
+            style={{ filter: 'drop-shadow(0 0 10px rgba(0,130,251,0.85))' }}>∞</text>
+      <text x="420" y="103" textAnchor="middle" fontSize="9"
+            fill="rgba(0,130,251,0.65)" fontWeight="600" letterSpacing="1">META</text>
+
+      {/* ── 4. TikTok — direita ── */}
+      <polygon points={hex(450, 248, 56)}
+               fill="rgba(255,0,80,0.07)" stroke="rgba(255,0,80,0.38)" strokeWidth="1.2"/>
+      <foreignObject x="418" y="216" width="64" height="64">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
+          <SiTiktok size={40} color="#FF0050"
+                    style={{filter:'drop-shadow(0 0 8px rgba(255,0,80,0.85))'}}/>
+        </div>
+      </foreignObject>
+
+      {/* ── 5. Instagram — baixo-esquerda (ícone câmera) ── */}
+      <polygon points={hex(152, 352, 54)}
+               fill="rgba(232,121,249,0.07)" stroke="rgba(232,121,249,0.40)" strokeWidth="1.2"/>
+      {/* Corpo da câmera */}
+      <rect x="126" y="337" width="32" height="24" rx="6"
+            fill="rgba(232,121,249,0.08)" stroke="rgba(232,121,249,0.82)" strokeWidth="1.8"
+            style={{ filter: 'drop-shadow(0 0 6px rgba(232,121,249,0.65))' }}/>
+      {/* Lente externa */}
+      <circle cx="152" cy="349" r="8"
+              fill="rgba(232,121,249,0.06)" stroke="rgba(232,121,249,0.78)" strokeWidth="1.5"
+              style={{ filter: 'drop-shadow(0 0 5px rgba(232,121,249,0.55))' }}/>
+      {/* Lente interna */}
+      <circle cx="152" cy="349" r="3" fill="rgba(232,121,249,0.60)"/>
+      {/* Visor */}
+      <circle cx="149" cy="339" r="2.5" fill="rgba(232,121,249,0.82)"/>
+
+      {/* ── 6. Facebook — baixo-direita ── */}
+      <polygon points={hex(426, 354, 46)}
+               fill="rgba(24,119,242,0.07)" stroke="rgba(24,119,242,0.40)" strokeWidth="1.2"/>
+      <foreignObject x="398" y="326" width="56" height="56">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
+          <SiFacebook size={36} color="#1877F2"
+                      style={{filter:'drop-shadow(0 0 8px rgba(24,119,242,0.85))'}}/>
+        </div>
+      </foreignObject>
+
+      {/* ── 7. Bar chart — baixo-centro ── */}
+      <polygon points={hex(305, 378, 48)}
+               fill="rgba(6,182,212,0.06)" stroke="rgba(6,182,212,0.36)" strokeWidth="1.2"/>
+      <rect x="276" y="376" width="7" height="14" rx="1.5" fill="rgba(6,182,212,0.78)"   filter="url(#hp-cy)"/>
+      <rect x="287" y="365" width="7" height="25" rx="1.5" fill="rgba(232,121,249,0.78)" filter="url(#hp-ma)"/>
+      <rect x="298" y="369" width="7" height="21" rx="1.5" fill="rgba(6,182,212,0.68)"   filter="url(#hp-cy)"/>
+      <rect x="309" y="359" width="7" height="31" rx="1.5" fill="rgba(168,85,247,0.82)"/>
+      <rect x="320" y="364" width="7" height="26" rx="1.5" fill="rgba(6,182,212,0.72)"   filter="url(#hp-cy)"/>
+      <line x1="270" y1="392" x2="334" y2="392"
+            stroke="rgba(6,182,212,0.30)" strokeWidth="0.8"/>
+
+      {/* ── 8. Pie chart — extremo-esquerda ── */}
+      <polygon points={hex(58, 262, 42)}
+               fill="rgba(232,121,249,0.06)" stroke="rgba(232,121,249,0.36)" strokeWidth="1.2"/>
+      {/* 35% ciano  — 270°→36° */}
+      <path d="M 58 262 L 58 234 A 28 28 0 0 1 81 279 Z"
+            fill="rgba(6,182,212,0.72)" filter="url(#hp-cy)"/>
+      {/* 40% magenta — 36°→180° */}
+      <path d="M 58 262 L 81 279 A 28 28 0 0 1 30 262 Z"
+            fill="rgba(232,121,249,0.72)" filter="url(#hp-ma)"/>
+      {/* 25% roxo    — 180°→270° */}
+      <path d="M 58 262 L 30 262 A 28 28 0 0 1 58 234 Z"
+            fill="rgba(168,85,247,0.62)"/>
+      {/* Buraco central */}
+      <circle cx="58" cy="262" r="9" fill="rgba(5,11,24,0.96)"/>
+      <circle cx="58" cy="262" r="2.5" fill="rgba(6,182,212,0.70)"/>
+
+    </svg>
+  )
+}
 
 export default function Hero() {
   const [email, setEmail] = useState("");
@@ -462,33 +677,13 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* ── Coluna direita — hero image ── */}
+        {/* ── Coluna direita — plataformas em código ── */}
         <div className="hidden lg:flex justify-center items-center relative">
-          {/* Glow atrás da imagem */}
-          <div aria-hidden className="pointer-events-none absolute inset-0"
-               style={{
-                 background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(6,182,212,0.12) 0%, rgba(232,121,249,0.08) 50%, transparent 80%)",
-                 zIndex: 0,
-               }}/>
-
-          <div style={{
-            position: "relative",
-            zIndex: 1,
-            width: "130%",
-            maxWidth: "860px",
-            marginRight: "-15%",
-            WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 35%, transparent 100%)",
-            maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 35%, transparent 100%)",
-          }}>
-            <img
-              src="/hero-image.png.png"
-              alt="Plataformas integradas no GetDashia"
-              style={{
-                width: "100%",
-                mixBlendMode: "screen",
-                animation: "float 4s ease-in-out infinite alternate",
-              }}
-            />
+          {/* Glow radial de fundo */}
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ zIndex: 0,
+               background: "radial-gradient(ellipse 85% 85% at 50% 50%, rgba(6,182,212,0.10) 0%, rgba(232,121,249,0.06) 50%, transparent 80%)" }}/>
+          <div style={{ position: 'relative', zIndex: 1, width: '115%', maxWidth: '680px', marginRight: '-8%' }}>
+            <HeroPlatforms />
           </div>
         </div>
 
