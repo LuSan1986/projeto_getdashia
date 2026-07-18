@@ -431,18 +431,24 @@ export default function Hero() {
                  zIndex: 0,
                }}/>
 
-          <img
-            src="/hero-image.png.png"
-            alt="Plataformas integradas no GetDashia"
-            style={{
-              position: "relative",
-              zIndex: 1,
-              width: "110%",
-              maxWidth: "680px",
-              mixBlendMode: "screen",
-              animation: "float 4s ease-in-out infinite alternate",
-            }}
-          />
+          <div style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            maxWidth: "680px",
+            WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)",
+          }}>
+            <img
+              src="/hero-image.png.png"
+              alt="Plataformas integradas no GetDashia"
+              style={{
+                width: "100%",
+                mixBlendMode: "screen",
+                animation: "float 4s ease-in-out infinite alternate",
+              }}
+            />
+          </div>
         </div>
 
       </div>
