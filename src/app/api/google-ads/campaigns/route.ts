@@ -108,6 +108,7 @@ export async function GET(request: NextRequest) {
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       'developer-token': devToken,
+      'login-customer-id': process.env.GOOGLE_ADS_MCC_ID ?? '',
       'Content-Type': 'application/json',
     }
 

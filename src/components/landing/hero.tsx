@@ -42,6 +42,18 @@ function HeroPlatforms() {
           <feGaussianBlur stdDeviation="4" result="b"/>
           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
+        {/* Remove fundo branco dos logos: branco vira transparente, cores ficam opacas */}
+        <filter id="hp-rmw">
+          <feColorMatrix type="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -1 -1 -1 3 0"/>
+        </filter>
+        {/* Gradiente original do Instagram */}
+        <linearGradient id="ig-grad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"   stopColor="#833AB4"/>
+          <stop offset="33%"  stopColor="#E1306C"/>
+          <stop offset="66%"  stopColor="#F77737"/>
+          <stop offset="100%" stopColor="#FCAF45"/>
+        </linearGradient>
       </defs>
 
       {/* ─── Grid de hexágonos de fundo (muito sutil) ─── */}
@@ -123,13 +135,10 @@ function HeroPlatforms() {
       <polygon points={hex(270, 205, 82)} fill="none" stroke="rgba(6,182,212,0.30)" strokeWidth="2.5">
         <animate attributeName="opacity" values="0.40;1.0;0.40" dur="2s" repeatCount="indefinite"/>
       </polygon>
-      {/* Ícone via foreignObject */}
-      <foreignObject x="234" y="168" width="72" height="72">
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
-          <SiGoogleads size={52} color="#06B6D4"
-                       style={{filter:'drop-shadow(0 0 10px rgba(6,182,212,0.95))'}}/>
-        </div>
-      </foreignObject>
+      {/* Logo real Google Ads — fundo branco removido pelo filtro */}
+      <image href="/logos/google-ads.jpeg"
+             x="241" y="173" width="58" height="58"
+             filter="url(#hp-rmw)" preserveAspectRatio="xMidYMid meet"/>
       <text x="270" y="246" textAnchor="middle" fontSize="9"
             fill="rgba(6,182,212,0.65)" fontWeight="600" letterSpacing="1.5">GOOGLE ADS</text>
 
@@ -141,41 +150,47 @@ function HeroPlatforms() {
             fontSize="52" fontWeight="700" fill="#4285F4"
             style={{ filter: 'drop-shadow(0 0 10px rgba(66,133,244,0.85))' }}>G</text>
 
-      {/* ── 3. Meta ∞ — topo-direita ── */}
+      {/* ── 3. Meta — topo-direita (logo real, fundo branco removido) ── */}
       <polygon points={hex(420, 77, 57)}
                fill="rgba(0,130,251,0.08)" stroke="rgba(0,130,251,0.40)" strokeWidth="1.2"/>
-      <text x="420" y="74"
-            textAnchor="middle" dominantBaseline="central"
-            fontSize="40" fill="#0082FB"
-            style={{ filter: 'drop-shadow(0 0 10px rgba(0,130,251,0.85))' }}>∞</text>
-      <text x="420" y="103" textAnchor="middle" fontSize="9"
-            fill="rgba(0,130,251,0.65)" fontWeight="600" letterSpacing="1">META</text>
+      <image href="/logos/meta-ads.png"
+             x="388" y="63" width="64" height="28"
+             filter="url(#hp-rmw)" preserveAspectRatio="xMidYMid meet"/>
 
-      {/* ── 4. TikTok — direita ── */}
+      {/* ── 4. TikTok — direita (3 camadas: ciano + vermelho + branco = logo original) ── */}
       <polygon points={hex(450, 248, 56)}
-               fill="rgba(255,0,80,0.07)" stroke="rgba(255,0,80,0.38)" strokeWidth="1.2"/>
+               fill="rgba(5,5,10,0.88)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+      {/* Sombra ciano (deslocada -3px) */}
+      <foreignObject x="413" y="216" width="64" height="64">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
+          <SiTiktok size={40} color="#69C9D0"/>
+        </div>
+      </foreignObject>
+      {/* Sombra vermelha (deslocada +3px) */}
+      <foreignObject x="423" y="216" width="64" height="64">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
+          <SiTiktok size={40} color="#EE1D52"/>
+        </div>
+      </foreignObject>
+      {/* Camada branca principal (topo) */}
       <foreignObject x="418" y="216" width="64" height="64">
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:'100%',height:'100%'}}>
-          <SiTiktok size={40} color="#FF0050"
-                    style={{filter:'drop-shadow(0 0 8px rgba(255,0,80,0.85))'}}/>
+          <SiTiktok size={40} color="#ffffff"/>
         </div>
       </foreignObject>
 
-      {/* ── 5. Instagram — baixo-esquerda (ícone câmera) ── */}
+      {/* ── 5. Instagram — baixo-esquerda (câmera com gradiente original) ── */}
       <polygon points={hex(152, 352, 54)}
-               fill="rgba(232,121,249,0.07)" stroke="rgba(232,121,249,0.40)" strokeWidth="1.2"/>
-      {/* Corpo da câmera */}
-      <rect x="126" y="337" width="32" height="24" rx="6"
-            fill="rgba(232,121,249,0.08)" stroke="rgba(232,121,249,0.82)" strokeWidth="1.8"
-            style={{ filter: 'drop-shadow(0 0 6px rgba(232,121,249,0.65))' }}/>
+               fill="rgba(131,58,180,0.12)" stroke="rgba(200,80,160,0.45)" strokeWidth="1.2"/>
+      {/* Corpo da câmera — gradiente roxo→laranja do Instagram */}
+      <rect x="126" y="337" width="32" height="24" rx="6" fill="url(#ig-grad)"/>
       {/* Lente externa */}
       <circle cx="152" cy="349" r="8"
-              fill="rgba(232,121,249,0.06)" stroke="rgba(232,121,249,0.78)" strokeWidth="1.5"
-              style={{ filter: 'drop-shadow(0 0 5px rgba(232,121,249,0.55))' }}/>
+              fill="none" stroke="rgba(255,255,255,0.92)" strokeWidth="1.8"/>
       {/* Lente interna */}
-      <circle cx="152" cy="349" r="3" fill="rgba(232,121,249,0.60)"/>
+      <circle cx="152" cy="349" r="3" fill="rgba(255,255,255,0.92)"/>
       {/* Visor */}
-      <circle cx="149" cy="339" r="2.5" fill="rgba(232,121,249,0.82)"/>
+      <circle cx="149" cy="339" r="2.5" fill="rgba(255,255,255,0.92)"/>
 
       {/* ── 6. Facebook — baixo-direita ── */}
       <polygon points={hex(426, 354, 46)}
