@@ -36,7 +36,7 @@ export async function fetchGoogleAdsData(
   `
 
   const res = await fetch(
-    `https://googleads.googleapis.com/v18/customers/${cleanCustomerId}/googleAds:search`,
+    `https://googleads.googleapis.com/v24/customers/${cleanCustomerId}/googleAds:search`,
     {
       method: 'POST',
       headers: {

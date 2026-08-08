@@ -22,7 +22,7 @@ function googleStatusToLocal(s: string): 'active' | 'paused' {
   return s === 'ENABLED' ? 'active' : 'paused'
 }
 
-const ADS_API = 'https://googleads.googleapis.com/v18'
+const ADS_API = 'https://googleads.googleapis.com/v24'
 
 export async function GET(request: NextRequest) {
   try {
