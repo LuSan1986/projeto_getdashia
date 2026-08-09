@@ -62,6 +62,26 @@ Pesquisa TikTok Ads API — decisão: adiar
   de app com vídeo/documentação, verificação de negócio, auditoria de segurança de dados)
 - Decisão: focar em concluir a verificação do Meta Ads primeiro, TikTok fica para depois
 
+Integração real do Meta Ads implementada ✅
+- Rota src/app/api/meta-ads/campaigns/route.ts criada, buscando campanhas e 
+  insights reais da Marketing API (act_445093580217547)
+- Dados mock do Meta Ads substituídos por dados reais em Relatórios
+- Corrigido bug de date_preset inválido (last_30_days → last_30d)
+
+App GetDashia rejeitado na revisão da Meta em 2026-08-04 — motivo identificado:
+- business_management e ads_read: screencast não mostrou fluxo completo (Meta pede 
+  novo vídeo em inglês, com legendas, mostrando login + concessão de permissão + uso real)
+- Marketing API Access Tier: sem chamadas suficientes à API nos últimos 15 dias
+- Ação em andamento: uso real da API do Meta Ads sendo gerado diariamente 
+  (lembrete automático configurado às 20h) até completar ~15 dias (previsão: 24/08/2026)
+
+Dois bugs corrigidos na Visão Geral do dashboard (/dashboard) ✅
+- Bug 1: mensagem "Nenhuma campanha encontrada" aparecia mesmo com campanhas ativas 
+  — corrigido criando DashboardGoogleMetrics.tsx, reaproveitando a mesma rota 
+  /api/google-ads/campaigns já usada em Relatórios
+- Bug 2: cards de Cliques e Impressões mostravam "0000" em vez de "0" — corrigido 
+  formatação numérica
+
 Sessão 9 — concluído em 2026-07-12
 
 Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeitos neon ciano/magenta:
@@ -145,29 +165,16 @@ E-mail de confirmação funcionando via Resend + Supabase SMTP ✅
 
 Pendente (ordem planejada)
 
-
-Corrigir bug na tela Visão Geral do dashboard — mostra "Nenhuma campanha encontrada" 
-mesmo com campanhas ativas (a tela Relatórios já lista corretamente, então é 
-inconsistência entre as duas queries)
-Confirmar se métricas (impressões/cliques) da Campaign #1 sincronizaram na API 
-(esperado levar algumas horas após aparecerem no Google Ads)
+Aguardar ~15 dias de uso real da API do Meta Ads (previsão: 24/08/2026), depois 
+regravar screencast em inglês e reenviar business_management + ads_read + 
+Marketing API Access Tier para revisão da Meta
 Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
-Aguardar revisão de política da campanha em 530-781-4497
-Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
-Confirmar que os dados da campanha 530-781-4497 aparecem em /dashboard/relatorios
+TikTok Ads API — adiado, avaliar depois que Meta for aprovado (API mais rigorosa: 
+Business Center, revisão de app, verificação de negócio, auditoria de segurança)
 Corrigir logos na seção de ferramentas — Google Ads e TikTok Ads não aparecem
-Redesign das seções restantes da landing page:
-
-Preços (página /precos)
-FAQ
-Footer
-Seção "Seu trabalho é gerar resultado"
-
-
-
-Aguardar aprovação da Verificação de Acesso do Meta (~5 dias úteis)
-Após aprovação Meta: submeter app para Análise (ads_read + ads_management)
-Adicionar gestor de tráfego como Testador no Meta Developer Portal (precisa do Facebook dele)
+Redesign das seções restantes da landing page: Preços, FAQ, Footer, seção 
+"Seu trabalho é gerar resultado"
+Adicionar gestor de tráfego como Testador no Meta Developer Portal
 Stripe → migrar para produção com CNPJ do MEI
 Remover card "Plano Grátis" após período de testes beta
 
