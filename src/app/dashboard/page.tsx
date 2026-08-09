@@ -3,9 +3,8 @@ import Charts from '@/components/dashboard/Charts'
 import ChannelsSection from '@/components/dashboard/ChannelsSection'
 import PendingAccountBanner from '@/components/dashboard/PendingAccountBanner'
 import AIConsultant from '@/components/dashboard/AIConsultant'
+import DashboardGoogleMetrics from '@/components/dashboard/DashboardGoogleMetrics'
 import { createClient } from '@/lib/supabase-server'
-import { decrypt } from '@/lib/crypto'
-import { fetchGoogleAdsData, type GoogleAdsMetrics } from '@/lib/integrations/google-ads'
 
 interface MetricCard {
   label: string
@@ -20,43 +19,16 @@ const DEMO_METRICS: MetricCard[] = [
   { label: 'ROAS', value: '4,7×', desc: 'Retorno sobre investimento em anúncios' },
 ]
 
-function buildMetrics(ads: GoogleAdsMetrics): MetricCard[] {
-  return [
-    {
-      label: 'Custo Total',
-      value: ads.cost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-      desc: 'Últimos 30 dias — Google Ads',
-    },
-    {
-      label: 'Cliques',
-      value: ads.clicks.toLocaleString('pt-BR'),
-      desc: 'Últimos 30 dias — Google Ads',
-    },
-    {
-      label: 'Conversões',
-      value: ads.conversions.toLocaleString('pt-BR'),
-      desc: 'Últimos 30 dias — Google Ads',
-    },
-    {
-      label: 'Impressões',
-      value: ads.impressions.toLocaleString('pt-BR'),
-      desc: 'Últimos 30 dias — Google Ads',
-    },
-  ]
-}
+const ZERO_AI_METRICS = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let metrics: MetricCard[] = DEMO_METRICS
   let hasIntegration = false
   let isPending = false
-  let dataLabel = 'valores de demonstração'
-  let noCampaigns = false
   let connectedAccountId = ''
   let metaConnected = false
-  let aiMetrics = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
   if (user) {
     const { data: membership } = await supabase
@@ -69,14 +41,13 @@ export default async function DashboardPage() {
     if (membership) {
       const { data: integration } = await supabase
         .from('integrations')
-        .select('access_token_encrypted, account_id')
+        .select('account_id')
         .eq('organization_id', membership.organization_id)
         .eq('platform', 'google_ads')
         .eq('status', 'active')
         .limit(1)
         .single()
 
-      // Check Meta integration
       const { data: metaIntegration } = await supabase
         .from('integrations')
         .select('id')
@@ -91,37 +62,14 @@ export default async function DashboardPage() {
       if (integration) {
         hasIntegration = true
         connectedAccountId = integration.account_id
-
-        if (integration.account_id === 'pending') {
-          isPending = true
-        }
-
-        // Always show real data when connected — zeros included, never DEMO_METRICS
-        let adsData: GoogleAdsMetrics = { clicks: 0, impressions: 0, cost: 0, conversions: 0 }
-
-        try {
-          const accessToken = decrypt(integration.access_token_encrypted!)
-          adsData = await fetchGoogleAdsData(accessToken, integration.account_id)
-          dataLabel = 'Google Ads — últimos 30 dias'
-        } catch (err) {
-          console.error('[dashboard] fetchGoogleAdsData failed:', err)
-          dataLabel = 'Google Ads conectado — erro ao buscar dados'
-        }
-
-        metrics = buildMetrics(adsData)
-        noCampaigns = adsData.clicks === 0 && adsData.impressions === 0 && adsData.cost === 0
-        aiMetrics = {
-          cost: adsData.cost,
-          revenue: 0,
-          roas: 0,
-          cpa: adsData.conversions > 0 ? adsData.cost / adsData.conversions : 0,
-          clicks: adsData.clicks,
-          conversions: adsData.conversions,
-          impressions: adsData.impressions,
-        }
+        isPending = integration.account_id === 'pending'
       }
     }
   }
+
+  const dataLabel = hasIntegration && !isPending
+    ? 'Google Ads — últimos 30 dias'
+    : 'valores de demonstração'
 
   return (
     <div className="p-6 md:p-8">
@@ -130,12 +78,6 @@ export default async function DashboardPage() {
         <p className="text-zinc-500 text-sm mt-1">
           Dados do período atual — {dataLabel}
         </p>
-
-        {hasIntegration && noCampaigns && !isPending && (
-          <p className="mt-2 text-yellow-500 text-xs">
-            Nenhuma campanha encontrada no período — conectado à conta {connectedAccountId}
-          </p>
-        )}
 
         {isPending && <PendingAccountBanner />}
 
@@ -155,25 +97,29 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {metrics.map(({ label, value, desc }) => (
-          <div
-            key={label}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-zinc-400 text-sm">{label}</p>
-              <TrendingUp size={14} className="text-indigo-400" />
+      {hasIntegration && !isPending ? (
+        <DashboardGoogleMetrics accountId={connectedAccountId} />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {DEMO_METRICS.map(({ label, value, desc }) => (
+            <div
+              key={label}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2"
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-zinc-400 text-sm">{label}</p>
+                <TrendingUp size={14} className="text-indigo-400" />
+              </div>
+              <p className="text-3xl font-bold text-white">{value}</p>
+              <p className="text-zinc-500 text-xs">{desc}</p>
             </div>
-            <p className="text-3xl font-bold text-white">{value}</p>
-            <p className="text-zinc-500 text-xs">{desc}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <ChannelsSection metaConnected={metaConnected} googleConnected={hasIntegration} />
       <Charts isLive={hasIntegration} />
-      <AIConsultant metrics={aiMetrics} />
+      <AIConsultant metrics={ZERO_AI_METRICS} />
     </div>
   )
 }
