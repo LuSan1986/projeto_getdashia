@@ -158,23 +158,29 @@ export default function RelatoriosClient() {
   const [channel, setChannel] = useState<Channel>('all')
 
   const [googleCampaigns, setGoogleCampaigns] = useState<Campaign[]>([])
+  const [metaCampaigns,   setMetaCampaigns]   = useState<Campaign[]>([])
   const [roasData,        setRoasData]        = useState<RoasPoint[]>([])
   const [loading,         setLoading]         = useState(true)
   const [error,           setError]           = useState<string | null>(null)
-  const [connected,       setConnected]       = useState(false)
+  const [googleConnected, setGoogleConnected] = useState(false)
+  const [metaConnected,   setMetaConnected]   = useState(false)
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     setError(null)
 
-    fetch(`/api/google-ads/campaigns?period=${period}`)
-      .then((r) => r.json())
-      .then((data) => {
+    Promise.all([
+      fetch(`/api/google-ads/campaigns?period=${period}`).then((r) => r.json()),
+      fetch(`/api/meta-ads/campaigns?period=${period}`).then((r) => r.json()),
+    ])
+      .then(([googleData, metaData]) => {
         if (cancelled) return
-        setConnected(data.connected ?? false)
-        setGoogleCampaigns(data.campaigns ?? [])
-        setRoasData(data.roasData ?? [])
+        setGoogleConnected(googleData.connected ?? false)
+        setGoogleCampaigns(googleData.campaigns ?? [])
+        setRoasData(googleData.roasData ?? [])
+        setMetaConnected(metaData.connected ?? false)
+        setMetaCampaigns(metaData.campaigns ?? [])
       })
       .catch(() => {
         if (!cancelled) setError('Erro ao carregar campanhas.')
@@ -187,9 +193,10 @@ export default function RelatoriosClient() {
   }, [period])
 
   const campaigns = useMemo<Campaign[]>(() => {
-    if (channel === 'meta') return []
-    return googleCampaigns
-  }, [channel, googleCampaigns])
+    if (channel === 'google') return googleCampaigns
+    if (channel === 'meta')   return metaCampaigns
+    return [...googleCampaigns, ...metaCampaigns]
+  }, [channel, googleCampaigns, metaCampaigns])
 
   const summary = useMemo(() => {
     const cost        = campaigns.reduce((s, c) => s + c.cost, 0)
@@ -203,6 +210,12 @@ export default function RelatoriosClient() {
     }
   }, [campaigns])
 
+  const isConnected = channel === 'google'
+    ? googleConnected
+    : channel === 'meta'
+    ? metaConnected
+    : googleConnected || metaConnected
+
   const periodLabel = periodOptions.find((o) => o.value === period)?.label ?? ''
 
   const aiMetrics = {
@@ -214,6 +227,14 @@ export default function RelatoriosClient() {
     conversions: campaigns.reduce((s, c) => s + c.conversions, 0),
     impressions: campaigns.reduce((s, c) => s + c.impressions, 0),
   }
+
+  const notConnectedMessage =
+    channel === 'google' ? 'Google Ads não conectado.' :
+    channel === 'meta'   ? 'Meta Ads não conectado.' :
+    'Nenhuma integração conectada.'
+
+  // Show ROAS chart only when Google data is available (Meta doesn't provide daily ROAS yet)
+  const showRoasChart = channel !== 'meta'
 
   return (
     <div className="p-6 md:p-8">
@@ -233,13 +254,12 @@ export default function RelatoriosClient() {
       </div>
 
       {/* Not connected banner */}
-      {!loading && !connected && (
+      {!loading && !isConnected && (
         <div className="mb-6 rounded-xl bg-yellow-500/10 border border-yellow-500/30 px-4 py-3 text-yellow-400 text-sm">
-          Google Ads não conectado. Acesse{' '}
-          <a href="/dashboard/integrations" className="underline font-medium">
-            Integrações
-          </a>{' '}
-          para conectar.
+          {notConnectedMessage}{' '}
+          <a href="/dashboard/integracoes" className="underline font-medium">
+            Acesse Integrações para conectar.
+          </a>
         </div>
       )}
 
@@ -247,13 +267,6 @@ export default function RelatoriosClient() {
       {error && (
         <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/30 px-4 py-3 text-red-400 text-sm">
           {error}
-        </div>
-      )}
-
-      {/* Meta placeholder */}
-      {channel === 'meta' && (
-        <div className="mb-6 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-8 text-center text-zinc-500 text-sm">
-          Meta Ads em breve
         </div>
       )}
 
@@ -279,49 +292,51 @@ export default function RelatoriosClient() {
         </div>
       )}
 
-      {/* ROAS chart */}
-      {loading ? (
-        <ChartSkeleton />
-      ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-          <p className="text-sm font-medium text-zinc-300 mb-5">
-            Evolução do ROAS — {periodLabel}
-          </p>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={roasData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-              <XAxis dataKey="dia" {...axisProps} />
-              <YAxis
-                {...axisProps}
-                tickFormatter={(v) => `${v}×`}
-                domain={['auto', 'auto']}
-                width={36}
-              />
-              <Tooltip
-                contentStyle={tooltipStyle}
-                cursor={{ stroke: 'rgba(99,102,241,0.3)', strokeWidth: 1 }}
-                formatter={(v: unknown) => {
-                  const n = typeof v === 'number' ? v : 0
-                  return [`${n.toFixed(1)}×`, 'ROAS']
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="roas"
-                stroke="#4f46e5"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, fill: '#4f46e5' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      {/* ROAS chart — Google only */}
+      {showRoasChart && (
+        loading ? (
+          <ChartSkeleton />
+        ) : (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+            <p className="text-sm font-medium text-zinc-300 mb-5">
+              Evolução do ROAS — {periodLabel}
+            </p>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={roasData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="dia" {...axisProps} />
+                <YAxis
+                  {...axisProps}
+                  tickFormatter={(v) => `${v}×`}
+                  domain={['auto', 'auto']}
+                  width={36}
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  cursor={{ stroke: 'rgba(99,102,241,0.3)', strokeWidth: 1 }}
+                  formatter={(v: unknown) => {
+                    const n = typeof v === 'number' ? v : 0
+                    return [`${n.toFixed(1)}×`, 'ROAS']
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="roas"
+                  stroke="#4f46e5"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: '#4f46e5' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )
       )}
 
       {/* Campaign table */}
       {loading ? (
         <TableSkeleton />
-      ) : channel === 'meta' ? null : (
+      ) : (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-800">
             <p className="text-sm font-medium text-zinc-300">
@@ -332,11 +347,11 @@ export default function RelatoriosClient() {
             </p>
           </div>
 
-          {connected && campaigns.length === 0 ? (
+          {isConnected && campaigns.length === 0 ? (
             <p className="px-6 py-8 text-center text-zinc-500 text-sm">
               Nenhuma campanha encontrada no período.
             </p>
-          ) : (
+          ) : !isConnected ? null : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -356,7 +371,7 @@ export default function RelatoriosClient() {
                     const ctr  = c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0
                     const roas = c.cost > 0 ? c.revenue / c.cost : 0
                     return (
-                      <tr key={c.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
+                      <tr key={`${c.platform}-${c.id}`} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2 min-w-[200px]">
                             <PlatformIcon platform={c.platform} />
