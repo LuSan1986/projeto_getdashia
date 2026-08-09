@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     if (!firstResource) throw new Error('No accessible Google Ads customers found')
 
     // TODO: replace with user-selected account once account picker is implemented
-    accountId = process.env.GOOGLE_ADS_TEST_CUSTOMER_ID ?? '4285623921'
+    accountId = process.env.GOOGLE_ADS_TEST_CUSTOMER_ID ?? '5307814497'
     console.log('[google/callback] resolved account_id:', accountId)
   } catch (err) {
     console.error('[google/callback] failed to fetch customer ID, saving as pending:', err)
