@@ -4,6 +4,20 @@ import { createClient } from '@/lib/supabase-server'
 import { decrypt, encrypt } from '@/lib/crypto'
 
 const REDIRECT_URI = 'https://www.getdashia.com.br/api/integrations/google/callback'
+const ADS_API = 'https://googleads.googleapis.com/v24'
+
+interface AccountInfo {
+  id: string
+  name: string
+}
+
+interface CustomerClientRow {
+  customerClient?: {
+    id?: number | string
+    descriptiveName?: string
+    manager?: boolean
+  }
+}
 
 export async function GET(_request: NextRequest) {
   try {
@@ -78,27 +92,102 @@ export async function GET(_request: NextRequest) {
       }
     }
 
-    const response = await fetch(
-      'https://googleads.googleapis.com/v24/customers:listAccessibleCustomers',
+    const devToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? ''
+
+    // Step 1: get all top-level accessible customers
+    const listRes = await fetch(
+      `${ADS_API}/customers:listAccessibleCustomers`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? '',
+          'developer-token': devToken,
         },
       }
     )
 
-    if (!response.ok) {
-      const text = await response.text()
+    if (!listRes.ok) {
+      const text = await listRes.text()
       console.error('[google/accounts] listAccessibleCustomers error:', text.substring(0, 300))
       return NextResponse.json({ error: 'Erro ao buscar contas do Google Ads' }, { status: 502 })
     }
 
-    const body = await response.json()
-    const resourceNames: string[] = body.resourceNames ?? []
-    const accounts = resourceNames.map((r: string) => r.replace('customers/', ''))
+    const listBody = await listRes.json()
+    const resourceNames: string[] = listBody.resourceNames ?? []
+    const topLevelIds = resourceNames.map((r: string) => r.replace('customers/', ''))
+    console.log('[google/accounts] top-level IDs:', topLevelIds)
 
-    return NextResponse.json({ accounts })
+    // Step 2: for each top-level account, query customer_client to expand sub-accounts.
+    // Manager accounts return their full client hierarchy; non-managers return an error
+    // (in which case we add the account itself directly).
+    const seenIds = new Set<string>()
+    const result: AccountInfo[] = []
+
+    const clientQuery = `
+      SELECT customer_client.id, customer_client.descriptive_name, customer_client.manager
+      FROM customer_client
+      WHERE customer_client.level <= 1
+    `
+
+    await Promise.all(
+      topLevelIds.map(async (topId) => {
+        try {
+          const res = await fetch(
+            `${ADS_API}/customers/${topId}/googleAds:search`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'developer-token': devToken,
+                'login-customer-id': topId,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ query: clientQuery }),
+            }
+          )
+
+          if (!res.ok) {
+            // Not a manager account — add it directly as a selectable account
+            if (!seenIds.has(topId)) {
+              seenIds.add(topId)
+              result.push({ id: topId, name: '' })
+            }
+            return
+          }
+
+          const body = await res.json()
+          const rows: CustomerClientRow[] = body.results ?? []
+          let addedAny = false
+
+          for (const row of rows) {
+            const clientId = String(row.customerClient?.id ?? '')
+            const isManager = row.customerClient?.manager === true
+            if (!isManager && clientId && !seenIds.has(clientId)) {
+              seenIds.add(clientId)
+              result.push({
+                id: clientId,
+                name: row.customerClient?.descriptiveName ?? '',
+              })
+              addedAny = true
+            }
+          }
+
+          // Query succeeded but returned no non-manager rows — add the account itself
+          if (!addedAny && !seenIds.has(topId)) {
+            seenIds.add(topId)
+            result.push({ id: topId, name: '' })
+          }
+        } catch (err) {
+          console.error('[google/accounts] error expanding account', topId, err)
+          if (!seenIds.has(topId)) {
+            seenIds.add(topId)
+            result.push({ id: topId, name: '' })
+          }
+        }
+      })
+    )
+
+    console.log('[google/accounts] final selectable accounts:', result.map(a => a.id))
+    return NextResponse.json({ accounts: result })
   } catch (err) {
     console.error('[google/accounts] erro inesperado:', err)
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })

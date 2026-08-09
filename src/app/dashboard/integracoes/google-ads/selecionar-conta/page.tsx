@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation'
 import { SiGoogleads } from 'react-icons/si'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
+interface AccountInfo {
+  id: string
+  name: string
+}
+
 function formatCustomerId(id: string): string {
   const clean = id.replace(/-/g, '')
   if (clean.length === 10) {
@@ -15,7 +20,7 @@ function formatCustomerId(id: string): string {
 
 export default function SelecionarContaPage() {
   const router = useRouter()
-  const [accounts, setAccounts] = useState<string[]>([])
+  const [accounts, setAccounts] = useState<AccountInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [connecting, setConnecting] = useState<string | null>(null)
@@ -103,23 +108,24 @@ export default function SelecionarContaPage() {
 
       {!loading && !error && accounts.length > 0 && (
         <div className="flex flex-col gap-3">
-          {accounts.map(accountId => (
+          {accounts.map(account => (
             <div
-              key={accountId}
+              key={account.id}
               className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-4"
             >
               <div>
-                <p className="text-sm font-mono font-medium text-zinc-100">
-                  {formatCustomerId(accountId)}
-                </p>
+                {account.name && (
+                  <p className="text-sm font-medium text-zinc-100">{account.name}</p>
+                )}
+                <p className="text-sm font-mono text-zinc-300">{formatCustomerId(account.id)}</p>
                 <p className="text-xs text-zinc-500 mt-0.5">Customer ID</p>
               </div>
               <button
-                onClick={() => handleSelect(accountId)}
+                onClick={() => handleSelect(account.id)}
                 disabled={connecting !== null}
                 className="flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm font-semibold text-white transition"
               >
-                {connecting === accountId ? (
+                {connecting === account.id ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
                     Conectando…
