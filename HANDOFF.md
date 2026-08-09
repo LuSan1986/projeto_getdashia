@@ -38,6 +38,19 @@ O PRD completo está em docs/PRD_GetDashia.md no repositório.
 
 4. ESTADO ATUAL
 
+Sessão 10 — concluído em 2026-08-09
+
+Bloqueio de faturamento resolvido na conta GetDashia (530-781-4497) ✅
+- Conta estava sem perfil de pagamento vinculado (por isso pedia "criar primeira campanha")
+- Perfil de pagamento (Luciano de Santana Oliveira) + cartão Mastercard vinculados
+- Pagamento manual configurado — saldo inicial R$ 40,00
+- 1ª campanha de Pesquisa criada na conta correta (530-781-4497), aguardando revisão de política
+- Tag Google Ads (gtag.js, ID: AW-18379845957) instalada em src/app/layout.tsx via next/script ✅
+- Build limpo, push feito para main
+
+Atenção: existe uma campanha "Teste GetDashia" na conta errada (428-562-3921, mesma MCC) —
+considerar pausar/excluir para não confundir relatórios futuros.
+
 Sessão 9 — concluído em 2026-07-12
 
 Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeitos neon ciano/magenta:
@@ -122,6 +135,9 @@ E-mail de confirmação funcionando via Resend + Supabase SMTP ✅
 Pendente (ordem planejada)
 
 
+Aguardar revisão de política da campanha em 530-781-4497
+Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
+Confirmar que os dados da campanha 530-781-4497 aparecem em /dashboard/relatorios
 Corrigir logos na seção de ferramentas — Google Ads e TikTok Ads não aparecem
 Redesign das seções restantes da landing page:
 
