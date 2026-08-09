@@ -41,15 +41,26 @@ O PRD completo está em docs/PRD_GetDashia.md no repositório.
 Sessão 10 — concluído em 2026-08-09
 
 Bloqueio de faturamento resolvido na conta GetDashia (530-781-4497) ✅
-- Conta estava sem perfil de pagamento vinculado (por isso pedia "criar primeira campanha")
+- Conta estava sem perfil de pagamento vinculado
 - Perfil de pagamento (Luciano de Santana Oliveira) + cartão Mastercard vinculados
 - Pagamento manual configurado — saldo inicial R$ 40,00
-- 1ª campanha de Pesquisa criada na conta correta (530-781-4497), aguardando revisão de política
+- 1ª campanha de Pesquisa criada na conta correta (530-781-4497): "Campaign #1"
+- Campanhas antigas Teste-GetDashia-2 e Teste-GetDashia-03 pausadas (economia de orçamento)
 - Tag Google Ads (gtag.js, ID: AW-18379845957) instalada em src/app/layout.tsx via next/script ✅
-- Build limpo, push feito para main
 
-Atenção: existe uma campanha "Teste GetDashia" na conta errada (428-562-3921, mesma MCC) —
-considerar pausar/excluir para não confundir relatórios futuros.
+Correção crítica na integração Google Ads do GetDashia ✅
+- Bug encontrado: OAuth conectava automaticamente à primeira conta acessível 
+  (428-562-3921), ignorando a conta correta do usuário
+- Implementada tela /dashboard/integracoes/google-ads/selecionar-conta que lista 
+  contas-cliente (incluindo as de dentro de contas gerenciadoras/MCC via query 
+  customer_client) e deixa o usuário escolher qual conectar
+- Resolve também o caso de futuros clientes com múltiplas contas de anúncio
+- Testado e confirmado: app agora conecta corretamente à conta GetDashia (530-781-4497)
+
+Pesquisa TikTok Ads API — decisão: adiar
+- TikTok Marketing API é a mais rigorosa entre as redes (Business Center, revisão 
+  de app com vídeo/documentação, verificação de negócio, auditoria de segurança de dados)
+- Decisão: focar em concluir a verificação do Meta Ads primeiro, TikTok fica para depois
 
 Sessão 9 — concluído em 2026-07-12
 
@@ -135,6 +146,12 @@ E-mail de confirmação funcionando via Resend + Supabase SMTP ✅
 Pendente (ordem planejada)
 
 
+Corrigir bug na tela Visão Geral do dashboard — mostra "Nenhuma campanha encontrada" 
+mesmo com campanhas ativas (a tela Relatórios já lista corretamente, então é 
+inconsistência entre as duas queries)
+Confirmar se métricas (impressões/cliques) da Campaign #1 sincronizaram na API 
+(esperado levar algumas horas após aparecerem no Google Ads)
+Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
 Aguardar revisão de política da campanha em 530-781-4497
 Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
 Confirmar que os dados da campanha 530-781-4497 aparecem em /dashboard/relatorios
