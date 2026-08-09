@@ -39,11 +39,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)
   }
 
-  // Step 2 — set credentials immediately so the client uses them for subsequent calls
+  // Step 2 — set credentials
   oauth2Client.setCredentials(tokens)
 
-  // Step 3 — fetch Google Ads customer ID (best-effort; falls back to 'pending')
+  // Step 3 — list accessible customer IDs and decide flow
   let accountId = 'pending'
+  let needsAccountSelection = false
   try {
     const response = await fetch(
       'https://googleads.googleapis.com/v24/customers:listAccessibleCustomers',
@@ -63,19 +64,26 @@ export async function GET(request: NextRequest) {
     }
 
     const body = JSON.parse(text)
-    const firstResource: string | undefined = body.resourceNames?.[0]
-    if (!firstResource) throw new Error('No accessible Google Ads customers found')
+    const resourceNames: string[] = body.resourceNames ?? []
+    const cleanIds = resourceNames.map((r: string) => r.replace('customers/', ''))
+    console.log('[google/callback] accessible customer IDs:', cleanIds)
 
-    // TODO: replace with user-selected account once account picker is implemented
-    accountId = process.env.GOOGLE_ADS_TEST_CUSTOMER_ID ?? '5307814497'
-    console.log('[google/callback] resolved account_id:', accountId)
+    if (cleanIds.length === 0) {
+      throw new Error('No accessible Google Ads customers found')
+    } else if (cleanIds.length === 1) {
+      accountId = cleanIds[0]
+      console.log('[google/callback] single account, auto-selecting:', accountId)
+    } else {
+      accountId = 'pending'
+      needsAccountSelection = true
+      console.log('[google/callback] multiple accounts found, redirecting to selector')
+    }
   } catch (err) {
-    console.error('[google/callback] failed to fetch customer ID, saving as pending:', err)
+    console.error('[google/callback] failed to fetch customer IDs, saving as pending:', err)
   }
 
-  // Step 4 — get Supabase user from session cookie
+  // Step 4 — get Supabase user
   const supabase = await createClient()
-
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
     console.error('[google/callback] no authenticated user:', userError)
@@ -94,7 +102,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${BASE}/onboarding`)
   }
 
-  // Step 5 — encrypt tokens and save to Supabase
+  // Step 5 — save integration
+  // When redirecting to the selector, wipe existing records first so the
+  // fresh "pending" token record is always the one the selector reads.
+  if (needsAccountSelection) {
+    await supabase
+      .from('integrations')
+      .delete()
+      .eq('organization_id', membership.organization_id)
+      .eq('platform', 'google_ads')
+  }
+
   try {
     const { error: upsertError } = await supabase.from('integrations').upsert(
       {
@@ -109,17 +127,17 @@ export async function GET(request: NextRequest) {
       { onConflict: 'organization_id,platform,account_id' }
     )
 
-    if (upsertError) {
-      throw new Error(upsertError.message)
-    }
+    if (upsertError) throw new Error(upsertError.message)
 
-    console.log('[google/callback] integration saved for org:', membership.organization_id, '| account_id:', accountId)
+    console.log('[google/callback] integration saved | account_id:', accountId)
   } catch (err) {
     console.error('[google/callback] failed to save integration:', err)
     return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)
   }
 
-  const redirectUrl = accountId === 'pending'
+  const redirectUrl = needsAccountSelection
+    ? `${BASE}/dashboard/integracoes/google-ads/selecionar-conta`
+    : accountId === 'pending'
     ? `${BASE}/dashboard?setup=pending`
     : `${BASE}/dashboard`
 
