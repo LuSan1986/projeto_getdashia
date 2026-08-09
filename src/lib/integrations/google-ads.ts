@@ -42,7 +42,7 @@ export async function fetchGoogleAdsData(
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'developer-token': developerToken,
-        'login-customer-id': cleanCustomerId,
+        'login-customer-id': process.env.GOOGLE_ADS_MCC_ID ?? '4534828300',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query }),
