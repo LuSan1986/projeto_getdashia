@@ -19,6 +19,9 @@ function get6MonthsRange(): { start: string; end: string } {
   return { start: fmt(start), end: fmt(today) }
 }
 
+export const dynamic    = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -106,6 +109,7 @@ export async function GET(_request: NextRequest) {
       fetch(`${ADS_API}/customers/${accountId}/googleAds:search`, {
         method: 'POST',
         headers,
+        cache: 'no-store',
         body: JSON.stringify({
           query: `
             SELECT segments.date, metrics.conversions_value
@@ -119,6 +123,7 @@ export async function GET(_request: NextRequest) {
       fetch(`${ADS_API}/customers/${accountId}/googleAds:search`, {
         method: 'POST',
         headers,
+        cache: 'no-store',
         body: JSON.stringify({
           query: `
             SELECT segments.date, metrics.clicks

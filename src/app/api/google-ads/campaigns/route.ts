@@ -3,7 +3,8 @@ import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt, encrypt } from '@/lib/crypto'
 
-export const dynamic = 'force-dynamic'
+export const dynamic    = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 const REDIRECT_URI = 'https://www.getdashia.com.br/api/integrations/google/callback'
 
@@ -141,7 +142,7 @@ export async function GET(request: NextRequest) {
       `
       const res  = await fetch(
         `${ADS_API}/customers/${accountId}/googleAds:search`,
-        { method: 'POST', headers, body: JSON.stringify({ query: summaryQuery }) }
+        { method: 'POST', headers, body: JSON.stringify({ query: summaryQuery }), cache: 'no-store' }
       )
       const body = await res.json()
       if (!res.ok) {
@@ -189,11 +190,11 @@ export async function GET(request: NextRequest) {
     const [campaignRes, roasRes] = await Promise.all([
       fetch(
         `${ADS_API}/customers/${accountId}/googleAds:search`,
-        { method: 'POST', headers, body: JSON.stringify({ query: campaignQuery }) }
+        { method: 'POST', headers, body: JSON.stringify({ query: campaignQuery }), cache: 'no-store' }
       ),
       fetch(
         `${ADS_API}/customers/${accountId}/googleAds:search`,
-        { method: 'POST', headers, body: JSON.stringify({ query: roasQuery }) }
+        { method: 'POST', headers, body: JSON.stringify({ query: roasQuery }), cache: 'no-store' }
       ),
     ])
 

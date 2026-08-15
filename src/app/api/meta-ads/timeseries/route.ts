@@ -27,6 +27,9 @@ function sumActionValues(
     .reduce((sum, a) => sum + Number(a.value ?? 0), 0)
 }
 
+export const dynamic    = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -79,7 +82,7 @@ export async function GET(_request: NextRequest) {
           `&client_id=${process.env.META_APP_ID ?? ''}` +
           `&client_secret=${process.env.META_APP_SECRET ?? ''}` +
           `&fb_exchange_token=${encodeURIComponent(accessToken)}`
-        const refreshRes = await fetch(refreshUrl)
+        const refreshRes = await fetch(refreshUrl, { cache: 'no-store' })
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json()
           if (refreshData.access_token) {
@@ -114,7 +117,8 @@ export async function GET(_request: NextRequest) {
         `&level=account` +
         `&date_preset=last_7d` +
         `&time_increment=1` +
-        `&access_token=${accessToken}`
+        `&access_token=${accessToken}`,
+        { cache: 'no-store' }
       ),
       fetch(
         `${GRAPH_API}/${adAccountId}/insights` +
@@ -122,7 +126,8 @@ export async function GET(_request: NextRequest) {
         `&level=account` +
         `&time_range=${m6timeRange}` +
         `&time_increment=monthly` +
-        `&access_token=${accessToken}`
+        `&access_token=${accessToken}`,
+        { cache: 'no-store' }
       ),
     ])
 

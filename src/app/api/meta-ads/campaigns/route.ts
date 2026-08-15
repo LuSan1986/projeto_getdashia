@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt, encrypt } from '@/lib/crypto'
 
-export const dynamic = 'force-dynamic'
+export const dynamic    = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 const GRAPH_API = 'https://graph.facebook.com/v21.0'
 
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
           `&client_secret=${process.env.META_APP_SECRET ?? ''}` +
           `&fb_exchange_token=${encodeURIComponent(accessToken)}`
 
-        const refreshRes = await fetch(refreshUrl)
+        const refreshRes = await fetch(refreshUrl, { cache: 'no-store' })
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json()
           if (refreshData.access_token) {
@@ -145,7 +146,8 @@ export async function GET(request: NextRequest) {
         `?fields=impressions,clicks,spend,actions,action_values` +
         `&level=account` +
         `&time_range=${timeRange}` +
-        `&access_token=${accessToken}`
+        `&access_token=${accessToken}`,
+        { cache: 'no-store' }
       )
       if (!res.ok) {
         const text = await res.text()
@@ -174,7 +176,8 @@ export async function GET(request: NextRequest) {
         `?fields=id,name,status` +
         `&filtering=${filterParam}` +
         `&limit=100` +
-        `&access_token=${accessToken}`
+        `&access_token=${accessToken}`,
+        { cache: 'no-store' }
       ),
       fetch(
         `${GRAPH_API}/${adAccountId}/insights` +
@@ -182,7 +185,8 @@ export async function GET(request: NextRequest) {
         `&level=campaign` +
         `&date_preset=${datePreset}` +
         `&limit=100` +
-        `&access_token=${accessToken}`
+        `&access_token=${accessToken}`,
+        { cache: 'no-store' }
       ),
     ])
 
