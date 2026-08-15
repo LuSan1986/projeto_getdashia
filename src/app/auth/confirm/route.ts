@@ -30,14 +30,26 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.verifyOtp({ type, token_hash })
 
+    // DIAG 1: verifyOtp result
+    console.log('[auth/confirm] verifyOtp — type:', type, '| error:', error ?? 'null')
+
     if (!error) {
       // Send welcome email only on new account confirmation, not on password recovery
       if (type === 'signup') {
         const { data: { user } } = await supabase.auth.getUser()
+
+        // DIAG 2: getUser result
+        console.log('[auth/confirm] getUser — user exists:', !!user, '| email:', user?.email ?? 'undefined')
+
         if (user?.email) {
-          sendWelcomeEmail(user.email).catch((err) =>
+          // DIAG 3: about to call Resend
+          console.log('[auth/confirm] Prestes a enviar welcome email para:', user.email)
+
+          sendWelcomeEmail(user.email).catch((err) => {
+            // DIAG 4: catch block reached
+            console.log('[auth/confirm] catch executado')
             console.error('[auth/confirm] welcome email failed:', err)
-          )
+          })
         }
       }
 
