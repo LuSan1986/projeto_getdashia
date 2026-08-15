@@ -26,6 +26,48 @@ types/
 3. DOCUMENTAÇÃO DO PRODUTO
 O PRD completo está em docs/PRD_GetDashia.md no repositório.
 4. ESTADO ATUAL
+Sessão 11 — concluído em 2026-08-15
+
+Campaign #1 pausada por segurança ✅
+- Campanha gerou tráfego real (2.082 impressões, 132 cliques, R$ 35,98 gastos) 
+  antes de percebermos — produto ainda não está pronto para receber clientes reais
+- Identificados possíveis leads reais na tabela waitlist (5 e-mails com datas 
+  recentes: adryavalentina234@gmail.com, rafaellasouzadf@gmail.com, 
+  malu31325@gmail.com, liviaewenner@gmail.com, rzinharibeiro@gmail.com)
+- Mensagens de contato preparadas (e-mail e WhatsApp) explicando fase beta e 
+  que só Google Ads está disponível para conectar (Meta Ads ainda em revisão)
+
+Melhorias nos Relatórios pensadas para gestor de tráfego ✅
+- Coluna CPC Médio adicionada na tabela de campanhas
+- Coluna Taxa de Conversão adicionada na tabela de campanhas
+- Comparativo com período anterior (▲/▼ %) nos cards Investimento Total, 
+  Receita Gerada, ROAS Médio e CPA Médio
+
+Gráficos da Visão Geral corrigidos e conectados a dados reais ✅
+- "Receita Total — últimos 7 dias" e "Cliques por Canal — últimos 6 meses" 
+  tinham datas fixas/hardcoded no eixo — corrigido para calcular dinamicamente 
+  a partir da data atual
+- Criadas rotas /api/google-ads/timeseries e /api/meta-ads/timeseries para 
+  puxar dados reais diários/mensais, substituindo os arrays zerados fixos
+- Corrigido bug de date_preset inválido no Meta timeseries (last_7_days → last_7d)
+
+Bugs de cache corrigidos ✅
+- Rotas /api/google-ads/campaigns e /api/meta-ads/campaigns estavam sujeitas a 
+  cache do Next.js (Data Cache), mostrando dados desatualizados
+- Adicionado export const dynamic = 'force-dynamic' e cache: 'no-store' nos 
+  fetches para garantir dados sempre atualizados
+- Divergência remanescente entre Google Ads UI e API (107 vs 132 cliques) 
+  confirmada como latência normal de processamento da API do Google (até 3h), 
+  não bug de código — testado acessando a API diretamente
+
+Redesign visual do dashboard alinhado com a landing page ✅
+- Aplicadas as cores e tipografia do redesign cyberpunk da landing (fundo 
+  #050B18, gradiente ciano→magenta, sem elementos decorativos) em: 
+  dashboard/layout.tsx, DashboardSidebar, RelatoriosClient, IntegracoesClient, 
+  ConfiguracoesClient, DashboardGoogleMetrics, Charts
+
+
+
 Sessão 7 — concluído em 2026-05-27
 
 OAuth Google aprovado (escopo adwords) ✅
@@ -75,16 +117,19 @@ Comando: git push origin main
 
 Pendente (ordem planejada)
 
-Meta Ads → Tornar-se Provedor de Tecnologia (requer CNPJ/documentação empresarial)
-
-Sem isso: apenas contas admin do app conseguem conectar
-Após verificação: submeter ads_read + ads_management para revisão Meta (1-4 semanas)
-
-
-Aguardar aprovação Google OAuth (email: lucianosantana48@gmail.com, 3-7 dias úteis)
-Stripe — migrar para modo produção (decidir CPF ou CNPJ — decisão irreversível)
-Substituir dados mock da página de Relatórios por dados reais da Google Ads API
-Dados do Meta Ads — buscar campanhas reais via Marketing API
+Decidir quando reativar a Campaign #1 (só depois do produto estar pronto para 
+clientes reais)
+Enviar mensagens de contato pros 5 leads reais da waitlist (mensagens já prontas)
+Aguardar ~15 dias de uso real da API do Meta Ads (previsão: 24/08/2026), depois 
+regravar screencast em inglês e reenviar business_management + ads_read + 
+Marketing API Access Tier para revisão da Meta
+Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
+TikTok Ads API — adiado, avaliar depois que Meta for aprovado
+Corrigir logos na seção de ferramentas — Google Ads e TikTok Ads não aparecem
+Redesign das seções restantes da landing page: Preços, FAQ, Footer
+Adicionar gestor de tráfego como Testador no Meta Developer Portal
+Stripe → migrar para produção com CNPJ do MEI
+Remover card "Plano Grátis" após período de testes beta
 
 5. CREDENCIAIS E CONTAS IMPORTANTES
 
