@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import {
   AreaChart,
   Area,
@@ -17,11 +18,12 @@ import {
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 
-// ── Date label helpers ────────────────────────────────────────────────────────
+// ── Date helpers ──────────────────────────────────────────────────────────────
 
 const MONTH_LC  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 const MONTH_CAP = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
+/** 'DD/mmm' labels for the last 7 days ending today */
 function last7DayLabels(): string[] {
   const today = new Date()
   return Array.from({ length: 7 }, (_, i) => {
@@ -31,6 +33,7 @@ function last7DayLabels(): string[] {
   })
 }
 
+/** 'Mmm' labels for the last 6 months ending this month */
 function last6MonthLabels(): string[] {
   const today = new Date()
   return Array.from({ length: 6 }, (_, i) => {
@@ -39,7 +42,17 @@ function last6MonthLabels(): string[] {
   })
 }
 
-// ── Demo values (labels are injected dynamically) ─────────────────────────────
+/** 'YYYY-MM-DD' key using local date (avoids UTC shift) */
+function dayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** 'YYYY-MM' key using local date */
+function monthKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+// ── Demo values ───────────────────────────────────────────────────────────────
 
 const DEMO_REVENUE_VALUES = [5200, 6800, 4900, 7200, 8100, 6600, 9400]
 
@@ -66,6 +79,16 @@ const ZERO_CONVERSION_DATA = [
   { name: 'Direto',     value: 0 },
 ]
 
+// ── Timeseries API types ──────────────────────────────────────────────────────
+
+interface TimeseriesResponse {
+  connected: boolean
+  revenue7d: Array<{ date: string; value: number }>
+  clicks6m:  Array<{ month: string; clicks: number }>
+}
+
+// ── Chart styles ──────────────────────────────────────────────────────────────
+
 const PIE_COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc']
 
 const tooltipProps = {
@@ -84,6 +107,8 @@ const axisProps = {
   axisLine: { stroke: '#27272a' },
   tickLine: false as const,
 }
+
+// ── Legend components ─────────────────────────────────────────────────────────
 
 const barLegendIcons: Record<string, React.ReactNode> = {
   'Google Ads': <SiGoogleads color="#4285F4" size={12} />,
@@ -137,17 +162,78 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   )
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function Charts({ isLive = false }: { isLive?: boolean }) {
   const dayLabels   = last7DayLabels()
   const monthLabels = last6MonthLabels()
 
-  const revenueData = isLive
-    ? dayLabels.map((dia) => ({ dia, receita: 0 }))
-    : dayLabels.map((dia, i) => ({ dia, receita: DEMO_REVENUE_VALUES[i] }))
+  // Live data — initialized to zero; filled in by useEffect below
+  const [liveRevenue,     setLiveRevenue]     = useState<number[]>(Array(7).fill(0))
+  const [liveGoogleClicks, setLiveGoogleClicks] = useState<number[]>(Array(6).fill(0))
+  const [liveMetaClicks,   setLiveMetaClicks]   = useState<number[]>(Array(6).fill(0))
 
-  const clicksData = isLive
-    ? monthLabels.map((mes) => ({ mes, 'Google Ads': 0, 'Meta Ads': 0 }))
-    : monthLabels.map((mes, i) => ({ mes, 'Google Ads': DEMO_CLICKS_VALUES[i].google, 'Meta Ads': DEMO_CLICKS_VALUES[i].meta }))
+  useEffect(() => {
+    if (!isLive) return
+
+    Promise.all([
+      fetch('/api/google-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null),
+      fetch('/api/meta-ads/timeseries').then((r) => r.json()   as Promise<TimeseriesResponse>).catch(() => null),
+    ]).then(([googleData, metaData]) => {
+      // ── Revenue 7d ──────────────────────────────────────────────────────────
+      // Build map: 'YYYY-MM-DD' → combined revenue
+      const revenueMap = new Map<string, number>()
+      for (const { date, value } of (googleData?.revenue7d ?? [])) {
+        revenueMap.set(date, (revenueMap.get(date) ?? 0) + value)
+      }
+      for (const { date, value } of (metaData?.revenue7d ?? [])) {
+        revenueMap.set(date, (revenueMap.get(date) ?? 0) + value)
+      }
+
+      const today = new Date()
+      setLiveRevenue(
+        Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(today)
+          d.setDate(today.getDate() - 6 + i)
+          return revenueMap.get(dayKey(d)) ?? 0
+        })
+      )
+
+      // ── Clicks 6m ───────────────────────────────────────────────────────────
+      const googleClicksMap = new Map<string, number>()
+      for (const { month, clicks } of (googleData?.clicks6m ?? [])) {
+        googleClicksMap.set(month, (googleClicksMap.get(month) ?? 0) + clicks)
+      }
+
+      const metaClicksMap = new Map<string, number>()
+      for (const { month, clicks } of (metaData?.clicks6m ?? [])) {
+        metaClicksMap.set(month, (metaClicksMap.get(month) ?? 0) + clicks)
+      }
+
+      const today2 = new Date()
+      const makeMonthArray = (map: Map<string, number>) =>
+        Array.from({ length: 6 }, (_, i) => {
+          const d = new Date(today2.getFullYear(), today2.getMonth() - 5 + i, 1)
+          return map.get(monthKey(d)) ?? 0
+        })
+
+      setLiveGoogleClicks(makeMonthArray(googleClicksMap))
+      setLiveMetaClicks(makeMonthArray(metaClicksMap))
+    })
+  }, [isLive])
+
+  // ── Build chart data ──────────────────────────────────────────────────────
+
+  const revenueData = dayLabels.map((dia, i) => ({
+    dia,
+    receita: isLive ? liveRevenue[i] : DEMO_REVENUE_VALUES[i],
+  }))
+
+  const clicksData = monthLabels.map((mes, i) => ({
+    mes,
+    'Google Ads': isLive ? liveGoogleClicks[i] : DEMO_CLICKS_VALUES[i].google,
+    'Meta Ads':   isLive ? liveMetaClicks[i]   : DEMO_CLICKS_VALUES[i].meta,
+  }))
 
   const conversionData = isLive ? ZERO_CONVERSION_DATA : DEMO_CONVERSION_DATA
 
