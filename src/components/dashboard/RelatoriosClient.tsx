@@ -37,6 +37,13 @@ interface RoasPoint {
   roas: number
 }
 
+interface PrevSummary {
+  investment: number
+  revenue: number
+  clicks: number
+  conversions: number
+}
+
 // ── Filter options ────────────────────────────────────────────────────────────
 
 const periodOptions: { value: Period; label: string }[] = [
@@ -59,6 +66,11 @@ function fmtBRL(n: number) {
 
 function fmtInt(n: number) {
   return n.toLocaleString('pt-BR')
+}
+
+function pct(current: number, prev: number): number | null {
+  if (prev === 0) return null
+  return ((current - prev) / prev) * 100
 }
 
 // ── Shared chart styles ───────────────────────────────────────────────────────
@@ -115,6 +127,19 @@ function PlatformIcon({ platform }: { platform: Platform }) {
     : <SiMeta      color="#0082FB" size={14} className="shrink-0" />
 }
 
+// ── Change indicator ──────────────────────────────────────────────────────────
+
+function ChangeIndicator({ change, higherIsBad }: { change: number | null; higherIsBad?: boolean }) {
+  if (change === null) return <span className="text-zinc-600 text-xs">—</span>
+  const isUp   = change > 0
+  const isGood = higherIsBad ? !isUp : isUp
+  return (
+    <span className={`text-xs font-medium ${isGood ? 'text-green-400' : 'text-red-400'}`}>
+      {isUp ? '▲' : '▼'} {Math.abs(change).toFixed(1).replace('.', ',')}% vs. período anterior
+    </span>
+  )
+}
+
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function CardSkeleton() {
@@ -157,13 +182,15 @@ export default function RelatoriosClient() {
   const [period,  setPeriod]  = useState<Period>('30d')
   const [channel, setChannel] = useState<Channel>('all')
 
-  const [googleCampaigns, setGoogleCampaigns] = useState<Campaign[]>([])
-  const [metaCampaigns,   setMetaCampaigns]   = useState<Campaign[]>([])
-  const [roasData,        setRoasData]        = useState<RoasPoint[]>([])
-  const [loading,         setLoading]         = useState(true)
-  const [error,           setError]           = useState<string | null>(null)
-  const [googleConnected, setGoogleConnected] = useState(false)
-  const [metaConnected,   setMetaConnected]   = useState(false)
+  const [googleCampaigns,   setGoogleCampaigns]   = useState<Campaign[]>([])
+  const [metaCampaigns,     setMetaCampaigns]     = useState<Campaign[]>([])
+  const [roasData,          setRoasData]          = useState<RoasPoint[]>([])
+  const [googlePrevSummary, setGooglePrevSummary] = useState<PrevSummary | null>(null)
+  const [metaPrevSummary,   setMetaPrevSummary]   = useState<PrevSummary | null>(null)
+  const [loading,           setLoading]           = useState(true)
+  const [error,             setError]             = useState<string | null>(null)
+  const [googleConnected,   setGoogleConnected]   = useState(false)
+  const [metaConnected,     setMetaConnected]     = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -173,14 +200,18 @@ export default function RelatoriosClient() {
     Promise.all([
       fetch(`/api/google-ads/campaigns?period=${period}`).then((r) => r.json()),
       fetch(`/api/meta-ads/campaigns?period=${period}`).then((r) => r.json()),
+      fetch(`/api/google-ads/campaigns?period=${period}&prev=true`).then((r) => r.json()).catch(() => null),
+      fetch(`/api/meta-ads/campaigns?period=${period}&prev=true`).then((r) => r.json()).catch(() => null),
     ])
-      .then(([googleData, metaData]) => {
+      .then(([googleData, metaData, googlePrevData, metaPrevData]) => {
         if (cancelled) return
         setGoogleConnected(googleData.connected ?? false)
         setGoogleCampaigns(googleData.campaigns ?? [])
         setRoasData(googleData.roasData ?? [])
         setMetaConnected(metaData.connected ?? false)
         setMetaCampaigns(metaData.campaigns ?? [])
+        setGooglePrevSummary((googlePrevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null)
+        setMetaPrevSummary((metaPrevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null)
       })
       .catch(() => {
         if (!cancelled) setError('Erro ao carregar campanhas.')
@@ -210,6 +241,23 @@ export default function RelatoriosClient() {
     }
   }, [campaigns])
 
+  const prevSummary = useMemo<{
+    investment: number; revenue: number; roas: number; cpa: number
+  } | null>(() => {
+    const gPrev = channel !== 'meta'   ? googlePrevSummary : null
+    const mPrev = channel !== 'google' ? metaPrevSummary   : null
+    if (!gPrev && !mPrev) return null
+    const investment  = (gPrev?.investment  ?? 0) + (mPrev?.investment  ?? 0)
+    const revenue     = (gPrev?.revenue     ?? 0) + (mPrev?.revenue     ?? 0)
+    const conversions = (gPrev?.conversions ?? 0) + (mPrev?.conversions ?? 0)
+    return {
+      investment,
+      revenue,
+      roas: investment > 0 ? revenue / investment : 0,
+      cpa:  conversions > 0 ? investment / conversions : 0,
+    }
+  }, [channel, googlePrevSummary, metaPrevSummary])
+
   const isConnected = channel === 'google'
     ? googleConnected
     : channel === 'meta'
@@ -235,6 +283,13 @@ export default function RelatoriosClient() {
 
   // Show ROAS chart only when Google data is available (Meta doesn't provide daily ROAS yet)
   const showRoasChart = channel !== 'meta'
+
+  const prevChanges = {
+    investment: prevSummary ? pct(summary.investment, prevSummary.investment) : null,
+    revenue:    prevSummary ? pct(summary.revenue,    prevSummary.revenue)    : null,
+    roas:       prevSummary ? pct(summary.roas,       prevSummary.roas)       : null,
+    cpa:        prevSummary ? pct(summary.cpa,        prevSummary.cpa)        : null,
+  }
 
   return (
     <div className="p-6 md:p-8">
@@ -278,15 +333,16 @@ export default function RelatoriosClient() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Investimento Total', value: fmtBRL(summary.investment), desc: periodLabel },
-            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),    desc: periodLabel },
-            { label: 'ROAS Médio',         value: `${summary.roas.toFixed(1).replace('.', ',')}×`, desc: 'Retorno sobre o investimento' },
-            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),        desc: 'Custo por aquisição' },
-          ].map(({ label, value, desc }) => (
+            { label: 'Investimento Total', value: fmtBRL(summary.investment), desc: periodLabel,                       change: prevChanges.investment, higherIsBad: true  },
+            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),    desc: periodLabel,                       change: prevChanges.revenue,    higherIsBad: false },
+            { label: 'ROAS Médio',         value: `${summary.roas.toFixed(1).replace('.', ',')}×`, desc: 'Retorno sobre o investimento', change: prevChanges.roas, higherIsBad: false },
+            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),        desc: 'Custo por aquisição',             change: prevChanges.cpa,        higherIsBad: true  },
+          ].map(({ label, value, desc, change, higherIsBad }) => (
             <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2">
               <p className="text-zinc-400 text-sm">{label}</p>
               <p className="text-3xl font-bold text-white">{value}</p>
               <p className="text-zinc-500 text-xs">{desc}</p>
+              <ChangeIndicator change={change} higherIsBad={higherIsBad} />
             </div>
           ))}
         </div>
@@ -356,7 +412,7 @@ export default function RelatoriosClient() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-800">
-                    {['Campanha', 'Status', 'Impressões', 'Cliques', 'CTR', 'Custo', 'Conversões', 'ROAS'].map((col) => (
+                    {['Campanha', 'Status', 'Impressões', 'Cliques', 'CTR', 'CPC Médio', 'Custo', 'Conversões', 'Taxa de Conv.', 'ROAS'].map((col) => (
                       <th
                         key={col}
                         className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap"
@@ -368,8 +424,10 @@ export default function RelatoriosClient() {
                 </thead>
                 <tbody>
                   {campaigns.map((c) => {
-                    const ctr  = c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0
-                    const roas = c.cost > 0 ? c.revenue / c.cost : 0
+                    const ctr      = c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0
+                    const cpc      = c.clicks > 0 ? c.cost / c.clicks : 0
+                    const convRate = c.clicks > 0 ? (c.conversions / c.clicks) * 100 : 0
+                    const roas     = c.cost > 0 ? c.revenue / c.cost : 0
                     return (
                       <tr key={`${c.platform}-${c.id}`} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
                         <td className="px-4 py-3">
@@ -394,8 +452,10 @@ export default function RelatoriosClient() {
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.impressions)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.clicks)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{ctr.toFixed(1).replace('.', ',')}%</td>
+                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtBRL(cpc)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtBRL(c.cost)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.conversions)}</td>
+                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{convRate.toFixed(2).replace('.', ',')}%</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className={`font-semibold ${roas >= 5 ? 'text-green-400' : roas >= 3.5 ? 'text-yellow-400' : 'text-red-400'}`}>
                             {roas.toFixed(1).replace('.', ',')}×

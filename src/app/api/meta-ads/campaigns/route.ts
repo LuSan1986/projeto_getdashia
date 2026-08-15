@@ -14,6 +14,17 @@ function metaStatusToLocal(s: string): 'active' | 'paused' {
   return s === 'ACTIVE' ? 'active' : 'paused'
 }
 
+function getPrevDateRange(period: string): { start: string; end: string } {
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+  const today = new Date()
+  const prevEnd = new Date(today)
+  prevEnd.setDate(today.getDate() - days - 1)
+  const prevStart = new Date(today)
+  prevStart.setDate(today.getDate() - 2 * days)
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  return { start: fmt(prevStart), end: fmt(prevEnd) }
+}
+
 function sumActionField(
   arr: Array<{ action_type: string; value: string }> | undefined,
   type: string
@@ -42,7 +53,8 @@ type CampaignRow = {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const period = searchParams.get('period') ?? '30d'
+    const period     = searchParams.get('period') ?? '30d'
+    const isPrev     = searchParams.get('prev') === 'true'
     const datePreset = META_PERIOD_MAP[period] ?? 'last_30_days'
 
     const supabase = await createClient()
@@ -121,6 +133,34 @@ export async function GET(request: NextRequest) {
 
     const rawAccountId = integration.account_id as string
     const adAccountId = rawAccountId.startsWith('act_') ? rawAccountId : `act_${rawAccountId}`
+
+    // Previous period summary — returns aggregate only, no campaign detail
+    if (isPrev) {
+      const { start, end } = getPrevDateRange(period)
+      const timeRange = encodeURIComponent(JSON.stringify({ since: start, until: end }))
+      const res = await fetch(
+        `${GRAPH_API}/${adAccountId}/insights` +
+        `?fields=impressions,clicks,spend,actions,action_values` +
+        `&level=account` +
+        `&time_range=${timeRange}` +
+        `&access_token=${accessToken}`
+      )
+      if (!res.ok) {
+        const text = await res.text()
+        console.error('[meta-ads/campaigns] prev query error:', text.substring(0, 300))
+        return NextResponse.json({ connected: true, prevSummary: null })
+      }
+      const body = await res.json()
+      const row  = (body.data ?? [])[0] as InsightRow | undefined
+      const investment  = Number(row?.spend ?? 0)
+      const clicks      = Number(row?.clicks ?? 0)
+      const conversions = sumActionField(row?.actions, 'purchase')
+      const revenue     = sumActionField(row?.action_values, 'purchase')
+      return NextResponse.json({
+        connected: true,
+        prevSummary: { investment, revenue, clicks, conversions },
+      })
+    }
 
     const filterParam = encodeURIComponent(
       JSON.stringify([{ field: 'effective_status', operator: 'IN', value: ['ACTIVE', 'PAUSED'] }])

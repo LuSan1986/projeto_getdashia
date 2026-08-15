@@ -22,12 +22,24 @@ function googleStatusToLocal(s: string): 'active' | 'paused' {
   return s === 'ENABLED' ? 'active' : 'paused'
 }
 
+function getPrevDateRange(period: string): { start: string; end: string } {
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+  const today = new Date()
+  const prevEnd = new Date(today)
+  prevEnd.setDate(today.getDate() - days - 1)
+  const prevStart = new Date(today)
+  prevStart.setDate(today.getDate() - 2 * days)
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  return { start: fmt(prevStart), end: fmt(prevEnd) }
+}
+
 const ADS_API = 'https://googleads.googleapis.com/v24'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const period = searchParams.get('period') ?? '30d'
+    const period  = searchParams.get('period') ?? '30d'
+    const isPrev  = searchParams.get('prev') === 'true'
     const dateRange = PERIOD_MAP[period] ?? 'LAST_30_DAYS'
 
     const supabase = await createClient()
@@ -110,6 +122,39 @@ export async function GET(request: NextRequest) {
       'developer-token': devToken,
       'login-customer-id': process.env.GOOGLE_ADS_MCC_ID ?? '',
       'Content-Type': 'application/json',
+    }
+
+    // Previous period summary — returns aggregate only, no campaign detail
+    if (isPrev) {
+      const { start, end } = getPrevDateRange(period)
+      const summaryQuery = `
+        SELECT
+          metrics.cost_micros,
+          metrics.conversions_value,
+          metrics.clicks,
+          metrics.conversions
+        FROM campaign
+        WHERE segments.date BETWEEN '${start}' AND '${end}'
+          AND campaign.status != 'REMOVED'
+      `
+      const res  = await fetch(
+        `${ADS_API}/customers/${accountId}/googleAds:search`,
+        { method: 'POST', headers, body: JSON.stringify({ query: summaryQuery }) }
+      )
+      const body = await res.json()
+      if (!res.ok) {
+        console.error('[google-ads/campaigns] prev query error:', JSON.stringify(body).substring(0, 300))
+        return NextResponse.json({ connected: true, prevSummary: null })
+      }
+      let investment = 0, revenue = 0, clicks = 0, conversions = 0
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const row of (body.results ?? []) as any[]) {
+        investment  += (row.metrics?.costMicros ?? 0) / 1_000_000
+        revenue     += Number(row.metrics?.conversionsValue ?? 0)
+        clicks      += Number(row.metrics?.clicks ?? 0)
+        conversions += Number(row.metrics?.conversions ?? 0)
+      }
+      return NextResponse.json({ connected: true, prevSummary: { investment, revenue, clicks, conversions } })
     }
 
     const campaignQuery = `
