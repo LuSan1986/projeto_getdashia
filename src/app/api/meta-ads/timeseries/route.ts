@@ -112,7 +112,7 @@ export async function GET(_request: NextRequest) {
         `${GRAPH_API}/${adAccountId}/insights` +
         `?fields=date_start,action_values` +
         `&level=account` +
-        `&date_preset=last_7_days` +
+        `&date_preset=last_7d` +
         `&time_increment=1` +
         `&access_token=${accessToken}`
       ),
