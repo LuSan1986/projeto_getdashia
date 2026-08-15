@@ -1,23 +1,7 @@
-import { TrendingUp } from 'lucide-react'
-import Charts from '@/components/dashboard/Charts'
-import ChannelsSection from '@/components/dashboard/ChannelsSection'
+import DashboardClient from '@/components/dashboard/DashboardClient'
 import PendingAccountBanner from '@/components/dashboard/PendingAccountBanner'
 import AIConsultant from '@/components/dashboard/AIConsultant'
-import DashboardGoogleMetrics from '@/components/dashboard/DashboardGoogleMetrics'
 import { createClient } from '@/lib/supabase-server'
-
-interface MetricCard {
-  label: string
-  value: string
-  desc: string
-}
-
-const DEMO_METRICS: MetricCard[] = [
-  { label: 'Receita Total', value: 'R$ 48.320', desc: '+12% em relação ao mês anterior' },
-  { label: 'Cliques', value: '128.450', desc: 'Total de cliques nos anúncios' },
-  { label: 'Conversões', value: '3.210', desc: 'Conversões atribuídas no período' },
-  { label: 'ROAS', value: '4,7×', desc: 'Retorno sobre investimento em anúncios' },
-]
 
 const ZERO_AI_METRICS = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
@@ -25,9 +9,8 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let hasIntegration = false
+  let googleConnected = false
   let isPending = false
-  let connectedAccountId = ''
   let metaConnected = false
 
   if (user) {
@@ -39,7 +22,7 @@ export default async function DashboardPage() {
       .single()
 
     if (membership) {
-      const { data: integration } = await supabase
+      const { data: googleIntegration } = await supabase
         .from('integrations')
         .select('account_id')
         .eq('organization_id', membership.organization_id)
@@ -59,32 +42,27 @@ export default async function DashboardPage() {
 
       metaConnected = !!metaIntegration
 
-      if (integration) {
-        hasIntegration = true
-        connectedAccountId = integration.account_id
-        isPending = integration.account_id === 'pending'
+      if (googleIntegration) {
+        googleConnected = googleIntegration.account_id !== 'pending'
+        isPending       = googleIntegration.account_id === 'pending'
       }
     }
   }
-
-  const dataLabel = hasIntegration && !isPending
-    ? 'Google Ads — últimos 30 dias'
-    : 'valores de demonstração'
 
   return (
     <div className="p-6 md:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Visão Geral</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          Dados do período atual — {dataLabel}
+          Selecione um canal para visualizar seus dados
         </p>
 
         {isPending && <PendingAccountBanner />}
 
-        {!hasIntegration && (
+        {!googleConnected && !isPending && (
           <a
             href="/api/integrations/google/connect"
-            className="mt-4 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+            className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -97,28 +75,12 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {hasIntegration && !isPending ? (
-        <DashboardGoogleMetrics accountId={connectedAccountId} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {DEMO_METRICS.map(({ label, value, desc }) => (
-            <div
-              key={label}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-zinc-400 text-sm">{label}</p>
-                <TrendingUp size={14} className="text-indigo-400" />
-              </div>
-              <p className="text-3xl font-bold text-white">{value}</p>
-              <p className="text-zinc-500 text-xs">{desc}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Channel tabs + metric cards + charts — all channel-aware */}
+      <DashboardClient
+        googleConnected={googleConnected}
+        metaConnected={metaConnected}
+      />
 
-      <ChannelsSection metaConnected={metaConnected} googleConnected={hasIntegration} />
-      <Charts isLive={hasIntegration} />
       <AIConsultant metrics={ZERO_AI_METRICS} />
     </div>
   )

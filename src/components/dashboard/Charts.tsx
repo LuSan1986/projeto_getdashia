@@ -17,13 +17,13 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
+import type { DataSource } from './DashboardMetricsCards'
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 
 const MONTH_LC  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 const MONTH_CAP = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
-/** 'DD/mmm' labels for the last 7 days ending today */
 function last7DayLabels(): string[] {
   const today = new Date()
   return Array.from({ length: 7 }, (_, i) => {
@@ -33,7 +33,6 @@ function last7DayLabels(): string[] {
   })
 }
 
-/** 'Mmm' labels for the last 6 months ending this month */
 function last6MonthLabels(): string[] {
   const today = new Date()
   return Array.from({ length: 6 }, (_, i) => {
@@ -42,42 +41,13 @@ function last6MonthLabels(): string[] {
   })
 }
 
-/** 'YYYY-MM-DD' key using local date (avoids UTC shift) */
 function dayKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-/** 'YYYY-MM' key using local date */
 function monthKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
-
-// ── Demo values ───────────────────────────────────────────────────────────────
-
-const DEMO_REVENUE_VALUES = [5200, 6800, 4900, 7200, 8100, 6600, 9400]
-
-const DEMO_CLICKS_VALUES = [
-  { google: 18200, meta: 14500 },
-  { google: 22100, meta: 17800 },
-  { google: 19500, meta: 16200 },
-  { google: 24300, meta: 19100 },
-  { google: 26700, meta: 21400 },
-  { google: 28900, meta: 23600 },
-]
-
-const DEMO_CONVERSION_DATA = [
-  { name: 'Google Ads', value: 1240 },
-  { name: 'Meta Ads',   value: 890  },
-  { name: 'Orgânico',   value: 640  },
-  { name: 'Direto',     value: 440  },
-]
-
-const ZERO_CONVERSION_DATA = [
-  { name: 'Google Ads', value: 0 },
-  { name: 'Meta Ads',   value: 0 },
-  { name: 'Orgânico',   value: 0 },
-  { name: 'Direto',     value: 0 },
-]
 
 // ── Timeseries API types ──────────────────────────────────────────────────────
 
@@ -91,6 +61,13 @@ interface TimeseriesResponse {
 
 const PIE_COLORS = ['#06B6D4', '#A855F7', '#E879F9', '#22d3ee']
 
+const ZERO_CONVERSION_DATA = [
+  { name: 'Google Ads', value: 0 },
+  { name: 'Meta Ads',   value: 0 },
+  { name: 'Orgânico',   value: 0 },
+  { name: 'Direto',     value: 0 },
+]
+
 const tooltipProps = {
   contentStyle: {
     backgroundColor: '#18181b',
@@ -99,7 +76,7 @@ const tooltipProps = {
     color: '#fff',
     fontSize: '12px',
   },
-  cursor: { fill: 'rgba(99,102,241,0.08)' },
+  cursor: { fill: 'rgba(6,182,212,0.06)' },
 }
 
 const axisProps = {
@@ -164,24 +141,34 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function Charts({ isLive = false }: { isLive?: boolean }) {
+export default function Charts({ source = 'none' }: { source?: DataSource | 'all' }) {
   const dayLabels   = last7DayLabels()
   const monthLabels = last6MonthLabels()
 
-  // Live data — initialized to zero; filled in by useEffect below
-  const [liveRevenue,     setLiveRevenue]     = useState<number[]>(Array(7).fill(0))
+  const [liveRevenue,      setLiveRevenue]      = useState<number[]>(Array(7).fill(0))
   const [liveGoogleClicks, setLiveGoogleClicks] = useState<number[]>(Array(6).fill(0))
   const [liveMetaClicks,   setLiveMetaClicks]   = useState<number[]>(Array(6).fill(0))
 
   useEffect(() => {
-    if (!isLive) return
+    // Reset whenever source changes
+    setLiveRevenue(Array(7).fill(0))
+    setLiveGoogleClicks(Array(6).fill(0))
+    setLiveMetaClicks(Array(6).fill(0))
+
+    if (source === 'none') return
+
+    const wantGoogle = source === 'google' || source === 'all'
+    const wantMeta   = source === 'meta'   || source === 'all'
 
     Promise.all([
-      fetch('/api/google-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null),
-      fetch('/api/meta-ads/timeseries').then((r) => r.json()   as Promise<TimeseriesResponse>).catch(() => null),
+      wantGoogle
+        ? fetch('/api/google-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
+        : Promise.resolve(null),
+      wantMeta
+        ? fetch('/api/meta-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
+        : Promise.resolve(null),
     ]).then(([googleData, metaData]) => {
-      // ── Revenue 7d ──────────────────────────────────────────────────────────
-      // Build map: 'YYYY-MM-DD' → combined revenue
+      // ── Revenue 7d ─────────────────────────────────────────────────────────
       const revenueMap = new Map<string, number>()
       for (const { date, value } of (googleData?.revenue7d ?? [])) {
         revenueMap.set(date, (revenueMap.get(date) ?? 0) + value)
@@ -189,7 +176,6 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
       for (const { date, value } of (metaData?.revenue7d ?? [])) {
         revenueMap.set(date, (revenueMap.get(date) ?? 0) + value)
       }
-
       const today = new Date()
       setLiveRevenue(
         Array.from({ length: 7 }, (_, i) => {
@@ -199,43 +185,41 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
         })
       )
 
-      // ── Clicks 6m ───────────────────────────────────────────────────────────
-      const googleClicksMap = new Map<string, number>()
-      for (const { month, clicks } of (googleData?.clicks6m ?? [])) {
-        googleClicksMap.set(month, (googleClicksMap.get(month) ?? 0) + clicks)
-      }
-
-      const metaClicksMap = new Map<string, number>()
-      for (const { month, clicks } of (metaData?.clicks6m ?? [])) {
-        metaClicksMap.set(month, (metaClicksMap.get(month) ?? 0) + clicks)
-      }
-
-      const today2 = new Date()
-      const makeMonthArray = (map: Map<string, number>) =>
-        Array.from({ length: 6 }, (_, i) => {
-          const d = new Date(today2.getFullYear(), today2.getMonth() - 5 + i, 1)
+      // ── Clicks 6m ──────────────────────────────────────────────────────────
+      const buildMonthArr = (data: TimeseriesResponse | null) => {
+        const map = new Map<string, number>()
+        for (const { month, clicks } of (data?.clicks6m ?? [])) {
+          map.set(month, (map.get(month) ?? 0) + clicks)
+        }
+        const t = new Date()
+        return Array.from({ length: 6 }, (_, i) => {
+          const d = new Date(t.getFullYear(), t.getMonth() - 5 + i, 1)
           return map.get(monthKey(d)) ?? 0
         })
+      }
 
-      setLiveGoogleClicks(makeMonthArray(googleClicksMap))
-      setLiveMetaClicks(makeMonthArray(metaClicksMap))
+      setLiveGoogleClicks(buildMonthArr(googleData))
+      setLiveMetaClicks(buildMonthArr(metaData))
     })
-  }, [isLive])
+  }, [source])
 
-  // ── Build chart data ──────────────────────────────────────────────────────
+  // ── Build chart data ────────────────────────────────────────────────────────
 
   const revenueData = dayLabels.map((dia, i) => ({
     dia,
-    receita: isLive ? liveRevenue[i] : DEMO_REVENUE_VALUES[i],
+    receita: liveRevenue[i],
   }))
 
-  const clicksData = monthLabels.map((mes, i) => ({
-    mes,
-    'Google Ads': isLive ? liveGoogleClicks[i] : DEMO_CLICKS_VALUES[i].google,
-    'Meta Ads':   isLive ? liveMetaClicks[i]   : DEMO_CLICKS_VALUES[i].meta,
-  }))
+  // Only include columns for the channels visible in this source
+  const showGoogle = source !== 'meta'
+  const showMeta   = source !== 'google'
 
-  const conversionData = isLive ? ZERO_CONVERSION_DATA : DEMO_CONVERSION_DATA
+  const clicksData = monthLabels.map((mes, i) => {
+    const row: Record<string, string | number> = { mes }
+    if (showGoogle) row['Google Ads'] = liveGoogleClicks[i]
+    if (showMeta)   row['Meta Ads']   = liveMetaClicks[i]
+    return row
+  })
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
@@ -246,7 +230,7 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
           <AreaChart data={revenueData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3} />
+                <stop offset="5%"  stopColor="#06B6D4" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -297,8 +281,8 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
               }}
             />
             <Legend content={(props) => <BarLegend payload={props.payload as Array<{ value: string }>} />} />
-            <Bar dataKey="Google Ads" fill="#4285F4" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Meta Ads"   fill="#0082FB" radius={[4, 4, 0, 0]} />
+            {showGoogle && <Bar dataKey="Google Ads" fill="#4285F4" radius={[4, 4, 0, 0]} />}
+            {showMeta   && <Bar dataKey="Meta Ads"   fill="#0082FB" radius={[4, 4, 0, 0]} />}
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -308,7 +292,7 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
-              data={conversionData}
+              data={ZERO_CONVERSION_DATA}
               cx="50%"
               cy="50%"
               innerRadius={55}
@@ -316,7 +300,7 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
               paddingAngle={3}
               dataKey="value"
             >
-              {conversionData.map((_, i) => (
+              {ZERO_CONVERSION_DATA.map((_, i) => (
                 <Cell key={i} fill={PIE_COLORS[i]} stroke="transparent" />
               ))}
             </Pie>
