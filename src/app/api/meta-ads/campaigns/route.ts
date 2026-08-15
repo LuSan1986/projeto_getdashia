@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt, encrypt } from '@/lib/crypto'
 
+export const dynamic = 'force-dynamic'
+
 const GRAPH_API = 'https://graph.facebook.com/v21.0'
 
 const META_PERIOD_MAP: Record<string, string> = {

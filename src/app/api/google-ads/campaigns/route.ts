@@ -3,6 +3,8 @@ import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase-server'
 import { decrypt, encrypt } from '@/lib/crypto'
 
+export const dynamic = 'force-dynamic'
+
 const REDIRECT_URI = 'https://www.getdashia.com.br/api/integrations/google/callback'
 
 const PERIOD_MAP: Record<string, string> = {
