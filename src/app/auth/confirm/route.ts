@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
+import { sendWelcomeEmail } from '@/lib/emails/welcome'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -30,6 +31,16 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash })
 
     if (!error) {
+      // Send welcome email only on new account confirmation, not on password recovery
+      if (type === 'signup') {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user?.email) {
+          sendWelcomeEmail(user.email).catch((err) =>
+            console.error('[auth/confirm] welcome email failed:', err)
+          )
+        }
+      }
+
       const redirectTo = type === 'recovery' ? '/auth/reset-password' : '/dashboard'
       return NextResponse.redirect(`${origin}${redirectTo}`)
     }
