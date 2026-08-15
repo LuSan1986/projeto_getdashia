@@ -15,7 +15,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed top-16 left-0 bottom-0 w-60 hidden lg:flex flex-col bg-zinc-900 border-r border-zinc-800 py-6 px-3 gap-1">
+    <aside className="fixed top-16 left-0 bottom-0 w-60 hidden lg:flex flex-col bg-[#070d1c] border-r border-cyan-900/20 py-6 px-3 gap-1">
       {navItems.map(({ label, icon: Icon, href }) => {
         const active =
           href === '/dashboard'
@@ -27,8 +27,8 @@ export default function DashboardSidebar() {
             href={href}
             className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition
               ${active
-                ? 'bg-indigo-600/20 text-indigo-400 font-medium'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                ? 'bg-cyan-500/10 text-cyan-400 font-medium'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
               }`}
           >
             <Icon size={16} />

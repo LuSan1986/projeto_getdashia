@@ -108,7 +108,7 @@ function FilterGroup<T extends string>({
           onClick={() => onChange(opt.value)}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap
             ${value === opt.value
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-gradient-to-r from-cyan-500 to-fuchsia-400 text-white'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
             }`}
         >
@@ -369,7 +369,7 @@ export default function RelatoriosClient() {
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
-                  cursor={{ stroke: 'rgba(99,102,241,0.3)', strokeWidth: 1 }}
+                  cursor={{ stroke: 'rgba(6,182,212,0.3)', strokeWidth: 1 }}
                   formatter={(v: unknown) => {
                     const n = typeof v === 'number' ? v : 0
                     return [`${n.toFixed(1)}×`, 'ROAS']
@@ -378,10 +378,10 @@ export default function RelatoriosClient() {
                 <Line
                   type="monotone"
                   dataKey="roas"
-                  stroke="#4f46e5"
+                  stroke="#06B6D4"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, fill: '#4f46e5' }}
+                  activeDot={{ r: 4, fill: '#06B6D4' }}
                 />
               </LineChart>
             </ResponsiveContainer>

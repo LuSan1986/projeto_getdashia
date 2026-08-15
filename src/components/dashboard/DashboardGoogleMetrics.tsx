@@ -88,7 +88,7 @@ export default function DashboardGoogleMetrics({ accountId }: Props) {
           >
             <div className="flex items-center justify-between">
               <p className="text-zinc-400 text-sm">{label}</p>
-              <TrendingUp size={14} className="text-indigo-400" />
+              <TrendingUp size={14} className="text-cyan-400" />
             </div>
             <p className="text-3xl font-bold text-white">{value}</p>
             <p className="text-zinc-500 text-xs">{desc}</p>

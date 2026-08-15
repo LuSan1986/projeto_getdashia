@@ -15,7 +15,7 @@ function SaveButton({ loading, disabled }: { loading: boolean; disabled: boolean
     <button
       type="submit"
       disabled={loading || disabled}
-      className="mt-4 rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+      className="mt-4 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
     >
       {loading ? 'Salvando…' : 'Salvar alterações'}
     </button>
@@ -113,7 +113,7 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Seu nome"
-                  className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-indigo-500"
+                  className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-cyan-500"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -143,7 +143,7 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
                   value={org}
                   onChange={(e) => setOrg(e.target.value)}
                   placeholder="Nome da sua empresa"
-                  className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-indigo-500"
+                  className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-cyan-500"
                 />
               </div>
               <SaveButton loading={orgLoading} disabled={!org.trim()} />

@@ -27,10 +27,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-[#050B18] text-white">
 
-      <header className="fixed top-0 left-0 right-0 h-16 z-50 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between px-6">
-        <span className="text-indigo-400 font-bold text-lg tracking-tight">
+      <header className="fixed top-0 left-0 right-0 h-16 z-50 bg-[#070d1c] border-b border-cyan-900/20 flex items-center justify-between px-6">
+        <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-cyan-400 to-fuchsia-400 bg-clip-text text-transparent">
           GetDashia
         </span>
         <div className="flex items-center gap-3">

@@ -149,7 +149,7 @@ function IntegrationCard({
         {!isActive ? (
           <a
             href={connectHref}
-            className="flex-1 text-center rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition"
+            className="flex-1 text-center rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-4 py-2 text-sm font-semibold text-white transition"
           >
             Conectar
           </a>

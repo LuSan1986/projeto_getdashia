@@ -89,7 +89,7 @@ interface TimeseriesResponse {
 
 // ── Chart styles ──────────────────────────────────────────────────────────────
 
-const PIE_COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc']
+const PIE_COLORS = ['#06B6D4', '#A855F7', '#E879F9', '#22d3ee']
 
 const tooltipProps = {
   contentStyle: {
@@ -246,8 +246,8 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
           <AreaChart data={revenueData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -267,11 +267,11 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
             <Area
               type="monotone"
               dataKey="receita"
-              stroke="#4f46e5"
+              stroke="#06B6D4"
               strokeWidth={2}
               fill="url(#gradReceita)"
               dot={false}
-              activeDot={{ r: 4, fill: '#4f46e5' }}
+              activeDot={{ r: 4, fill: '#06B6D4' }}
             />
           </AreaChart>
         </ResponsiveContainer>
