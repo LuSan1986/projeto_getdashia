@@ -17,56 +17,53 @@ import {
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 
-const DEMO_REVENUE_DATA = [
-  { dia: '28/abr', receita: 5200 },
-  { dia: '29/abr', receita: 6800 },
-  { dia: '30/abr', receita: 4900 },
-  { dia: '01/mai', receita: 7200 },
-  { dia: '02/mai', receita: 8100 },
-  { dia: '03/mai', receita: 6600 },
-  { dia: '04/mai', receita: 9400 },
-]
+// ── Date label helpers ────────────────────────────────────────────────────────
 
-const ZERO_REVENUE_DATA = [
-  { dia: '28/abr', receita: 0 },
-  { dia: '29/abr', receita: 0 },
-  { dia: '30/abr', receita: 0 },
-  { dia: '01/mai', receita: 0 },
-  { dia: '02/mai', receita: 0 },
-  { dia: '03/mai', receita: 0 },
-  { dia: '04/mai', receita: 0 },
-]
+const MONTH_LC  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+const MONTH_CAP = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
-const DEMO_CLICKS_DATA = [
-  { mes: 'Nov', 'Google Ads': 18200, 'Meta Ads': 14500 },
-  { mes: 'Dez', 'Google Ads': 22100, 'Meta Ads': 17800 },
-  { mes: 'Jan', 'Google Ads': 19500, 'Meta Ads': 16200 },
-  { mes: 'Fev', 'Google Ads': 24300, 'Meta Ads': 19100 },
-  { mes: 'Mar', 'Google Ads': 26700, 'Meta Ads': 21400 },
-  { mes: 'Abr', 'Google Ads': 28900, 'Meta Ads': 23600 },
-]
+function last7DayLabels(): string[] {
+  const today = new Date()
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today)
+    d.setDate(today.getDate() - 6 + i)
+    return `${String(d.getDate()).padStart(2, '0')}/${MONTH_LC[d.getMonth()]}`
+  })
+}
 
-const ZERO_CLICKS_DATA = [
-  { mes: 'Nov', 'Google Ads': 0, 'Meta Ads': 0 },
-  { mes: 'Dez', 'Google Ads': 0, 'Meta Ads': 0 },
-  { mes: 'Jan', 'Google Ads': 0, 'Meta Ads': 0 },
-  { mes: 'Fev', 'Google Ads': 0, 'Meta Ads': 0 },
-  { mes: 'Mar', 'Google Ads': 0, 'Meta Ads': 0 },
-  { mes: 'Abr', 'Google Ads': 0, 'Meta Ads': 0 },
+function last6MonthLabels(): string[] {
+  const today = new Date()
+  return Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(today.getFullYear(), today.getMonth() - 5 + i, 1)
+    return MONTH_CAP[d.getMonth()]
+  })
+}
+
+// ── Demo values (labels are injected dynamically) ─────────────────────────────
+
+const DEMO_REVENUE_VALUES = [5200, 6800, 4900, 7200, 8100, 6600, 9400]
+
+const DEMO_CLICKS_VALUES = [
+  { google: 18200, meta: 14500 },
+  { google: 22100, meta: 17800 },
+  { google: 19500, meta: 16200 },
+  { google: 24300, meta: 19100 },
+  { google: 26700, meta: 21400 },
+  { google: 28900, meta: 23600 },
 ]
 
 const DEMO_CONVERSION_DATA = [
   { name: 'Google Ads', value: 1240 },
-  { name: 'Meta Ads', value: 890 },
-  { name: 'Orgânico', value: 640 },
-  { name: 'Direto', value: 440 },
+  { name: 'Meta Ads',   value: 890  },
+  { name: 'Orgânico',   value: 640  },
+  { name: 'Direto',     value: 440  },
 ]
 
 const ZERO_CONVERSION_DATA = [
   { name: 'Google Ads', value: 0 },
-  { name: 'Meta Ads', value: 0 },
-  { name: 'Orgânico', value: 0 },
-  { name: 'Direto', value: 0 },
+  { name: 'Meta Ads',   value: 0 },
+  { name: 'Orgânico',   value: 0 },
+  { name: 'Direto',     value: 0 },
 ]
 
 const PIE_COLORS = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc']
@@ -90,7 +87,7 @@ const axisProps = {
 
 const barLegendIcons: Record<string, React.ReactNode> = {
   'Google Ads': <SiGoogleads color="#4285F4" size={12} />,
-  'Meta Ads': <SiMeta color="#0082FB" size={12} />,
+  'Meta Ads':   <SiMeta      color="#0082FB" size={12} />,
 }
 
 function BarLegend({ payload }: { payload?: Array<{ value: string }> }) {
@@ -141,8 +138,17 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 }
 
 export default function Charts({ isLive = false }: { isLive?: boolean }) {
-  const revenueData  = isLive ? ZERO_REVENUE_DATA    : DEMO_REVENUE_DATA
-  const clicksData   = isLive ? ZERO_CLICKS_DATA     : DEMO_CLICKS_DATA
+  const dayLabels   = last7DayLabels()
+  const monthLabels = last6MonthLabels()
+
+  const revenueData = isLive
+    ? dayLabels.map((dia) => ({ dia, receita: 0 }))
+    : dayLabels.map((dia, i) => ({ dia, receita: DEMO_REVENUE_VALUES[i] }))
+
+  const clicksData = isLive
+    ? monthLabels.map((mes) => ({ mes, 'Google Ads': 0, 'Meta Ads': 0 }))
+    : monthLabels.map((mes, i) => ({ mes, 'Google Ads': DEMO_CLICKS_VALUES[i].google, 'Meta Ads': DEMO_CLICKS_VALUES[i].meta }))
+
   const conversionData = isLive ? ZERO_CONVERSION_DATA : DEMO_CONVERSION_DATA
 
   return (
@@ -206,7 +212,7 @@ export default function Charts({ isLive = false }: { isLive?: boolean }) {
             />
             <Legend content={(props) => <BarLegend payload={props.payload as Array<{ value: string }>} />} />
             <Bar dataKey="Google Ads" fill="#4285F4" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Meta Ads" fill="#0082FB" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Meta Ads"   fill="#0082FB" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
