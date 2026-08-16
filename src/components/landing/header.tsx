@@ -87,7 +87,7 @@ export default function Header() {
             Entrar
           </Link>
           <a
-            href="#waitlist"
+            href="/cadastro"
             className="rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200"
             style={{
               background: "linear-gradient(90deg, #06B6D4, #E879F9)",
@@ -157,7 +157,7 @@ export default function Header() {
               Entrar
             </Link>
             <a
-              href="#waitlist"
+              href="/cadastro"
               className="rounded-lg px-4 py-2.5 text-sm font-semibold text-center"
               style={{
                 background: "linear-gradient(90deg, #06B6D4, #E879F9)",

@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { Input } from "@/components/ui/input";
 import { SiGoogleads, SiTiktok, SiFacebook } from 'react-icons/si';
 
 /* ──────────────────────────────────────────────────────────
@@ -234,34 +232,6 @@ function HeroPlatforms() {
 }
 
 export default function Hero() {
-  const [email, setEmail] = useState("");
-  const [enviado, setEnviado] = useState(false);
-  const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setCarregando(true);
-    setErro("");
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setErro(data.error || "Erro ao cadastrar. Tente novamente.");
-      } else {
-        setEnviado(true);
-      }
-    } catch {
-      setErro("Erro de conexão. Tente novamente.");
-    } finally {
-      setCarregando(false);
-    }
-  }
-
   return (
     <section
       className="relative min-h-screen flex items-center px-4 py-24 sm:py-32 overflow-hidden"
@@ -623,7 +593,7 @@ export default function Hero() {
 
           <div className="mt-10 flex flex-col items-center lg:items-start gap-4 sm:flex-row">
             <a
-              href="#waitlist"
+              href="/cadastro"
               className="cyber-btn-primary inline-flex h-11 items-center justify-center rounded-lg px-6 text-base"
             >
               Garantir meu lugar →
@@ -636,7 +606,7 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Waitlist */}
+          {/* Signup CTA */}
           <div
             id="waitlist"
             className="mt-10 w-full max-w-md scroll-mt-24 rounded-2xl p-8"
@@ -651,44 +621,15 @@ export default function Hero() {
               Seja um dos primeiros a testar
             </p>
             <p className="mb-6 text-sm" style={{ color: "#64748B" }}>
-              Acesso antecipado para um grupo limitado de gestores.
+              Crie sua conta agora e comece a usar. Sem cartão, acesso imediato.
             </p>
 
-            {!enviado ? (
-              <>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
-                  <Input
-                    type="email"
-                    required
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="cyber-input h-10 flex-1"
-                  />
-                  <button
-                    type="submit"
-                    disabled={carregando}
-                    className="cyber-btn-magenta inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm whitespace-nowrap"
-                  >
-                    {carregando ? "Enviando..." : "Garantir meu lugar"}
-                  </button>
-                </form>
-                {erro && <p className="mt-2 text-xs text-red-400">{erro}</p>}
-              </>
-            ) : (
-              <div
-                className="rounded-lg px-4 py-3 text-sm"
-                style={{
-                  background: "rgba(6,182,212,0.08)",
-                  border: "1px solid rgba(6,182,212,0.3)",
-                  color: "#06B6D4",
-                }}
-              >
-                Recebemos seu e-mail. Avisaremos quando o beta abrir!
-              </div>
-            )}
-
-            <p className="mt-3 text-xs" style={{ color: "#334155" }}>Sem spam. Só o aviso de acesso.</p>
+            <a
+              href="/cadastro"
+              className="cyber-btn-magenta inline-flex w-full h-10 items-center justify-center rounded-lg px-4 text-sm"
+            >
+              Garantir meu lugar →
+            </a>
           </div>
         </div>
 

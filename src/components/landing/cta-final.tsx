@@ -72,7 +72,7 @@ export default function CtaFinal() {
         {/* CTA */}
         <div className="mt-10">
           <Link
-            href="#waitlist"
+            href="/cadastro"
             style={{
               display: "inline-block",
               background: "linear-gradient(90deg, #06B6D4, #E879F9)",
