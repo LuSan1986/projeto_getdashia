@@ -68,6 +68,34 @@ Redesign visual do dashboard alinhado com a landing page ✅
 
 
 
+Sessão 12 — concluído em 2026-08-16
+
+Campanha Meta Ads "GetDashia - Divulgação Beta" publicada ✅
+- Conta Instagram @getdashia criada e vinculada ao Business Manager
+- Campanha publicada: R$10/dia, status Em análise (aguardando aprovação da Meta)
+- Período: até 21/08/2026
+- UTM params: utm_source=instagram&utm_medium=paid&utm_campaign=beta
+- CTA: "Cadastre-se" | URL destino: getdashia.com.br/cadastro
+
+E-mail automático de boas-vindas via Resend ✅
+- sendWelcomeEmail() integrado em /auth/confirm/route.ts
+- Disparado quando type === 'email' (confirmação de cadastro pelo Supabase)
+- Enviado de luciano@getdashia.com.br com informações da fase beta
+- Fire-and-forget — não bloqueia o redirect para /dashboard
+
+Landing page: formulário waitlist substituído por link direto ✅
+- Botões "Garantir meu lugar" no Hero, Header (desktop e mobile) e CTA Final
+- Redirecionam diretamente para /cadastro (produto já em fase beta)
+- Formulário de captura de e-mail para waitlist removido do Hero
+
+Filtro de canais na Visão Geral do dashboard corrigido ✅
+- Abas Google Ads / Instagram / Facebook / TikTok agora filtram dados reais
+- Criado DashboardClient (client orchestrator) que mantém estado do canal selecionado
+- Criado DashboardMetricsCards que recebe prop source: 'google' | 'meta' | 'none'
+- Charts atualizado para receber source e renderizar barras condicionalmente
+
+
+
 Sessão 7 — concluído em 2026-05-27
 
 OAuth Google aprovado (escopo adwords) ✅
@@ -117,6 +145,7 @@ Comando: git push origin main
 
 Pendente (ordem planejada)
 
+Acompanhar aprovação da campanha Meta Ads "GetDashia - Divulgação Beta" (status: Em análise)
 Decidir quando reativar a Campaign #1 (só depois do produto estar pronto para 
 clientes reais)
 Enviar mensagens de contato pros 5 leads reais da waitlist (mensagens já prontas)
@@ -130,6 +159,7 @@ Redesign das seções restantes da landing page: Preços, FAQ, Footer
 Adicionar gestor de tráfego como Testador no Meta Developer Portal
 Stripe → migrar para produção com CNPJ do MEI
 Remover card "Plano Grátis" após período de testes beta
+Considerar instalar Pixel da Meta na landing page futuramente
 
 5. CREDENCIAIS E CONTAS IMPORTANTES
 
