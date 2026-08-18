@@ -158,6 +158,7 @@ Corrigir logos na seção de ferramentas — Google Ads e TikTok Ads não aparec
 Redesign das seções restantes da landing page: Preços, FAQ, Footer
 Adicionar gestor de tráfego como Testador no Meta Developer Portal
 Stripe → migrar para produção com CNPJ do MEI
+  ⚠️ Antes de ativar cobrança real: migrar hosting do plano Vercel Hobby (gratuito, uso comercial não permitido) para o plano Pro (~$20/mês). Também revisar limites gratuitos de Supabase/Resend caso o volume de usuários cresça bastante nesse momento.
 Remover card "Plano Grátis" após período de testes beta
 Considerar instalar Pixel da Meta na landing page futuramente
 

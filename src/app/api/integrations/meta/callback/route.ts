@@ -70,28 +70,26 @@ export async function GET(request: NextRequest) {
     longLivedToken = shortLivedToken
   }
 
-  // Step 3 — fetch ad accounts linked to this user
-  let accountId = 'pending'
+  // Step 3 — fetch all accessible ad accounts
+  let adAccounts: Array<{ id: string; name: string }> = []
   try {
     const adAccountsUrl = new URL(`https://graph.facebook.com/${API_VERSION}/me/adaccounts`)
     adAccountsUrl.searchParams.set('access_token', longLivedToken)
-    adAccountsUrl.searchParams.set('fields', 'id,name')
-    adAccountsUrl.searchParams.set('limit', '1')
+    adAccountsUrl.searchParams.set('fields', 'id,name,account_status,business_name')
+    adAccountsUrl.searchParams.set('limit', '25')
 
     const res = await fetch(adAccountsUrl.toString())
     const json = await res.json()
 
-    if (json.data && json.data.length > 0) {
-      accountId = json.data[0].id // e.g. "act_123456789"
-      console.log('[meta/callback] resolved ad account:', accountId)
-    } else {
-      console.warn('[meta/callback] no ad accounts found, saving as pending')
+    if (json.data) {
+      adAccounts = json.data
     }
+    console.log('[meta/callback] ad accounts found:', adAccounts.length)
   } catch (err) {
     console.error('[meta/callback] failed to fetch ad accounts:', err)
   }
 
-  // Step 4 — get authenticated user
+  // Step 4 — get authenticated user + organization
   const supabase = await createClient()
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
@@ -112,30 +110,63 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${BASE}/onboarding`)
   }
 
-  // Step 5 — save encrypted token to Supabase
+  const encryptedToken = encrypt(longLivedToken)
+
+  // Step 5 — single account: auto-connect; multiple: save pending and redirect to selector
+  if (adAccounts.length === 1) {
+    const accountId = adAccounts[0].id
+    try {
+      const { error: upsertError } = await supabase.from('integrations').upsert(
+        {
+          organization_id: membership.organization_id,
+          platform: 'meta_ads',
+          account_id: accountId,
+          access_token_encrypted: encryptedToken,
+          refresh_token_encrypted: null,
+          token_expires_at: null,
+          status: 'active',
+        },
+        { onConflict: 'organization_id,platform,account_id' }
+      )
+
+      if (upsertError) throw new Error(upsertError.message)
+      console.log('[meta/callback] auto-connected single account:', accountId)
+    } catch (err) {
+      console.error('[meta/callback] failed to save integration:', err)
+      return NextResponse.redirect(`${BASE}/dashboard/integracoes?error=meta_failed`)
+    }
+    return NextResponse.redirect(`${BASE}/dashboard/integracoes?success=meta_connected`)
+  }
+
+  // Multiple (or zero) accounts — save token as pending, redirect to account selector
   try {
+    // Clean up any existing active (non-pending) rows to avoid unique constraint conflict
+    await supabase
+      .from('integrations')
+      .delete()
+      .eq('organization_id', membership.organization_id)
+      .eq('platform', 'meta_ads')
+      .neq('account_id', 'pending')
+
     const { error: upsertError } = await supabase.from('integrations').upsert(
       {
         organization_id: membership.organization_id,
         platform: 'meta_ads',
-        account_id: accountId,
-        access_token_encrypted: encrypt(longLivedToken),
+        account_id: 'pending',
+        access_token_encrypted: encryptedToken,
         refresh_token_encrypted: null,
-        token_expires_at: null, // long-lived tokens expire in ~60 days; refresh handled separately
+        token_expires_at: null,
         status: 'active',
       },
       { onConflict: 'organization_id,platform,account_id' }
     )
 
-    if (upsertError) {
-      throw new Error(upsertError.message)
-    }
-
-    console.log('[meta/callback] Meta Ads integration saved for org:', membership.organization_id)
+    if (upsertError) throw new Error(upsertError.message)
+    console.log('[meta/callback] multiple accounts, redirecting to selector')
   } catch (err) {
-    console.error('[meta/callback] failed to save integration:', err)
+    console.error('[meta/callback] failed to save pending integration:', err)
     return NextResponse.redirect(`${BASE}/dashboard/integracoes?error=meta_failed`)
   }
 
-  return NextResponse.redirect(`${BASE}/dashboard/integracoes?success=meta_connected`)
+  return NextResponse.redirect(`${BASE}/dashboard/integracoes/meta-ads/selecionar-conta`)
 }
