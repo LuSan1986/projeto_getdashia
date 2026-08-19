@@ -40,11 +40,20 @@ function sumActionField(
 
 type InsightRow = {
   campaign_id: string
+  publisher_platform?: string
   impressions?: string
   clicks?: string
   spend?: string
   actions?: Array<{ action_type: string; value: string }>
   action_values?: Array<{ action_type: string; value: string }>
+}
+
+type CampaignInsight = {
+  impressions: number
+  clicks: number
+  spend: number
+  conversions: number
+  revenue: number
 }
 
 type CampaignRow = {
@@ -56,10 +65,11 @@ type CampaignRow = {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const period        = searchParams.get('period') ?? '30d'
-    const isPrev        = searchParams.get('prev') === 'true'
+    const period         = searchParams.get('period') ?? '30d'
+    const isPrev         = searchParams.get('prev') === 'true'
     const accountIdParam = searchParams.get('account_id')
-    const datePreset    = META_PERIOD_MAP[period] ?? 'last_30_days'
+    const platformParam  = searchParams.get('platform') // 'facebook' | 'instagram' | null
+    const datePreset     = META_PERIOD_MAP[period] ?? 'last_30_days'
 
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -154,6 +164,7 @@ export async function GET(request: NextRequest) {
         `?fields=impressions,clicks,spend,actions,action_values` +
         `&level=account` +
         `&time_range=${timeRange}` +
+        `&breakdowns=publisher_platform` +
         `&access_token=${accessToken}`,
         { cache: 'no-store' }
       )
@@ -163,11 +174,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ connected: true, prevSummary: null })
       }
       const body = await res.json()
-      const row  = (body.data ?? [])[0] as InsightRow | undefined
-      const investment  = Number(row?.spend ?? 0)
-      const clicks      = Number(row?.clicks ?? 0)
-      const conversions = sumActionField(row?.actions, 'purchase')
-      const revenue     = sumActionField(row?.action_values, 'purchase')
+      const rows = (body.data ?? []) as InsightRow[]
+      const filtered = platformParam ? rows.filter(r => r.publisher_platform === platformParam) : rows
+      const investment  = filtered.reduce((s, r) => s + Number(r.spend ?? 0), 0)
+      const clicks      = filtered.reduce((s, r) => s + Number(r.clicks ?? 0), 0)
+      const conversions = filtered.reduce((s, r) => s + sumActionField(r.actions, 'purchase'), 0)
+      const revenue     = filtered.reduce((s, r) => s + sumActionField(r.action_values, 'purchase'), 0)
       return NextResponse.json({
         connected: true,
         prevSummary: { investment, revenue, clicks, conversions },
@@ -192,7 +204,8 @@ export async function GET(request: NextRequest) {
         `?fields=campaign_id,impressions,clicks,spend,actions,action_values` +
         `&level=campaign` +
         `&date_preset=${datePreset}` +
-        `&limit=100` +
+        `&breakdowns=publisher_platform` +
+        `&limit=500` +
         `&access_token=${accessToken}`,
         { cache: 'no-store' }
       ),
@@ -206,12 +219,20 @@ export async function GET(request: NextRequest) {
 
     const campaignBody = await campaignRes.json()
 
-    // Build insights map even if insights call failed (best-effort)
-    const insightsMap = new Map<string, InsightRow>()
+    // Aggregate breakdown rows by campaign_id, filtering by platform when requested
+    const insightsMap = new Map<string, CampaignInsight>()
     if (insightsRes.ok) {
       const insightsBody = await insightsRes.json()
       for (const row of (insightsBody.data ?? []) as InsightRow[]) {
-        insightsMap.set(row.campaign_id, row)
+        if (platformParam && row.publisher_platform !== platformParam) continue
+        const prev = insightsMap.get(row.campaign_id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0 }
+        insightsMap.set(row.campaign_id, {
+          impressions: prev.impressions + Number(row.impressions ?? 0),
+          clicks:      prev.clicks      + Number(row.clicks ?? 0),
+          spend:       prev.spend       + Number(row.spend ?? 0),
+          conversions: prev.conversions + sumActionField(row.actions, 'purchase'),
+          revenue:     prev.revenue     + sumActionField(row.action_values, 'purchase'),
+        })
       }
     } else {
       const text = await insightsRes.text()
@@ -219,20 +240,18 @@ export async function GET(request: NextRequest) {
     }
 
     const campaigns = (campaignBody.data ?? [] as CampaignRow[]).map((c: CampaignRow) => {
-      const ins = insightsMap.get(c.id)
-      const cost = Number(ins?.spend ?? 0)
-      const conversions = sumActionField(ins?.actions, 'purchase')
-      const revenue = sumActionField(ins?.action_values, 'purchase')
+      // Campaigns with no activity on the requested platform default to zero — not an error
+      const ins = insightsMap.get(c.id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0 }
       return {
         id:          Number(c.id),
         platform:    'meta' as const,
         name:        c.name,
         status:      metaStatusToLocal(c.status),
-        impressions: Number(ins?.impressions ?? 0),
-        clicks:      Number(ins?.clicks ?? 0),
-        cost,
-        conversions,
-        revenue,
+        impressions: ins.impressions,
+        clicks:      ins.clicks,
+        cost:        ins.spend,
+        conversions: ins.conversions,
+        revenue:     ins.revenue,
       }
     })
 

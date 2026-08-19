@@ -122,6 +122,11 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
     isMetaChannel         ? selectedMetaId   :
     null
 
+  const metaPlatform: 'facebook' | 'instagram' | undefined =
+    selected === 'facebook'  ? 'facebook'  :
+    selected === 'instagram' ? 'instagram' :
+    undefined
+
   const showGoogleSelector = selected === 'google'   && googleAccounts.length > 1
   const showMetaSelector   = isMetaChannel           && metaAccounts.length   > 1
 
@@ -134,13 +139,7 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
         badgeClass: 'text-zinc-400 bg-zinc-800 border-zinc-700',
       }
     }
-    if (isMetaChannel && metaConnected) {
-      return {
-        text:       'Os dados abaixo representam toda a conta Meta Ads — Facebook e Instagram combinados, sem separação por placement.',
-        badge:      'Dados do Meta Ads',
-        badgeClass: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-      }
-    }
+    if (isMetaChannel && metaConnected) return null
     if (isMetaChannel && !metaConnected) {
       return {
         text:       'Meta Ads não conectado. Conecte sua conta em Integrações.',
@@ -211,10 +210,10 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
       </div>
 
       {/* Metric cards — react to selected channel + account */}
-      <DashboardMetricsCards source={dataSource} accountId={currentAccountId} />
+      <DashboardMetricsCards source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} />
 
       {/* Charts — react to selected channel + account */}
-      <Charts source={dataSource} accountId={currentAccountId} />
+      <Charts source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} />
     </>
   )
 }

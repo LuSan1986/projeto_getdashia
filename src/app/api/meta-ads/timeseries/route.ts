@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const accountIdParam = searchParams.get('account_id')
+    const platformParam  = searchParams.get('platform') // 'facebook' | 'instagram' | null
 
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -127,6 +128,7 @@ export async function GET(request: NextRequest) {
         `&level=account` +
         `&date_preset=last_7d` +
         `&time_increment=1` +
+        `&breakdowns=publisher_platform` +
         `&access_token=${accessToken}`,
         { cache: 'no-store' }
       ),
@@ -136,38 +138,46 @@ export async function GET(request: NextRequest) {
         `&level=account` +
         `&time_range=${m6timeRange}` +
         `&time_increment=monthly` +
+        `&breakdowns=publisher_platform` +
         `&access_token=${accessToken}`,
         { cache: 'no-store' }
       ),
     ])
 
-    // Revenue 7d — daily purchase action_values
+    // Revenue 7d — daily rows, one per publisher_platform; aggregate by date
     let revenue7d: Array<{ date: string; value: number }> = []
     if (rev7dRes.ok) {
       const body = await rev7dRes.json()
-      revenue7d = ((body.data ?? []) as Array<{
+      const revenueMap = new Map<string, number>()
+      for (const row of (body.data ?? []) as Array<{
         date_start: string
+        publisher_platform?: string
         action_values?: Array<{ action_type: string; value: string }>
-      }>).map((row) => ({
-        date:  row.date_start,
-        value: sumActionValues(row.action_values, 'purchase'),
-      }))
+      }>) {
+        if (platformParam && row.publisher_platform !== platformParam) continue
+        revenueMap.set(row.date_start, (revenueMap.get(row.date_start) ?? 0) + sumActionValues(row.action_values, 'purchase'))
+      }
+      revenue7d = Array.from(revenueMap.entries()).map(([date, value]) => ({ date, value }))
     } else {
       const text = await rev7dRes.text()
       console.error('[meta-ads/timeseries] revenue7d error:', text.substring(0, 300))
     }
 
-    // Clicks 6m — monthly breakdown, date_start = first day of month
+    // Clicks 6m — monthly rows, one per publisher_platform; aggregate by month
     let clicks6m: Array<{ month: string; clicks: number }> = []
     if (clicks6mRes.ok) {
       const body = await clicks6mRes.json()
-      clicks6m = ((body.data ?? []) as Array<{
+      const clicksMap = new Map<string, number>()
+      for (const row of (body.data ?? []) as Array<{
         date_start: string
+        publisher_platform?: string
         clicks?: string
-      }>).map((row) => ({
-        month:  row.date_start.substring(0, 7), // 'YYYY-MM'
-        clicks: Number(row.clicks ?? 0),
-      }))
+      }>) {
+        if (platformParam && row.publisher_platform !== platformParam) continue
+        const month = row.date_start.substring(0, 7) // 'YYYY-MM'
+        clicksMap.set(month, (clicksMap.get(month) ?? 0) + Number(row.clicks ?? 0))
+      }
+      clicks6m = Array.from(clicksMap.entries()).map(([month, clicks]) => ({ month, clicks }))
     } else {
       const text = await clicks6mRes.text()
       console.error('[meta-ads/timeseries] clicks6m error:', text.substring(0, 300))

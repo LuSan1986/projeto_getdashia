@@ -141,7 +141,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function Charts({ source = 'none', accountId }: { source?: DataSource | 'all'; accountId?: string | null }) {
+export default function Charts({ source = 'none', accountId, metaPlatform }: { source?: DataSource | 'all'; accountId?: string | null; metaPlatform?: 'facebook' | 'instagram' }) {
   const dayLabels   = last7DayLabels()
   const monthLabels = last6MonthLabels()
 
@@ -163,9 +163,10 @@ export default function Charts({ source = 'none', accountId }: { source?: DataSo
     const googleUrl = accountId && wantGoogle
       ? `/api/google-ads/timeseries?account_id=${encodeURIComponent(accountId)}`
       : '/api/google-ads/timeseries'
+    const metaPlatformSuffix = metaPlatform ? `&platform=${metaPlatform}` : ''
     const metaUrl = accountId && wantMeta
-      ? `/api/meta-ads/timeseries?account_id=${encodeURIComponent(accountId)}`
-      : '/api/meta-ads/timeseries'
+      ? `/api/meta-ads/timeseries?account_id=${encodeURIComponent(accountId)}${metaPlatformSuffix}`
+      : `/api/meta-ads/timeseries${metaPlatform ? `?platform=${metaPlatform}` : ''}`
 
     Promise.all([
       wantGoogle
@@ -208,7 +209,7 @@ export default function Charts({ source = 'none', accountId }: { source?: DataSo
       setLiveGoogleClicks(buildMonthArr(googleData))
       setLiveMetaClicks(buildMonthArr(metaData))
     })
-  }, [source, accountId])
+  }, [source, accountId, metaPlatform])
 
   // ── Build chart data ────────────────────────────────────────────────────────
 

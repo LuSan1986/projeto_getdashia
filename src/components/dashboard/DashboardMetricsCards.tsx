@@ -33,9 +33,11 @@ function CardSkeleton() {
 export default function DashboardMetricsCards({
   source,
   accountId,
+  metaPlatform,
 }: {
   source: DataSource
   accountId?: string | null
+  metaPlatform?: 'facebook' | 'instagram'
 }) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading,   setLoading]   = useState(false)
@@ -49,13 +51,16 @@ export default function DashboardMetricsCards({
     const base = source === 'google'
       ? '/api/google-ads/campaigns?period=30d'
       : '/api/meta-ads/campaigns?period=30d'
-    const url = accountId ? `${base}&account_id=${encodeURIComponent(accountId)}` : base
+    const platformSuffix = source === 'meta' && metaPlatform ? `&platform=${metaPlatform}` : ''
+    const url = accountId
+      ? `${base}${platformSuffix}&account_id=${encodeURIComponent(accountId)}`
+      : `${base}${platformSuffix}`
     fetch(url)
       .then((r) => r.json())
       .then((data) => setCampaigns((data.campaigns ?? []) as Campaign[]))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [source, accountId])
+  }, [source, accountId, metaPlatform])
 
   if (loading) {
     return (
@@ -76,7 +81,11 @@ export default function DashboardMetricsCards({
   )
 
   const connected = source !== 'none'
-  const platformLabel = source === 'google' ? 'Google Ads' : source === 'meta' ? 'Meta Ads' : ''
+  const platformLabel =
+    source === 'google' ? 'Google Ads' :
+    source === 'meta' && metaPlatform === 'facebook'  ? 'Facebook Ads' :
+    source === 'meta' && metaPlatform === 'instagram' ? 'Instagram Ads' :
+    source === 'meta' ? 'Meta Ads' : ''
   const cardDesc = connected ? `Últimos 30 dias — ${platformLabel}` : 'Canal não conectado'
 
   const cards = [
