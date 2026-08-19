@@ -30,7 +30,13 @@ function CardSkeleton() {
   )
 }
 
-export default function DashboardMetricsCards({ source }: { source: DataSource }) {
+export default function DashboardMetricsCards({
+  source,
+  accountId,
+}: {
+  source: DataSource
+  accountId?: string | null
+}) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading,   setLoading]   = useState(false)
 
@@ -40,15 +46,16 @@ export default function DashboardMetricsCards({ source }: { source: DataSource }
       return
     }
     setLoading(true)
-    const url = source === 'google'
+    const base = source === 'google'
       ? '/api/google-ads/campaigns?period=30d'
       : '/api/meta-ads/campaigns?period=30d'
+    const url = accountId ? `${base}&account_id=${encodeURIComponent(accountId)}` : base
     fetch(url)
       .then((r) => r.json())
       .then((data) => setCampaigns((data.campaigns ?? []) as Campaign[]))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [source])
+  }, [source, accountId])
 
   if (loading) {
     return (

@@ -56,9 +56,10 @@ type CampaignRow = {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const period     = searchParams.get('period') ?? '30d'
-    const isPrev     = searchParams.get('prev') === 'true'
-    const datePreset = META_PERIOD_MAP[period] ?? 'last_30_days'
+    const period        = searchParams.get('period') ?? '30d'
+    const isPrev        = searchParams.get('prev') === 'true'
+    const accountIdParam = searchParams.get('account_id')
+    const datePreset    = META_PERIOD_MAP[period] ?? 'last_30_days'
 
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -77,16 +78,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ campaigns: [], connected: false })
     }
 
-    const { data: integration } = await supabase
+    let integrationQuery = supabase
       .from('integrations')
       .select('*')
       .eq('organization_id', membership.organization_id)
       .eq('platform', 'meta_ads')
       .eq('status', 'active')
-      .limit(1)
-      .single()
+      .neq('account_id', 'pending')
 
-    if (!integration || !integration.account_id || integration.account_id === 'pending') {
+    if (accountIdParam) {
+      integrationQuery = integrationQuery.eq('account_id', accountIdParam)
+    } else {
+      integrationQuery = integrationQuery.order('is_default', { ascending: false })
+    }
+
+    const { data: integration } = await integrationQuery.limit(1).single()
+
+    if (!integration) {
       return NextResponse.json({ campaigns: [], connected: false })
     }
 

@@ -102,23 +102,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${BASE}/onboarding`)
   }
 
-  // Step 5 — save integration
-  // When redirecting to the selector, wipe existing records first so the
-  // fresh "pending" token record is always the one the selector reads.
-  if (needsAccountSelection) {
-    await supabase
+  const orgId = membership.organization_id
+
+  // Step 5 — determine is_default and save integration
+  // For single account auto-connect: is_default if no other real account connected yet
+  let isDefault = false
+  if (!needsAccountSelection && accountId !== 'pending') {
+    const { data: existing } = await supabase
       .from('integrations')
-      .delete()
-      .eq('organization_id', membership.organization_id)
+      .select('id, is_default')
+      .eq('organization_id', orgId)
       .eq('platform', 'google_ads')
+      .eq('account_id', accountId)
+      .maybeSingle()
+
+    if (existing) {
+      isDefault = existing.is_default ?? false
+    } else {
+      const { count } = await supabase
+        .from('integrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .eq('platform', 'google_ads')
+        .eq('status', 'active')
+        .neq('account_id', 'pending')
+      isDefault = (count ?? 0) === 0
+    }
   }
 
   try {
     const { error: upsertError } = await supabase.from('integrations').upsert(
       {
-        organization_id: membership.organization_id,
+        organization_id: orgId,
         platform: 'google_ads',
         account_id: accountId,
+        is_default: isDefault,
         access_token_encrypted: encrypt(tokens.access_token),
         refresh_token_encrypted: tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
         token_expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
@@ -128,8 +146,7 @@ export async function GET(request: NextRequest) {
     )
 
     if (upsertError) throw new Error(upsertError.message)
-
-    console.log('[google/callback] integration saved | account_id:', accountId)
+    console.log('[google/callback] integration saved | account_id:', accountId, '| is_default:', isDefault)
   } catch (err) {
     console.error('[google/callback] failed to save integration:', err)
     return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)

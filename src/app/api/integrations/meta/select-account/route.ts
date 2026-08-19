@@ -26,10 +26,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Organização não encontrada' }, { status: 404 })
     }
 
+    const orgId = membership.organization_id
+
     const { data: pendingIntegration } = await supabase
       .from('integrations')
       .select('id')
-      .eq('organization_id', membership.organization_id)
+      .eq('organization_id', orgId)
       .eq('platform', 'meta_ads')
       .eq('account_id', 'pending')
       .limit(1)
@@ -39,17 +41,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nenhuma integração pendente encontrada' }, { status: 404 })
     }
 
-    // Remove other non-pending meta_ads rows to avoid unique constraint conflict
-    await supabase
+    // Check if this is the first real account (pending row excluded)
+    const { count: existingCount } = await supabase
       .from('integrations')
-      .delete()
-      .eq('organization_id', membership.organization_id)
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
       .eq('platform', 'meta_ads')
+      .eq('status', 'active')
       .neq('account_id', 'pending')
+
+    const isDefault = (existingCount ?? 0) === 0
 
     const { error: updateError } = await supabase
       .from('integrations')
-      .update({ account_id: accountId, status: 'active' })
+      .update({ account_id: accountId, status: 'active', is_default: isDefault })
       .eq('id', pendingIntegration.id)
 
     if (updateError) {

@@ -5,15 +5,22 @@ import { useRouter } from 'next/navigation'
 import { SiGoogleads, SiMeta, SiGoogleanalytics, SiTiktok } from 'react-icons/si'
 import type { IconType } from 'react-icons'
 
-export interface PlatformIntegration {
-  status: 'connected' | 'pending' | 'inactive' | null
-  accountId: string | null
-  connectedAt: string | null
+export interface ConnectedAccount {
+  id: string
+  accountId: string
+  accountName: string | null
+  isDefault: boolean
+  connectedAt: string
+}
+
+export interface PlatformState {
+  accounts: ConnectedAccount[]
+  hasPending: boolean
 }
 
 interface Props {
-  google: PlatformIntegration
-  meta: PlatformIntegration
+  google: PlatformState
+  meta: PlatformState
 }
 
 type ChannelStatus = 'connected' | 'pending' | 'inactive' | 'soon'
@@ -55,56 +62,120 @@ function formatDate(iso: string) {
   })
 }
 
-interface IntegrationCardProps {
-  icon: IconType
-  iconColor: string
-  name: string
-  description: string
-  status: ChannelStatus
-  accountId?: string | null
-  accountLabel?: string
-  connectedAt?: string | null
-  connectHref: string
-  disconnectApiRoute: string
-}
-
-function IntegrationCard({
-  icon: Icon,
-  iconColor,
-  name,
-  description,
-  status,
-  accountId,
-  accountLabel = 'Account ID',
-  connectedAt,
-  connectHref,
+function AccountRow({
+  account,
   disconnectApiRoute,
-}: IntegrationCardProps) {
-  const [loading, setLoading] = useState(false)
+}: {
+  account: ConnectedAccount
+  disconnectApiRoute: string
+}) {
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [disconnectError, setDisconnectError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-
-  const isActive = status === 'connected' || status === 'pending'
 
   async function handleDisconnect() {
     setLoading(true)
-    setDisconnectError(null)
+    setError(null)
     try {
-      const res = await fetch(disconnectApiRoute, { method: 'POST' })
+      const res = await fetch(disconnectApiRoute, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integrationId: account.id }),
+      })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        setDisconnectError((body as { error?: string }).error ?? 'Erro ao desconectar')
+        setError((body as { error?: string }).error ?? 'Erro ao desconectar')
         return
       }
       setConfirmOpen(false)
       router.refresh()
     } catch {
-      setDisconnectError('Erro ao conectar ao servidor')
+      setError('Erro ao conectar ao servidor')
     } finally {
       setLoading(false)
     }
   }
+
+  const label = account.accountName ?? account.accountId
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-3 bg-zinc-800/50 rounded-xl px-4 py-3">
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-100 truncate">{label}</span>
+            {account.isDefault && (
+              <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full border border-cyan-500/30">
+                padrão
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-zinc-500 truncate">{account.accountId}</span>
+            <span className="text-xs text-zinc-600">·</span>
+            <span className="text-xs text-zinc-500 shrink-0">desde {formatDate(account.connectedAt)}</span>
+          </div>
+        </div>
+        {!confirmOpen && (
+          <button
+            onClick={() => setConfirmOpen(true)}
+            className="shrink-0 text-xs text-zinc-400 hover:text-red-400 transition px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+          >
+            Desconectar
+          </button>
+        )}
+      </div>
+
+      {confirmOpen && (
+        <div className="flex flex-col gap-2 px-1">
+          {error && (
+            <p className="text-xs text-red-400 bg-red-500/10 rounded-xl px-3 py-2">{error}</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={handleDisconnect}
+              disabled={loading}
+              className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
+            >
+              {loading ? 'Desconectando…' : 'Confirmar'}
+            </button>
+            <button
+              onClick={() => { setConfirmOpen(false); setError(null) }}
+              className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface PlatformCardProps {
+  icon: IconType
+  iconColor: string
+  name: string
+  description: string
+  state: PlatformState
+  connectHref: string
+  disconnectApiRoute: string
+}
+
+function PlatformCard({
+  icon: Icon,
+  iconColor,
+  name,
+  description,
+  state,
+  connectHref,
+  disconnectApiRoute,
+}: PlatformCardProps) {
+  const { accounts, hasPending } = state
+  const hasConnected = accounts.length > 0
+  const isActive = hasConnected || hasPending
+  const overallStatus: ChannelStatus = hasConnected ? 'connected' : hasPending ? 'pending' : 'inactive'
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4">
@@ -119,70 +190,45 @@ function IntegrationCard({
             <p className="text-xs text-zinc-500 mt-0.5">{description}</p>
           </div>
         </div>
-        <StatusBadge status={status} />
+        <StatusBadge status={overallStatus} />
       </div>
 
-      {/* Account info */}
-      {isActive && accountId && accountId !== 'pending' && (
-        <div className="flex flex-col gap-1 bg-zinc-800/50 rounded-xl px-4 py-3">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-zinc-500">{accountLabel}</span>
-            <span className="text-xs font-mono text-zinc-300">{accountId}</span>
-          </div>
-          {connectedAt && (
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-zinc-500">Conectado em</span>
-              <span className="text-xs text-zinc-400">{formatDate(connectedAt)}</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {status === 'pending' && (
+      {/* Pending warning */}
+      {hasPending && (
         <p className="text-xs text-amber-400 bg-amber-500/10 rounded-xl px-4 py-3">
-          Conta conectada — aguardando configuração no painel principal.
+          Aguardando seleção de conta no painel principal.
         </p>
       )}
 
+      {/* Account list */}
+      {hasConnected && (
+        <div className="flex flex-col gap-2">
+          {accounts.map(account => (
+            <AccountRow
+              key={account.id}
+              account={account}
+              disconnectApiRoute={disconnectApiRoute}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex gap-2 mt-auto pt-2">
-        {!isActive ? (
+      <div className="mt-auto pt-2">
+        {!hasConnected && !hasPending ? (
           <a
             href={connectHref}
-            className="flex-1 text-center rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-4 py-2 text-sm font-semibold text-white transition"
+            className="block text-center rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-4 py-2 text-sm font-semibold text-white transition"
           >
             Conectar
           </a>
-        ) : confirmOpen ? (
-          <div className="flex-1 flex flex-col gap-2">
-            {disconnectError && (
-              <p className="text-xs text-red-400 bg-red-500/10 rounded-xl px-3 py-2">
-                {disconnectError}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={handleDisconnect}
-                disabled={loading}
-                className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
-              >
-                {loading ? 'Desconectando…' : 'Confirmar'}
-              </button>
-              <button
-                onClick={() => { setConfirmOpen(false); setDisconnectError(null) }}
-                className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
         ) : (
-          <button
-            onClick={() => setConfirmOpen(true)}
-            className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
+          <a
+            href={connectHref}
+            className="block text-center rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition"
           >
-            Desconectar
-          </button>
+            + Conectar outra conta
+          </a>
         )}
       </div>
     </div>
@@ -231,28 +277,22 @@ export default function IntegracoesClient({ google, meta }: Props) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 max-w-3xl">
-        <IntegrationCard
+        <PlatformCard
           icon={SiGoogleads}
           iconColor="#4285F4"
           name="Google Ads"
           description="Importe campanhas, cliques e conversões do Google Ads"
-          status={google.status ?? 'inactive'}
-          accountId={google.accountId}
-          accountLabel="Customer ID"
-          connectedAt={google.connectedAt}
+          state={google}
           connectHref="/api/integrations/google/connect"
           disconnectApiRoute="/api/integrations/google/disconnect"
         />
 
-        <IntegrationCard
+        <PlatformCard
           icon={SiMeta}
           iconColor="#0082FB"
           name="Meta Ads"
           description="Facebook e Instagram Ads"
-          status={meta.status ?? 'inactive'}
-          accountId={meta.accountId}
-          accountLabel="Ad Account ID"
-          connectedAt={meta.connectedAt}
+          state={meta}
           connectHref="/api/integrations/meta/connect"
           disconnectApiRoute="/api/integrations/meta/disconnect"
         />

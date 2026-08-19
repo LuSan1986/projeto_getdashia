@@ -141,7 +141,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function Charts({ source = 'none' }: { source?: DataSource | 'all' }) {
+export default function Charts({ source = 'none', accountId }: { source?: DataSource | 'all'; accountId?: string | null }) {
   const dayLabels   = last7DayLabels()
   const monthLabels = last6MonthLabels()
 
@@ -160,12 +160,19 @@ export default function Charts({ source = 'none' }: { source?: DataSource | 'all
     const wantGoogle = source === 'google' || source === 'all'
     const wantMeta   = source === 'meta'   || source === 'all'
 
+    const googleUrl = accountId && wantGoogle
+      ? `/api/google-ads/timeseries?account_id=${encodeURIComponent(accountId)}`
+      : '/api/google-ads/timeseries'
+    const metaUrl = accountId && wantMeta
+      ? `/api/meta-ads/timeseries?account_id=${encodeURIComponent(accountId)}`
+      : '/api/meta-ads/timeseries'
+
     Promise.all([
       wantGoogle
-        ? fetch('/api/google-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
+        ? fetch(googleUrl).then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
         : Promise.resolve(null),
       wantMeta
-        ? fetch('/api/meta-ads/timeseries').then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
+        ? fetch(metaUrl).then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
         : Promise.resolve(null),
     ]).then(([googleData, metaData]) => {
       // ── Revenue 7d ─────────────────────────────────────────────────────────
@@ -201,7 +208,7 @@ export default function Charts({ source = 'none' }: { source?: DataSource | 'all
       setLiveGoogleClicks(buildMonthArr(googleData))
       setLiveMetaClicks(buildMonthArr(metaData))
     })
-  }, [source])
+  }, [source, accountId])
 
   // ── Build chart data ────────────────────────────────────────────────────────
 

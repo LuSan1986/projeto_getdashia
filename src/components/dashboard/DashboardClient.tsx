@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { SiGoogleads, SiFacebook, SiTiktok } from 'react-icons/si'
+import { ChevronDown } from 'lucide-react'
 import type { ReactNode } from 'react'
 import DashboardMetricsCards, { type DataSource } from './DashboardMetricsCards'
 import Charts from './Charts'
+import type { AccountInfo } from '@/app/dashboard/page'
 
 // ── Channel definitions ───────────────────────────────────────────────────────
 
@@ -40,25 +42,91 @@ const CHANNELS: { id: ChannelId; name: string; renderIcon: () => ReactNode }[] =
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
-  googleConnected: boolean
-  metaConnected: boolean
+  googleAccounts: AccountInfo[]
+  metaAccounts:   AccountInfo[]
+}
+
+// ── Account selector dropdown ─────────────────────────────────────────────────
+
+function AccountSelector({
+  accounts,
+  selectedId,
+  onSelect,
+}: {
+  accounts: AccountInfo[]
+  selectedId: string | null
+  onSelect: (id: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = accounts.find(a => a.account_id === selectedId) ?? accounts[0]
+
+  if (!selected) return null
+
+  const label = selected.account_name ?? selected.account_id
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:border-zinc-500 transition"
+      >
+        <span className="max-w-[220px] truncate">{label}</span>
+        <ChevronDown size={14} className={`text-zinc-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-20 min-w-[260px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl overflow-hidden">
+          {accounts.map(a => (
+            <button
+              key={a.id}
+              onClick={() => { onSelect(a.account_id); setOpen(false) }}
+              className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-sm text-left hover:bg-zinc-800 transition
+                ${a.account_id === selectedId ? 'bg-zinc-800' : ''}`}
+            >
+              <span className="truncate text-zinc-100">{a.account_name ?? a.account_id}</span>
+              {a.is_default && (
+                <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full">
+                  padrão
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function DashboardClient({ googleConnected, metaConnected }: Props) {
+export default function DashboardClient({ googleAccounts, metaAccounts }: Props) {
   const [selected, setSelected] = useState<ChannelId>('google')
 
-  const isMetaChannel = selected === 'instagram' || selected === 'facebook'
+  const defaultGoogleId = (googleAccounts.find(a => a.is_default) ?? googleAccounts[0])?.account_id ?? null
+  const defaultMetaId   = (metaAccounts.find(a => a.is_default)   ?? metaAccounts[0])?.account_id   ?? null
+
+  const [selectedGoogleId, setSelectedGoogleId] = useState<string | null>(defaultGoogleId)
+  const [selectedMetaId,   setSelectedMetaId]   = useState<string | null>(defaultMetaId)
+
+  const googleConnected = googleAccounts.length > 0
+  const metaConnected   = metaAccounts.length   > 0
+  const isMetaChannel   = selected === 'instagram' || selected === 'facebook'
 
   const dataSource: DataSource =
     selected === 'google' ? (googleConnected ? 'google' : 'none') :
     isMetaChannel         ? (metaConnected   ? 'meta'   : 'none') :
-    'none' // tiktok
+    'none'
 
-  // Status message shown under the tabs (null = no message needed)
+  const currentAccountId =
+    selected === 'google' ? selectedGoogleId :
+    isMetaChannel         ? selectedMetaId   :
+    null
+
+  const showGoogleSelector = selected === 'google'   && googleAccounts.length > 1
+  const showMetaSelector   = isMetaChannel           && metaAccounts.length   > 1
+
   function getStatusInfo(): { text: string; badge: string; badgeClass: string } | null {
-    if (selected === 'google' && googleConnected)   return null
+    if (selected === 'google' && googleConnected) return null
     if (selected === 'google' && !googleConnected) {
       return {
         text:       'Google Ads não conectado. Conecte sua conta em Integrações.',
@@ -80,7 +148,6 @@ export default function DashboardClient({ googleConnected, metaConnected }: Prop
         badgeClass: 'text-zinc-400 bg-zinc-800 border-zinc-700',
       }
     }
-    // tiktok
     return {
       text:       'TikTok Ads — integração em breve.',
       badge:      'Em breve',
@@ -112,6 +179,27 @@ export default function DashboardClient({ googleConnected, metaConnected }: Prop
           ))}
         </div>
 
+        {/* Account selector — only when 2+ accounts for the selected platform */}
+        {(showGoogleSelector || showMetaSelector) && (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-zinc-500">Conta:</span>
+            {showGoogleSelector && (
+              <AccountSelector
+                accounts={googleAccounts}
+                selectedId={selectedGoogleId}
+                onSelect={setSelectedGoogleId}
+              />
+            )}
+            {showMetaSelector && (
+              <AccountSelector
+                accounts={metaAccounts}
+                selectedId={selectedMetaId}
+                onSelect={setSelectedMetaId}
+              />
+            )}
+          </div>
+        )}
+
         {statusInfo && (
           <div className="mt-4 rounded-xl bg-zinc-900 border border-zinc-800 px-5 py-4 flex flex-col items-center gap-2">
             <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border ${statusInfo.badgeClass}`}>
@@ -122,11 +210,11 @@ export default function DashboardClient({ googleConnected, metaConnected }: Prop
         )}
       </div>
 
-      {/* Metric cards — react to selected channel */}
-      <DashboardMetricsCards source={dataSource} />
+      {/* Metric cards — react to selected channel + account */}
+      <DashboardMetricsCards source={dataSource} accountId={currentAccountId} />
 
-      {/* Charts — react to selected channel */}
-      <Charts source={dataSource} />
+      {/* Charts — react to selected channel + account */}
+      <Charts source={dataSource} accountId={currentAccountId} />
     </>
   )
 }

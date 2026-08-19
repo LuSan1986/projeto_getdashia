@@ -5,13 +5,20 @@ import { createClient } from '@/lib/supabase-server'
 
 const ZERO_AI_METRICS = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
 
+export interface AccountInfo {
+  id: string
+  account_id: string
+  account_name: string | null
+  is_default: boolean
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let googleConnected = false
+  let googleAccounts: AccountInfo[] = []
+  let metaAccounts: AccountInfo[]   = []
   let isPending = false
-  let metaConnected = false
 
   if (user) {
     const { data: membership } = await supabase
@@ -22,32 +29,44 @@ export default async function DashboardPage() {
       .single()
 
     if (membership) {
-      const { data: googleIntegration } = await supabase
-        .from('integrations')
-        .select('account_id')
-        .eq('organization_id', membership.organization_id)
-        .eq('platform', 'google_ads')
-        .eq('status', 'active')
-        .limit(1)
-        .single()
+      const orgId = membership.organization_id
 
-      const { data: metaIntegration } = await supabase
-        .from('integrations')
-        .select('id')
-        .eq('organization_id', membership.organization_id)
-        .eq('platform', 'meta_ads')
-        .eq('status', 'active')
-        .limit(1)
-        .single()
+      const [{ data: googleRows }, { data: metaRows }, { data: pendingRow }] = await Promise.all([
+        supabase
+          .from('integrations')
+          .select('id, account_id, account_name, is_default')
+          .eq('organization_id', orgId)
+          .eq('platform', 'google_ads')
+          .eq('status', 'active')
+          .neq('account_id', 'pending')
+          .order('is_default', { ascending: false }),
 
-      metaConnected = !!metaIntegration
+        supabase
+          .from('integrations')
+          .select('id, account_id, account_name, is_default')
+          .eq('organization_id', orgId)
+          .eq('platform', 'meta_ads')
+          .eq('status', 'active')
+          .neq('account_id', 'pending')
+          .order('is_default', { ascending: false }),
 
-      if (googleIntegration) {
-        googleConnected = googleIntegration.account_id !== 'pending'
-        isPending       = googleIntegration.account_id === 'pending'
-      }
+        supabase
+          .from('integrations')
+          .select('id')
+          .eq('organization_id', orgId)
+          .eq('platform', 'google_ads')
+          .eq('account_id', 'pending')
+          .limit(1)
+          .maybeSingle(),
+      ])
+
+      googleAccounts = (googleRows ?? []) as AccountInfo[]
+      metaAccounts   = (metaRows   ?? []) as AccountInfo[]
+      isPending      = !!pendingRow
     }
   }
+
+  const googleConnected = googleAccounts.length > 0
 
   return (
     <div className="p-6 md:p-8">
@@ -75,10 +94,9 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Channel tabs + metric cards + charts — all channel-aware */}
       <DashboardClient
-        googleConnected={googleConnected}
-        metaConnected={metaConnected}
+        googleAccounts={googleAccounts}
+        metaAccounts={metaAccounts}
       />
 
       <AIConsultant metrics={ZERO_AI_METRICS} />

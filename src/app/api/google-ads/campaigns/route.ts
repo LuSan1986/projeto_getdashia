@@ -41,9 +41,10 @@ const ADS_API = 'https://googleads.googleapis.com/v24'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const period  = searchParams.get('period') ?? '30d'
-    const isPrev  = searchParams.get('prev') === 'true'
-    const dateRange = PERIOD_MAP[period] ?? 'LAST_30_DAYS'
+    const period        = searchParams.get('period') ?? '30d'
+    const isPrev        = searchParams.get('prev') === 'true'
+    const accountIdParam = searchParams.get('account_id')
+    const dateRange     = PERIOD_MAP[period] ?? 'LAST_30_DAYS'
 
     const supabase = await createClient()
 
@@ -63,14 +64,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ campaigns: [], roasData: [], connected: false })
     }
 
-    const { data: integration } = await supabase
+    let integrationQuery = supabase
       .from('integrations')
       .select('*')
       .eq('organization_id', membership.organization_id)
       .eq('platform', 'google_ads')
       .eq('status', 'active')
-      .limit(1)
-      .single()
+      .neq('account_id', 'pending')
+
+    if (accountIdParam) {
+      integrationQuery = integrationQuery.eq('account_id', accountIdParam)
+    } else {
+      integrationQuery = integrationQuery.order('is_default', { ascending: false })
+    }
+
+    const { data: integration } = await integrationQuery.limit(1).single()
 
     if (!integration) {
       return NextResponse.json({ campaigns: [], roasData: [], connected: false })

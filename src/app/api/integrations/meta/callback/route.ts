@@ -110,17 +110,43 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${BASE}/onboarding`)
   }
 
+  const orgId = membership.organization_id
   const encryptedToken = encrypt(longLivedToken)
 
   // Step 5 — single account: auto-connect; multiple: save pending and redirect to selector
   if (adAccounts.length === 1) {
     const accountId = adAccounts[0].id
+
+    // Determine is_default: keep existing value on reconnect, or true if first account
+    let isDefault = false
+    const { data: existing } = await supabase
+      .from('integrations')
+      .select('id, is_default')
+      .eq('organization_id', orgId)
+      .eq('platform', 'meta_ads')
+      .eq('account_id', accountId)
+      .maybeSingle()
+
+    if (existing) {
+      isDefault = existing.is_default ?? false
+    } else {
+      const { count } = await supabase
+        .from('integrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .eq('platform', 'meta_ads')
+        .eq('status', 'active')
+        .neq('account_id', 'pending')
+      isDefault = (count ?? 0) === 0
+    }
+
     try {
       const { error: upsertError } = await supabase.from('integrations').upsert(
         {
-          organization_id: membership.organization_id,
+          organization_id: orgId,
           platform: 'meta_ads',
           account_id: accountId,
+          is_default: isDefault,
           access_token_encrypted: encryptedToken,
           refresh_token_encrypted: null,
           token_expires_at: null,
@@ -130,7 +156,7 @@ export async function GET(request: NextRequest) {
       )
 
       if (upsertError) throw new Error(upsertError.message)
-      console.log('[meta/callback] auto-connected single account:', accountId)
+      console.log('[meta/callback] auto-connected single account:', accountId, '| is_default:', isDefault)
     } catch (err) {
       console.error('[meta/callback] failed to save integration:', err)
       return NextResponse.redirect(`${BASE}/dashboard/integracoes?error=meta_failed`)
@@ -140,19 +166,12 @@ export async function GET(request: NextRequest) {
 
   // Multiple (or zero) accounts — save token as pending, redirect to account selector
   try {
-    // Clean up any existing active (non-pending) rows to avoid unique constraint conflict
-    await supabase
-      .from('integrations')
-      .delete()
-      .eq('organization_id', membership.organization_id)
-      .eq('platform', 'meta_ads')
-      .neq('account_id', 'pending')
-
     const { error: upsertError } = await supabase.from('integrations').upsert(
       {
-        organization_id: membership.organization_id,
+        organization_id: orgId,
         platform: 'meta_ads',
         account_id: 'pending',
+        is_default: false,
         access_token_encrypted: encryptedToken,
         refresh_token_encrypted: null,
         token_expires_at: null,
