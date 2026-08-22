@@ -18,12 +18,15 @@ export async function POST(request: Request) {
 
     const origin = request.headers.get("origin") ?? "http://localhost:3000";
 
+    const price = prices.data[0]
+    const amountCents = price.unit_amount ?? 0
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
-      line_items: [{ price: prices.data[0].id, quantity: 1 }],
+      line_items: [{ price: price.id, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
-      success_url: `${origin}/dashboard?success=true`,
+      success_url: `${origin}/dashboard?success=true&amount_cents=${amountCents}`,
       cancel_url: `${origin}/precos`,
     });
 

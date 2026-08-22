@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import PendingAccountBanner from '@/components/dashboard/PendingAccountBanner'
 import AIConsultant from '@/components/dashboard/AIConsultant'
+import CheckoutSuccessTracker from '@/components/dashboard/CheckoutSuccessTracker'
 import { createClient } from '@/lib/supabase-server'
 
 const ZERO_AI_METRICS = { cost: 0, revenue: 0, roas: 0, cpa: 0, clicks: 0, conversions: 0, impressions: 0 }
@@ -100,6 +102,10 @@ export default async function DashboardPage() {
       />
 
       <AIConsultant metrics={ZERO_AI_METRICS} />
+
+      <Suspense fallback={null}>
+        <CheckoutSuccessTracker />
+      </Suspense>
     </div>
   )
 }

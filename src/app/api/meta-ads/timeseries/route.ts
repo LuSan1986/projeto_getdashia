@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const accountIdParam = searchParams.get('account_id')
     const platformParam  = searchParams.get('platform') // 'facebook' | 'instagram' | null
+    const revDays = Math.min(Math.max(parseInt(searchParams.get('revenue_days') ?? '7'), 1), 90)
 
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -121,12 +122,16 @@ export async function GET(request: NextRequest) {
     const { since: m6since, until: m6until } = get6MonthsRange()
     const m6timeRange = encodeURIComponent(JSON.stringify({ since: m6since, until: m6until }))
 
+    const revEnd   = fmt(new Date())
+    const revStart = fmt(new Date(Date.now() - (revDays - 1) * 86_400_000))
+    const revTimeRange = encodeURIComponent(JSON.stringify({ since: revStart, until: revEnd }))
+
     const [rev7dRes, clicks6mRes] = await Promise.all([
       fetch(
         `${GRAPH_API}/${adAccountId}/insights` +
         `?fields=date_start,action_values` +
         `&level=account` +
-        `&date_preset=last_7d` +
+        `&time_range=${revTimeRange}` +
         `&time_increment=1` +
         `&breakdowns=publisher_platform` +
         `&access_token=${accessToken}`,

@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const accountIdParam = searchParams.get('account_id')
+    const revDays = Math.min(Math.max(parseInt(searchParams.get('revenue_days') ?? '7'), 1), 90)
 
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -115,6 +116,9 @@ export async function GET(request: NextRequest) {
 
     const { start: m6start, end: m6end } = get6MonthsRange()
 
+    const revEnd   = fmt(new Date())
+    const revStart = fmt(new Date(Date.now() - (revDays - 1) * 86_400_000))
+
     const [rev7dRes, clicks6mRes] = await Promise.all([
       fetch(`${ADS_API}/customers/${accountId}/googleAds:search`, {
         method: 'POST',
@@ -124,7 +128,7 @@ export async function GET(request: NextRequest) {
           query: `
             SELECT segments.date, metrics.conversions_value
             FROM campaign
-            WHERE segments.date DURING LAST_7_DAYS
+            WHERE segments.date BETWEEN '${revStart}' AND '${revEnd}'
               AND campaign.status != 'REMOVED'
             ORDER BY segments.date ASC
           `,
@@ -146,7 +150,7 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
-    // Revenue 7d — aggregate by date
+    // Revenue (configurable period) — aggregate by date
     let revenue7d: Array<{ date: string; value: number }> = []
     if (rev7dRes.ok) {
       const body = await rev7dRes.json()
@@ -162,7 +166,7 @@ export async function GET(request: NextRequest) {
         .map(([date, value]) => ({ date, value }))
     } else {
       const text = await rev7dRes.text()
-      console.error('[google-ads/timeseries] revenue7d error:', text.substring(0, 300))
+      console.error('[google-ads/timeseries] revenue error:', text.substring(0, 300))
     }
 
     // Clicks 6m — aggregate by YYYY-MM

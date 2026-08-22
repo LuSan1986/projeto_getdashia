@@ -24,11 +24,11 @@ import type { DataSource } from './DashboardMetricsCards'
 const MONTH_LC  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 const MONTH_CAP = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
-function last7DayLabels(): string[] {
+function lastNDayLabels(n: number): string[] {
   const today = new Date()
-  return Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: n }, (_, i) => {
     const d = new Date(today)
-    d.setDate(today.getDate() - 6 + i)
+    d.setDate(today.getDate() - (n - 1) + i)
     return `${String(d.getDate()).padStart(2, '0')}/${MONTH_LC[d.getMonth()]}`
   })
 }
@@ -130,10 +130,13 @@ function PieLegend({ payload }: { payload?: Array<{ value: string; color: string
   )
 }
 
-function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+function ChartCard({ title, children, headerRight }: { title: string; children: React.ReactNode; headerRight?: React.ReactNode }) {
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-      <p className="text-sm font-medium text-zinc-300 mb-5">{title}</p>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm font-medium text-zinc-300">{title}</p>
+        {headerRight}
+      </div>
       {children}
     </div>
   )
@@ -142,16 +145,15 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function Charts({ source = 'none', accountId, metaPlatform }: { source?: DataSource | 'all'; accountId?: string | null; metaPlatform?: 'facebook' | 'instagram' }) {
-  const dayLabels   = last7DayLabels()
   const monthLabels = last6MonthLabels()
 
+  const [revDays,          setRevDays]          = useState<7 | 15 | 30>(7)
   const [liveRevenue,      setLiveRevenue]      = useState<number[]>(Array(7).fill(0))
   const [liveGoogleClicks, setLiveGoogleClicks] = useState<number[]>(Array(6).fill(0))
   const [liveMetaClicks,   setLiveMetaClicks]   = useState<number[]>(Array(6).fill(0))
 
   useEffect(() => {
-    // Reset whenever source changes
-    setLiveRevenue(Array(7).fill(0))
+    setLiveRevenue(Array(revDays).fill(0))
     setLiveGoogleClicks(Array(6).fill(0))
     setLiveMetaClicks(Array(6).fill(0))
 
@@ -160,13 +162,14 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
     const wantGoogle = source === 'google' || source === 'all'
     const wantMeta   = source === 'meta'   || source === 'all'
 
+    const revParam = `revenue_days=${revDays}`
     const googleUrl = accountId && wantGoogle
-      ? `/api/google-ads/timeseries?account_id=${encodeURIComponent(accountId)}`
-      : '/api/google-ads/timeseries'
+      ? `/api/google-ads/timeseries?account_id=${encodeURIComponent(accountId)}&${revParam}`
+      : `/api/google-ads/timeseries?${revParam}`
     const metaPlatformSuffix = metaPlatform ? `&platform=${metaPlatform}` : ''
     const metaUrl = accountId && wantMeta
-      ? `/api/meta-ads/timeseries?account_id=${encodeURIComponent(accountId)}${metaPlatformSuffix}`
-      : `/api/meta-ads/timeseries${metaPlatform ? `?platform=${metaPlatform}` : ''}`
+      ? `/api/meta-ads/timeseries?account_id=${encodeURIComponent(accountId)}${metaPlatformSuffix}&${revParam}`
+      : `/api/meta-ads/timeseries?${revParam}${metaPlatformSuffix}`
 
     Promise.all([
       wantGoogle
@@ -176,7 +179,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
         ? fetch(metaUrl).then((r) => r.json() as Promise<TimeseriesResponse>).catch(() => null)
         : Promise.resolve(null),
     ]).then(([googleData, metaData]) => {
-      // ── Revenue 7d ─────────────────────────────────────────────────────────
+      // ── Revenue (configurable period) ───────────────────────────────────────
       const revenueMap = new Map<string, number>()
       for (const { date, value } of (googleData?.revenue7d ?? [])) {
         revenueMap.set(date, (revenueMap.get(date) ?? 0) + value)
@@ -186,9 +189,9 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
       }
       const today = new Date()
       setLiveRevenue(
-        Array.from({ length: 7 }, (_, i) => {
+        Array.from({ length: revDays }, (_, i) => {
           const d = new Date(today)
-          d.setDate(today.getDate() - 6 + i)
+          d.setDate(today.getDate() - (revDays - 1) + i)
           return revenueMap.get(dayKey(d)) ?? 0
         })
       )
@@ -209,11 +212,12 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
       setLiveGoogleClicks(buildMonthArr(googleData))
       setLiveMetaClicks(buildMonthArr(metaData))
     })
-  }, [source, accountId, metaPlatform])
+  }, [source, accountId, metaPlatform, revDays])
 
   // ── Build chart data ────────────────────────────────────────────────────────
 
-  const revenueData = dayLabels.map((dia, i) => ({
+  const revLabels   = lastNDayLabels(revDays)
+  const revenueData = revLabels.map((dia, i) => ({
     dia,
     receita: liveRevenue[i],
   }))
@@ -232,8 +236,27 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
 
-      {/* Área — Receita últimos 7 dias */}
-      <ChartCard title="Receita Total — últimos 7 dias">
+      {/* Área — Receita (período selecionável) */}
+      <ChartCard
+        title={`Receita Total — últimos ${revDays} dias`}
+        headerRight={
+          <div className="flex gap-1">
+            {([7, 15, 30] as const).map(d => (
+              <button
+                key={d}
+                onClick={() => setRevDays(d)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition
+                  ${revDays === d
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 border border-transparent'
+                  }`}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+        }
+      >
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={revenueData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
@@ -243,7 +266,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-            <XAxis dataKey="dia" {...axisProps} />
+            <XAxis dataKey="dia" {...axisProps} interval={revDays <= 7 ? 0 : revDays <= 15 ? 1 : 4} />
             <YAxis
               {...axisProps}
               tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
