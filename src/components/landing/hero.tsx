@@ -360,24 +360,23 @@ function HeroPlatforms() {
       <g transform={`translate(${sat.sw.x},${sat.sw.y})`}>
         <g className="hp2-sw">
           <polygon points={H(54)} fill="rgba(5,5,10,0.95)"/>
-          {/* TikTok music note ♪ — drawn in 3 layers (ciano offset, pink offset, white main) */}
-          {/* Note head + stem + flag */}
-          {/* Cyan layer -3px left */}
-          <g transform="translate(-4, 0)" opacity="0.75">
-            <ellipse cx="-6" cy="14" rx="10" ry="7.5" fill="#69C9D0" transform="rotate(-15,-6,14)"/>
-            <rect x="3" y="-20" width="4.5" height="36" rx="2" fill="#69C9D0"/>
-            <path d="M 7.5,-20 C 22,-12 22,2 7.5,6" stroke="#69C9D0" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          {/* TikTok music note — 3-layer chromatic depth (official brand colors) */}
+          {/* Cyan shadow: #25F4EE, offset 4px left + 1px down */}
+          <g transform="translate(-4, 1)" opacity="0.90">
+            <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#25F4EE" transform="rotate(-18,-7,13)"/>
+            <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#25F4EE"/>
+            <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#25F4EE" strokeWidth="5" fill="none" strokeLinecap="round"/>
           </g>
-          {/* Pink layer +3px right */}
-          <g transform="translate(4, 0)" opacity="0.75">
-            <ellipse cx="-6" cy="14" rx="10" ry="7.5" fill="#EE1D52" transform="rotate(-15,-6,14)"/>
-            <rect x="3" y="-20" width="4.5" height="36" rx="2" fill="#EE1D52"/>
-            <path d="M 7.5,-20 C 22,-12 22,2 7.5,6" stroke="#EE1D52" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          {/* Red shadow: #FE2C55, offset 4px right + 1px up */}
+          <g transform="translate(4, -1)" opacity="0.90">
+            <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#FE2C55" transform="rotate(-18,-7,13)"/>
+            <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#FE2C55"/>
+            <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#FE2C55" strokeWidth="5" fill="none" strokeLinecap="round"/>
           </g>
           {/* White main layer */}
-          <ellipse cx="-6" cy="14" rx="10" ry="7.5" fill="white" transform="rotate(-15,-6,14)"/>
-          <rect x="3" y="-20" width="4.5" height="36" rx="2" fill="white"/>
-          <path d="M 7.5,-20 C 22,-12 22,2 7.5,6" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round"/>
+          <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="white" transform="rotate(-18,-7,13)"/>
+          <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="white"/>
+          <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
         </g>
       </g>
       {/* SW label — above hex */}
@@ -846,7 +845,7 @@ export default function Hero() {
           <div style={{ position:'relative', zIndex:1, width:'115%', maxWidth:'680px', marginRight:'-8%' }}>
             <HeroPlatforms />
             {/* ── Mini chart cards (absolute, floating around the SVG) ── */}
-            <div style={{ position:'absolute', top:'-2%',  left:'12%' }}><MiniBarChart4 /></div>
+            <div style={{ position:'absolute', top:'-14%', left:'8%' }}><MiniBarChart4 /></div>
             <div style={{ position:'absolute', top:'18%',  right:'-15%' }}><MiniLineChart /></div>
             <div style={{ position:'absolute', bottom:'18%', left:'-14%' }}><MiniDonutChart /></div>
             <div style={{ position:'absolute', bottom:'-2%', right:'12%' }}><MiniBars5Chart /></div>
