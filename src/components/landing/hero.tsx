@@ -282,19 +282,14 @@ function HeroPlatforms() {
       {/* ════════════ NW: Google Ads ════════════ */}
       <g transform={`translate(${sat.nw.x},${sat.nw.y})`}>
         <g className="hp2-nw">
-          {/* Border */}
-          <polygon points={H(60)} fill="rgba(66,133,244,0.35)"/>
-          {/* White fill */}
-          <polygon points={H(56)} fill="rgba(250,250,252,0.97)"/>
-          {/* Google Ads "A" icon */}
-          {/* Yellow left bar */}
-          <path d="M -2,-24 L -8,-24 L -22,20 L -12,20 Z" fill="#FBBC04"/>
-          {/* Blue right bar */}
-          <path d="M  2,-24 L  8,-24 L  22,20 L  12,20 Z" fill="#4285F4"/>
-          {/* Green base circle */}
-          <circle cx="0" cy="24" r="10" fill="#34A853"/>
-          {/* White dot inside green circle */}
-          <circle cx="0" cy="24" r="4.5" fill="rgba(250,250,252,0.95)"/>
+          {/* Outer border ring (blue-tinted) + dark inner fill */}
+          <polygon points={H(60)} fill="rgba(66,133,244,0.30)"/>
+          <polygon points={H(56)} fill="rgba(8,12,30,0.97)"/>
+          {/* Google Ads "A" — two thick rounded strokes meeting at apex */}
+          <line x1="0" y1="-20" x2="-15" y2="17" stroke="#F9AB00" strokeWidth="8" strokeLinecap="round"/>
+          <line x1="0" y1="-20" x2="15"  y2="17" stroke="#4285F4" strokeWidth="8" strokeLinecap="round"/>
+          {/* Green circle at base of yellow arm */}
+          <circle cx="-15" cy="17" r="9" fill="#34A853"/>
         </g>
       </g>
       {/* NW label */}
@@ -845,7 +840,7 @@ export default function Hero() {
           <div style={{ position:'relative', zIndex:1, width:'115%', maxWidth:'680px', marginRight:'-8%' }}>
             <HeroPlatforms />
             {/* ── Mini chart cards (absolute, floating around the SVG) ── */}
-            <div style={{ position:'absolute', top:'-14%', left:'8%' }}><MiniBarChart4 /></div>
+            <div style={{ position:'absolute', top:'-24%', left:'8%' }}><MiniBarChart4 /></div>
             <div style={{ position:'absolute', top:'18%',  right:'-15%' }}><MiniLineChart /></div>
             <div style={{ position:'absolute', bottom:'18%', left:'-14%' }}><MiniDonutChart /></div>
             <div style={{ position:'absolute', bottom:'-2%', right:'12%' }}><MiniBars5Chart /></div>
