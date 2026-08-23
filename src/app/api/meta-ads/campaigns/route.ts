@@ -8,9 +8,9 @@ export const fetchCache = 'force-no-store'
 const GRAPH_API = 'https://graph.facebook.com/v21.0'
 
 const META_PERIOD_MAP: Record<string, string> = {
-  '7d':  'last_7_days',
+  '7d':  'last_7d',
   '30d': 'last_30d',
-  '90d': 'last_90_days',
+  '90d': 'last_90d',
 }
 
 function metaStatusToLocal(s: string): 'active' | 'paused' {
