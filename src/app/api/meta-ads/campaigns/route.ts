@@ -54,6 +54,7 @@ type CampaignInsight = {
   spend: number
   conversions: number
   revenue: number
+  leads: number
 }
 
 type CampaignRow = {
@@ -225,13 +226,14 @@ export async function GET(request: NextRequest) {
       const insightsBody = await insightsRes.json()
       for (const row of (insightsBody.data ?? []) as InsightRow[]) {
         if (platformParam && row.publisher_platform !== platformParam) continue
-        const prev = insightsMap.get(row.campaign_id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0 }
+        const prev = insightsMap.get(row.campaign_id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0, leads: 0 }
         insightsMap.set(row.campaign_id, {
           impressions: prev.impressions + Number(row.impressions ?? 0),
           clicks:      prev.clicks      + Number(row.clicks ?? 0),
           spend:       prev.spend       + Number(row.spend ?? 0),
           conversions: prev.conversions + sumActionField(row.actions, 'purchase'),
           revenue:     prev.revenue     + sumActionField(row.action_values, 'purchase'),
+          leads:       prev.leads       + sumActionField(row.actions, 'lead'),
         })
       }
     } else {
@@ -241,7 +243,7 @@ export async function GET(request: NextRequest) {
 
     const campaigns = (campaignBody.data ?? [] as CampaignRow[]).map((c: CampaignRow) => {
       // Campaigns with no activity on the requested platform default to zero — not an error
-      const ins = insightsMap.get(c.id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0 }
+      const ins = insightsMap.get(c.id) ?? { impressions: 0, clicks: 0, spend: 0, conversions: 0, revenue: 0, leads: 0 }
       return {
         id:          Number(c.id),
         platform:    'meta' as const,
@@ -252,6 +254,7 @@ export async function GET(request: NextRequest) {
         cost:        ins.spend,
         conversions: ins.conversions,
         revenue:     ins.revenue,
+        leads:       ins.leads,
       }
     })
 

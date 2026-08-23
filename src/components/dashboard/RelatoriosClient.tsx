@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Eye, MousePointerClick, Users, CheckCircle2, CircleDollarSign } from 'lucide-react'
 import AIConsultant from '@/components/dashboard/AIConsultant'
 import type { AccountInfo } from '@/app/dashboard/page'
 
@@ -40,10 +40,19 @@ interface Campaign {
   cost:         number
   conversions:  number
   revenue:      number
+  leads?:       number
 }
 
 interface RoasPoint   { dia: string; roas: number }
 interface PrevSummary { investment: number; revenue: number; clicks: number; conversions: number }
+
+type FunnelStep = {
+  key:          string
+  label:        string
+  barValue:     number
+  displayed:    string
+  rateFromPrev: string | null
+}
 
 interface Props {
   googleAccounts: AccountInfo[]
@@ -265,6 +274,88 @@ function TableSkeleton() {
   )
 }
 
+function FunnelSkeleton() {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+      <div className="h-3 w-40 bg-zinc-800 rounded animate-pulse mb-5" />
+      {[100, 65, 38, 38].map((w, i) => (
+        <div key={i}>
+          {i > 0 && <div className="h-8" />}
+          <div
+            className="h-14 bg-zinc-800 rounded-xl animate-pulse"
+            style={{ width: `${w}%` }}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Funnel step icon ──────────────────────────────────────────────────────────
+
+function stepIcon(key: string, size: number, color: string): ReactNode {
+  if (key === 'impressions') return <Eye               size={size} color={color} />
+  if (key === 'clicks')      return <MousePointerClick  size={size} color={color} />
+  if (key === 'leads')       return <Users              size={size} color={color} />
+  if (key === 'conversions') return <CheckCircle2       size={size} color={color} />
+  if (key === 'revenue')     return <CircleDollarSign   size={size} color={color} />
+  return null
+}
+
+const FUNNEL_COLORS = ['#06B6D4', '#3B82F6', '#818CF8', '#C084FC', '#E879F9']
+
+// ── Funnel chart ──────────────────────────────────────────────────────────────
+
+function FunnelChart({ steps }: { steps: FunnelStep[] }) {
+  if (steps.length === 0) return null
+  const ref = steps[0]?.barValue ?? 1
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+      <p className="text-sm font-medium text-zinc-300 mb-5">Funil de Resultados</p>
+      <div>
+        {steps.map((step, i) => {
+          const barPct = ref > 0 ? Math.max(12, Math.sqrt(step.barValue / ref) * 100) : 12
+          const color  = FUNNEL_COLORS[Math.min(i, FUNNEL_COLORS.length - 1)]
+
+          return (
+            <div key={step.key}>
+              {i > 0 && (
+                <div className="flex items-center gap-2.5 pl-5 py-2">
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M6 10L0 0H12L6 10Z" fill="#3f3f46" />
+                  </svg>
+                  {step.rateFromPrev && (
+                    <span className="text-xs text-zinc-500">{step.rateFromPrev}</span>
+                  )}
+                </div>
+              )}
+
+              <div className="relative h-14 bg-zinc-800/30 rounded-xl overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-xl transition-all duration-700 ease-out"
+                  style={{
+                    width: `${barPct}%`,
+                    background: `linear-gradient(to right, ${color}15, ${color}35)`,
+                    borderRight: `2px solid ${color}80`,
+                  }}
+                />
+                <div className="relative z-10 h-full flex items-center justify-between px-5">
+                  <div className="flex items-center gap-2.5">
+                    {stepIcon(step.key, 15, color)}
+                    <span className="text-sm font-medium text-zinc-200">{step.label}</span>
+                  </div>
+                  <span className="text-base font-bold text-white">{step.displayed}</span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props) {
@@ -417,6 +508,39 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     }
   }, [campaigns])
 
+  const funnelSteps = useMemo<FunnelStep[]>(() => {
+    if (campaigns.length === 0) return []
+
+    const impressions = campaigns.reduce((s, c) => s + c.impressions,        0)
+    const clicks      = campaigns.reduce((s, c) => s + c.clicks,             0)
+    const conversions = campaigns.reduce((s, c) => s + c.conversions,        0)
+    const revenue     = campaigns.reduce((s, c) => s + c.revenue,            0)
+    const leads       = campaigns.reduce((s, c) => s + (c.leads ?? 0),       0)
+
+    if (impressions === 0) return []
+
+    const isMetaChannel = channel === 'meta' || channel === 'facebook' || channel === 'instagram'
+    const showLeads     = isMetaChannel && leads > 0
+
+    const fmtPct = (n: number) => `${n.toFixed(1).replace('.', ',')}%`
+
+    const ctr       = impressions > 0 ? `${fmtPct(clicks / impressions * 100)} clicaram (CTR)` : null
+    const leadRate  = clicks > 0 && showLeads ? `${fmtPct(leads / clicks * 100)} viraram leads` : null
+    const convBase  = showLeads ? leads : clicks
+    const convRate  = convBase > 0 ? `${fmtPct(conversions / convBase * 100)} converteram` : null
+    const avgTicket = conversions > 0 ? `Ticket médio: ${fmtBRL(revenue / conversions)}` : null
+
+    const steps: FunnelStep[] = [
+      { key: 'impressions', label: 'Impressões',  barValue: impressions,  displayed: fmtInt(impressions),  rateFromPrev: null       },
+      { key: 'clicks',      label: 'Cliques',     barValue: clicks,       displayed: fmtInt(clicks),       rateFromPrev: ctr        },
+      ...(showLeads ? [{ key: 'leads', label: 'Leads', barValue: leads, displayed: fmtInt(leads), rateFromPrev: leadRate }] : []),
+      { key: 'conversions', label: 'Conversões',  barValue: conversions,  displayed: fmtInt(conversions),  rateFromPrev: convRate   },
+      { key: 'revenue',     label: 'Receita',     barValue: conversions,  displayed: fmtBRL(revenue),      rateFromPrev: avgTicket  },
+    ]
+
+    return steps
+  }, [campaigns, channel])
+
   const prevSummary = useMemo<{ investment: number; revenue: number; roas: number; cpa: number } | null>(() => {
     const gPrev = (channel === 'all' || channel === 'google') ? googlePrevSummary : null
     const mPrev = channel !== 'google'                        ? metaPrevSummary   : null
@@ -557,6 +681,12 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
           ))}
         </div>
       )}
+
+      {/* Funnel chart */}
+      {loading
+        ? <FunnelSkeleton />
+        : (isConnected && funnelSteps.length > 0 && <FunnelChart steps={funnelSteps} />)
+      }
 
       {/* ROAS chart — Google only; hidden for meta channels */}
       {showRoasChart && (
