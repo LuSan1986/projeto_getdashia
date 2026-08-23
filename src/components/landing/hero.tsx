@@ -166,11 +166,16 @@ function HeroPlatforms() {
           <stop offset="0%"   stopColor="#06B6D4"/>
           <stop offset="100%" stopColor="#E879F9"/>
         </linearGradient>
-        {/* Instagram gradient bg */}
+        {/* Instagram gradient bg — laranja/dourado (baixo-esq) → rosa → roxo (cima-dir) */}
         <linearGradient id="hp2-ig-bg" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#833AB4"/>
-          <stop offset="50%"  stopColor="#E1306C"/>
-          <stop offset="100%" stopColor="#F77737"/>
+          <stop offset="0%"   stopColor="#FCAF45"/>
+          <stop offset="40%"  stopColor="#E1306C"/>
+          <stop offset="100%" stopColor="#833AB4"/>
+        </linearGradient>
+        {/* Facebook gradient bg — azul mais claro no topo */}
+        <linearGradient id="hp2-fb-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#2d93f5"/>
+          <stop offset="100%" stopColor="#0d5cbf"/>
         </linearGradient>
         {/* Glow filters */}
         <filter id="hp2-glow-cy" x="-80%" y="-80%" width="260%" height="260%">
@@ -286,7 +291,7 @@ function HeroPlatforms() {
           <polygon points={H(60)} fill="rgba(66,133,244,0.30)"/>
           <polygon points={H(56)} fill="rgba(8,12,30,0.97)"/>
           {/* Google Ads "A" — two thick rounded strokes meeting at apex */}
-          <line x1="0" y1="-20" x2="-15" y2="17" stroke="#F9AB00" strokeWidth="8" strokeLinecap="round"/>
+          <line x1="0" y1="-20" x2="-15" y2="17" stroke="#FBBC04" strokeWidth="8" strokeLinecap="round"/>
           <line x1="0" y1="-20" x2="15"  y2="17" stroke="#4285F4" strokeWidth="8" strokeLinecap="round"/>
           {/* Green circle at base of yellow arm */}
           <circle cx="-15" cy="17" r="9" fill="#34A853"/>
@@ -307,18 +312,13 @@ function HeroPlatforms() {
         <g className="hp2-ne">
           {/* Instagram gradient bg */}
           <polygon points={H(54)} fill="url(#hp2-ig-bg)"/>
-          {/* Camera body */}
-          <rect x="-18" y="-13" width="36" height="27" rx="6.5"
+          {/* Camera body — square stroke only */}
+          <rect x="-16" y="-16" width="32" height="32" rx="7"
             fill="none" stroke="rgba(255,255,255,0.92)" strokeWidth="2.5"/>
-          {/* Lens outer */}
+          {/* Lens — stroke only */}
           <circle cy="0" r="9.5" fill="none" stroke="rgba(255,255,255,0.92)" strokeWidth="2.5"/>
-          {/* Lens inner */}
-          <circle cy="0" r="3.5" fill="rgba(255,255,255,0.90)"/>
-          {/* Viewfinder bump */}
-          <rect x="-7" y="-19" width="14" height="7" rx="3.5"
-            fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="2.5"/>
-          {/* Flash dot */}
-          <circle cx="15" cy="-8" r="3" fill="rgba(255,255,255,0.90)"/>
+          {/* Flash dot — top-right */}
+          <circle cx="11" cy="-10" r="3" fill="rgba(255,255,255,0.90)"/>
         </g>
       </g>
       {/* NE label */}
@@ -334,11 +334,14 @@ function HeroPlatforms() {
       {/* ════════════ SE: Facebook ════════════ */}
       <g transform={`translate(${sat.se.x},${sat.se.y})`}>
         <g className="hp2-se">
-          <polygon points={H(54)} fill="#1877F2"/>
-          {/* Facebook "f" — vertical bar left-of-center + two horizontal bars */}
-          <rect x="-4" y="-24" width="8" height="48" rx="4" fill="rgba(255,255,255,0.95)"/>
-          <rect x="-4" y="-24" width="22" height="8" rx="4" fill="rgba(255,255,255,0.95)"/>
-          <rect x="-4" y="-5"  width="18" height="7" rx="3.5" fill="rgba(255,255,255,0.95)"/>
+          <polygon points={H(54)} fill="url(#hp2-fb-bg)"/>
+          {/* Facebook "f" — vertical stem + curved top hook + crossbar */}
+          <path d="M 0,22 L 0,-10 C 0,-22 2,-28 14,-28"
+            stroke="rgba(255,255,255,0.95)" strokeWidth="8.5"
+            strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <line x1="-3" y1="-3" x2="14" y2="-3"
+            stroke="rgba(255,255,255,0.95)" strokeWidth="7.5"
+            strokeLinecap="round"/>
         </g>
       </g>
       {/* SE label — above hex */}
@@ -356,14 +359,14 @@ function HeroPlatforms() {
         <g className="hp2-sw">
           <polygon points={H(54)} fill="rgba(5,5,10,0.95)"/>
           {/* TikTok music note — 3-layer chromatic depth (official brand colors) */}
-          {/* Cyan shadow: #25F4EE, offset 4px left + 1px down */}
-          <g transform="translate(-4, 1)" opacity="0.90">
+          {/* Cyan shadow: #25F4EE, offset 3px left + 3px down */}
+          <g transform="translate(-3, 3)" opacity="0.90">
             <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#25F4EE" transform="rotate(-18,-7,13)"/>
             <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#25F4EE"/>
             <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#25F4EE" strokeWidth="5" fill="none" strokeLinecap="round"/>
           </g>
-          {/* Red shadow: #FE2C55, offset 4px right + 1px up */}
-          <g transform="translate(4, -1)" opacity="0.90">
+          {/* Red shadow: #FE2C55, offset 3px right + 3px up */}
+          <g transform="translate(3, -3)" opacity="0.90">
             <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#FE2C55" transform="rotate(-18,-7,13)"/>
             <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#FE2C55"/>
             <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#FE2C55" strokeWidth="5" fill="none" strokeLinecap="round"/>
