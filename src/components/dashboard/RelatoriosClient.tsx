@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import type { ReactNode } from 'react'
 import {
   LineChart,
   Line,
@@ -10,41 +11,54 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { SiGoogleads, SiMeta } from 'react-icons/si'
+import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
+import { ChevronDown } from 'lucide-react'
 import AIConsultant from '@/components/dashboard/AIConsultant'
+import type { AccountInfo } from '@/app/dashboard/page'
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 
-type Platform = 'google' | 'meta'
-type Status   = 'active' | 'paused'
-type Period   = '7d' | '30d' | '90d'
-type Channel  = 'all' | 'google' | 'meta'
+const ALL_ACCOUNTS = '__all__'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type Platform    = 'google' | 'meta'
+type SubPlatform = 'facebook' | 'instagram'
+type Status      = 'active' | 'paused'
+type Period      = '7d' | '30d' | '90d'
+type Channel     = 'all' | 'google' | 'meta' | 'instagram' | 'facebook'
 
 interface Campaign {
-  id: number
-  platform: Platform
-  name: string
-  status: Status
-  impressions: number
-  clicks: number
-  cost: number
-  conversions: number
-  revenue: number
+  id:           string | number
+  platform:     Platform
+  subPlatform?: SubPlatform
+  accountName?: string
+  name:         string
+  status:       Status
+  impressions:  number
+  clicks:       number
+  cost:         number
+  conversions:  number
+  revenue:      number
 }
 
-interface RoasPoint {
-  dia: string
-  roas: number
+interface RoasPoint   { dia: string; roas: number }
+interface PrevSummary { investment: number; revenue: number; clicks: number; conversions: number }
+
+interface Props {
+  googleAccounts: AccountInfo[]
+  metaAccounts:   AccountInfo[]
 }
 
-interface PrevSummary {
-  investment: number
-  revenue: number
-  clicks: number
-  conversions: number
+type FetchResult = {
+  campaigns:   Campaign[]
+  roasData:    RoasPoint[]
+  connected:   boolean
+  prevSummary: PrevSummary | null
+  source:      'google' | 'meta'
 }
 
-// ── Filter options ────────────────────────────────────────────────────────────
+// ── Options ───────────────────────────────────────────────────────────────────
 
 const periodOptions: { value: Period; label: string }[] = [
   { value: '7d',  label: 'Últimos 7 dias'  },
@@ -52,28 +66,56 @@ const periodOptions: { value: Period; label: string }[] = [
   { value: '90d', label: 'Últimos 90 dias' },
 ]
 
-const channelOptions: { value: Channel; label: string }[] = [
-  { value: 'all',    label: 'Todos os canais' },
-  { value: 'google', label: 'Google Ads'      },
-  { value: 'meta',   label: 'Meta Ads'        },
-]
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtBRL(n: number) {
   return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
-
-function fmtInt(n: number) {
-  return n.toLocaleString('pt-BR')
-}
-
+function fmtInt(n: number) { return n.toLocaleString('pt-BR') }
 function pct(current: number, prev: number): number | null {
   if (prev === 0) return null
   return ((current - prev) / prev) * 100
 }
+function sumPrevResults(results: FetchResult[]): PrevSummary | null {
+  const withData = results.filter(r => r.prevSummary)
+  if (withData.length === 0) return null
+  return withData.reduce<PrevSummary>((acc, r) => ({
+    investment:  acc.investment  + (r.prevSummary!.investment  ?? 0),
+    revenue:     acc.revenue     + (r.prevSummary!.revenue     ?? 0),
+    clicks:      acc.clicks      + (r.prevSummary!.clicks      ?? 0),
+    conversions: acc.conversions + (r.prevSummary!.conversions ?? 0),
+  }), { investment: 0, revenue: 0, clicks: 0, conversions: 0 })
+}
 
-// ── Shared chart styles ───────────────────────────────────────────────────────
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function InstagramIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+      <defs>
+        <linearGradient id="rel-ig-grad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"   stopColor="#f09433" />
+          <stop offset="25%"  stopColor="#e6683c" />
+          <stop offset="50%"  stopColor="#dc2743" />
+          <stop offset="75%"  stopColor="#cc2366" />
+          <stop offset="100%" stopColor="#bc1888" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="5" fill="url(#rel-ig-grad)" />
+      <rect x="7" y="7" width="10" height="10" rx="3" stroke="white" strokeWidth="1.5" fill="none" />
+      <circle cx="12" cy="12" r="2.5" stroke="white" strokeWidth="1.5" fill="none" />
+      <circle cx="17.5" cy="6.5" r="0.75" fill="white" />
+    </svg>
+  )
+}
+
+function PlatformIcon({ platform, subPlatform }: { platform: Platform; subPlatform?: SubPlatform }) {
+  if (platform === 'google')              return <SiGoogleads color="#4285F4" size={14} className="shrink-0" />
+  if (subPlatform === 'instagram')        return <InstagramIcon size={14} />
+  return <SiFacebook color="#1877F2" size={14} className="shrink-0" />
+}
+
+// ── Chart styles ──────────────────────────────────────────────────────────────
 
 const tooltipStyle = {
   backgroundColor: '#18181b',
@@ -82,49 +124,96 @@ const tooltipStyle = {
   color: '#fff',
   fontSize: '12px',
 }
-
 const axisProps = {
   tick: { fill: '#71717a', fontSize: 11 },
   axisLine: { stroke: '#27272a' },
   tickLine: false as const,
 }
 
-// ── Filter button ─────────────────────────────────────────────────────────────
+// ── Account selector with "Todas as contas" ───────────────────────────────────
+
+function AccountSelectorWithAll({
+  accounts,
+  selectedId,
+  onSelect,
+}: {
+  accounts:   AccountInfo[]
+  selectedId: string
+  onSelect:   (id: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const label = selectedId === ALL_ACCOUNTS
+    ? 'Todas as contas'
+    : (accounts.find(a => a.account_id === selectedId)?.account_name ?? selectedId)
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:border-zinc-500 transition"
+      >
+        <span className="max-w-[220px] truncate">{label}</span>
+        <ChevronDown size={14} className={`text-zinc-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-20 min-w-[260px] rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl overflow-hidden">
+          <button
+            onClick={() => { onSelect(ALL_ACCOUNTS); setOpen(false) }}
+            className={`w-full flex items-center px-4 py-3 text-sm text-left hover:bg-zinc-800 transition
+              ${selectedId === ALL_ACCOUNTS ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-300'}`}
+          >
+            Todas as contas
+          </button>
+          {accounts.map(a => (
+            <button
+              key={a.id}
+              onClick={() => { onSelect(a.account_id); setOpen(false) }}
+              className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-sm text-left hover:bg-zinc-800 transition
+                ${a.account_id === selectedId ? 'bg-zinc-800' : ''}`}
+            >
+              <span className="truncate text-zinc-100">{a.account_name ?? a.account_id}</span>
+              {a.is_default && (
+                <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full">
+                  padrão
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Filter group ──────────────────────────────────────────────────────────────
 
 function FilterGroup<T extends string>({
   options,
   value,
   onChange,
 }: {
-  options: { value: T; label: string }[]
-  value: T
+  options: { value: T; label: string; icon?: ReactNode }[]
+  value:   T
   onChange: (v: T) => void
 }) {
   return (
-    <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 gap-1">
+    <div className="flex flex-wrap bg-zinc-900 border border-zinc-800 rounded-xl p-1 gap-1">
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap
             ${value === opt.value
               ? 'bg-gradient-to-r from-cyan-500 to-fuchsia-400 text-white'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
             }`}
         >
+          {opt.icon}
           {opt.label}
         </button>
       ))}
     </div>
   )
-}
-
-// ── Platform icon ─────────────────────────────────────────────────────────────
-
-function PlatformIcon({ platform }: { platform: Platform }) {
-  return platform === 'google'
-    ? <SiGoogleads color="#4285F4" size={14} className="shrink-0" />
-    : <SiMeta      color="#0082FB" size={14} className="shrink-0" />
 }
 
 // ── Change indicator ──────────────────────────────────────────────────────────
@@ -140,7 +229,7 @@ function ChangeIndicator({ change, higherIsBad }: { change: number | null; highe
   )
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// ── Skeletons ─────────────────────────────────────────────────────────────────
 
 function CardSkeleton() {
   return (
@@ -178,9 +267,12 @@ function TableSkeleton() {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function RelatoriosClient() {
+export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props) {
   const [period,  setPeriod]  = useState<Period>('30d')
   const [channel, setChannel] = useState<Channel>('all')
+
+  const [selectedGoogleId, setSelectedGoogleId] = useState<string>(ALL_ACCOUNTS)
+  const [selectedMetaId,   setSelectedMetaId]   = useState<string>(ALL_ACCOUNTS)
 
   const [googleCampaigns,   setGoogleCampaigns]   = useState<Campaign[]>([])
   const [metaCampaigns,     setMetaCampaigns]     = useState<Campaign[]>([])
@@ -197,35 +289,119 @@ export default function RelatoriosClient() {
     setLoading(true)
     setError(null)
 
-    Promise.all([
-      fetch(`/api/google-ads/campaigns?period=${period}`).then((r) => r.json()),
-      fetch(`/api/meta-ads/campaigns?period=${period}`).then((r) => r.json()),
-      fetch(`/api/google-ads/campaigns?period=${period}&prev=true`).then((r) => r.json()).catch(() => null),
-      fetch(`/api/meta-ads/campaigns?period=${period}&prev=true`).then((r) => r.json()).catch(() => null),
-    ])
-      .then(([googleData, metaData, googlePrevData, metaPrevData]) => {
-        if (cancelled) return
-        setGoogleConnected(googleData.connected ?? false)
-        setGoogleCampaigns(googleData.campaigns ?? [])
-        setRoasData(googleData.roasData ?? [])
-        setMetaConnected(metaData.connected ?? false)
-        setMetaCampaigns(metaData.campaigns ?? [])
-        setGooglePrevSummary((googlePrevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null)
-        setMetaPrevSummary((metaPrevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null)
-      })
-      .catch(() => {
-        if (!cancelled) setError('Erro ao carregar campanhas.')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+    async function load() {
+      const isGoogleChannel = channel === 'all' || channel === 'google'
+      const isMetaChannel   = channel !== 'google'
+
+      const googleAcctsToFetch = isGoogleChannel
+        ? (selectedGoogleId === ALL_ACCOUNTS
+            ? googleAccounts
+            : googleAccounts.filter(a => a.account_id === selectedGoogleId))
+        : []
+
+      const metaAcctsToFetch = isMetaChannel
+        ? (selectedMetaId === ALL_ACCOUNTS
+            ? metaAccounts
+            : metaAccounts.filter(a => a.account_id === selectedMetaId))
+        : []
+
+      // Which Meta platforms to query depends on channel
+      const metaPlats: SubPlatform[] =
+        channel === 'facebook'  ? ['facebook'] :
+        channel === 'instagram' ? ['instagram'] :
+        ['facebook', 'instagram']
+
+      const multiGoogle = googleAcctsToFetch.length > 1
+      const multiMeta   = metaAcctsToFetch.length   > 1
+
+      const fetches: Promise<FetchResult>[] = []
+
+      // Google: one fetch per account
+      for (const acct of googleAcctsToFetch) {
+        const accountName = multiGoogle ? (acct.account_name ?? acct.account_id) : undefined
+        const base = `/api/google-ads/campaigns?period=${period}&account_id=${encodeURIComponent(acct.account_id)}`
+        fetches.push(
+          Promise.all([
+            fetch(base).then(r => r.json()),
+            fetch(`${base}&prev=true`).then(r => r.json()).catch(() => null),
+          ]).then(([data, prevData]) => ({
+            campaigns: (data.campaigns ?? []).map((c: Campaign) => ({
+              ...c,
+              ...(accountName ? { accountName } : {}),
+            })),
+            roasData:    data.roasData ?? [],
+            connected:   data.connected ?? false,
+            prevSummary: (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
+            source:      'google' as const,
+          }))
+        )
+      }
+
+      // Meta: one fetch per account × platform
+      for (const acct of metaAcctsToFetch) {
+        for (const plat of metaPlats) {
+          const accountName = multiMeta ? (acct.account_name ?? acct.account_id) : undefined
+          const base = `/api/meta-ads/campaigns?period=${period}&account_id=${encodeURIComponent(acct.account_id)}&platform=${plat}`
+          fetches.push(
+            Promise.all([
+              fetch(base).then(r => r.json()),
+              fetch(`${base}&prev=true`).then(r => r.json()).catch(() => null),
+            ]).then(([data, prevData]) => ({
+              campaigns: (data.campaigns ?? []).map((c: Campaign) => ({
+                ...c,
+                subPlatform: plat,
+                ...(accountName ? { accountName } : {}),
+              })),
+              roasData:    [],
+              connected:   data.connected ?? false,
+              prevSummary: (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
+              source:      'meta' as const,
+            }))
+          )
+        }
+      }
+
+      if (fetches.length === 0) {
+        if (!cancelled) {
+          setGoogleCampaigns([])
+          setMetaCampaigns([])
+          setRoasData([])
+          setGooglePrevSummary(null)
+          setMetaPrevSummary(null)
+          setGoogleConnected(false)
+          setMetaConnected(false)
+        }
+        return
+      }
+
+      const results = await Promise.all(fetches)
+      if (cancelled) return
+
+      const gResults = results.filter(r => r.source === 'google')
+      const mResults = results.filter(r => r.source === 'meta')
+
+      setGoogleCampaigns(gResults.flatMap(r => r.campaigns))
+      setMetaCampaigns(mResults.flatMap(r => r.campaigns))
+      // ROAS chart: only meaningful for a single Google account
+      setRoasData(gResults.length === 1 ? gResults[0].roasData : [])
+      setGooglePrevSummary(sumPrevResults(gResults))
+      setMetaPrevSummary(sumPrevResults(mResults))
+      setGoogleConnected(gResults.some(r => r.connected))
+      setMetaConnected(mResults.some(r => r.connected))
+    }
+
+    load().catch(() => {
+      if (!cancelled) setError('Erro ao carregar campanhas.')
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
 
     return () => { cancelled = true }
-  }, [period])
+  }, [period, channel, selectedGoogleId, selectedMetaId, googleAccounts, metaAccounts])
 
   const campaigns = useMemo<Campaign[]>(() => {
     if (channel === 'google') return googleCampaigns
-    if (channel === 'meta')   return metaCampaigns
+    if (channel === 'meta' || channel === 'facebook' || channel === 'instagram') return metaCampaigns
     return [...googleCampaigns, ...metaCampaigns]
   }, [channel, googleCampaigns, metaCampaigns])
 
@@ -241,11 +417,9 @@ export default function RelatoriosClient() {
     }
   }, [campaigns])
 
-  const prevSummary = useMemo<{
-    investment: number; revenue: number; roas: number; cpa: number
-  } | null>(() => {
-    const gPrev = channel !== 'meta'   ? googlePrevSummary : null
-    const mPrev = channel !== 'google' ? metaPrevSummary   : null
+  const prevSummary = useMemo<{ investment: number; revenue: number; roas: number; cpa: number } | null>(() => {
+    const gPrev = (channel === 'all' || channel === 'google') ? googlePrevSummary : null
+    const mPrev = channel !== 'google'                        ? metaPrevSummary   : null
     if (!gPrev && !mPrev) return null
     const investment  = (gPrev?.investment  ?? 0) + (mPrev?.investment  ?? 0)
     const revenue     = (gPrev?.revenue     ?? 0) + (mPrev?.revenue     ?? 0)
@@ -258,13 +432,26 @@ export default function RelatoriosClient() {
     }
   }, [channel, googlePrevSummary, metaPrevSummary])
 
-  const isConnected = channel === 'google'
-    ? googleConnected
-    : channel === 'meta'
-    ? metaConnected
-    : googleConnected || metaConnected
+  const isConnected =
+    channel === 'google'                                                         ? googleConnected :
+    (channel === 'meta' || channel === 'facebook' || channel === 'instagram')    ? metaConnected   :
+    (googleConnected || metaConnected)
 
-  const periodLabel = periodOptions.find((o) => o.value === period)?.label ?? ''
+  const showRoasChart     = channel !== 'meta' && channel !== 'facebook' && channel !== 'instagram'
+  const hasAccountNames   = campaigns.some(c => c.accountName)
+  const periodLabel       = periodOptions.find(o => o.value === period)?.label ?? ''
+
+  const notConnectedMessage =
+    channel === 'google'                                                      ? 'Google Ads não conectado.' :
+    (channel === 'meta' || channel === 'facebook' || channel === 'instagram') ? 'Meta Ads não conectado.'   :
+    'Nenhuma integração conectada.'
+
+  const prevChanges = {
+    investment: prevSummary ? pct(summary.investment, prevSummary.investment) : null,
+    revenue:    prevSummary ? pct(summary.revenue,    prevSummary.revenue)    : null,
+    roas:       prevSummary ? pct(summary.roas,       prevSummary.roas)       : null,
+    cpa:        prevSummary ? pct(summary.cpa,        prevSummary.cpa)        : null,
+  }
 
   const aiMetrics = {
     cost:        summary.investment,
@@ -276,20 +463,16 @@ export default function RelatoriosClient() {
     impressions: campaigns.reduce((s, c) => s + c.impressions, 0),
   }
 
-  const notConnectedMessage =
-    channel === 'google' ? 'Google Ads não conectado.' :
-    channel === 'meta'   ? 'Meta Ads não conectado.' :
-    'Nenhuma integração conectada.'
+  const showGoogleSelector = (channel === 'all' || channel === 'google') && googleAccounts.length > 1
+  const showMetaSelector   = channel !== 'google' && metaAccounts.length > 1
 
-  // Show ROAS chart only when Google data is available (Meta doesn't provide daily ROAS yet)
-  const showRoasChart = channel !== 'meta'
-
-  const prevChanges = {
-    investment: prevSummary ? pct(summary.investment, prevSummary.investment) : null,
-    revenue:    prevSummary ? pct(summary.revenue,    prevSummary.revenue)    : null,
-    roas:       prevSummary ? pct(summary.roas,       prevSummary.roas)       : null,
-    cpa:        prevSummary ? pct(summary.cpa,        prevSummary.cpa)        : null,
-  }
+  const channelOptions: { value: Channel; label: string; icon?: ReactNode }[] = [
+    { value: 'all',       label: 'Todos os canais' },
+    { value: 'google',    label: 'Google Ads',  icon: <SiGoogleads  color="#4285F4" size={12} /> },
+    { value: 'meta',      label: 'Meta Ads',    icon: <SiMeta       color="#0082FB" size={12} /> },
+    { value: 'facebook',  label: 'Facebook',    icon: <SiFacebook   color="#1877F2" size={12} /> },
+    { value: 'instagram', label: 'Instagram',   icon: <InstagramIcon size={12} /> },
+  ]
 
   return (
     <div className="p-6 md:p-8">
@@ -297,16 +480,43 @@ export default function RelatoriosClient() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">Relatórios</h1>
-        <p className="text-zinc-500 text-sm mt-1">
-          Análise detalhada das suas campanhas
-        </p>
+        <p className="text-zinc-500 text-sm mt-1">Análise detalhada das suas campanhas</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      {/* Period + channel filters */}
+      <div className="flex flex-wrap gap-3 mb-4">
         <FilterGroup options={periodOptions}  value={period}  onChange={setPeriod}  />
         <FilterGroup options={channelOptions} value={channel} onChange={setChannel} />
       </div>
+
+      {/* Account selectors — shown when 2+ accounts */}
+      {(showGoogleSelector || showMetaSelector) && (
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          {showGoogleSelector && (
+            <div className="flex items-center gap-2">
+              <SiGoogleads color="#4285F4" size={13} />
+              <span className="text-xs text-zinc-500">Conta:</span>
+              <AccountSelectorWithAll
+                accounts={googleAccounts}
+                selectedId={selectedGoogleId}
+                onSelect={setSelectedGoogleId}
+              />
+            </div>
+          )}
+          {showMetaSelector && (
+            <div className="flex items-center gap-2">
+              <SiMeta color="#0082FB" size={13} />
+              <span className="text-xs text-zinc-500">Conta Meta:</span>
+              <AccountSelectorWithAll
+                accounts={metaAccounts}
+                selectedId={selectedMetaId}
+                onSelect={setSelectedMetaId}
+              />
+            </div>
+          )}
+        </div>
+      )}
+      {!(showGoogleSelector || showMetaSelector) && <div className="mb-6" />}
 
       {/* Not connected banner */}
       {!loading && !isConnected && (
@@ -333,10 +543,10 @@ export default function RelatoriosClient() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Investimento Total', value: fmtBRL(summary.investment), desc: periodLabel,                       change: prevChanges.investment, higherIsBad: true  },
-            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),    desc: periodLabel,                       change: prevChanges.revenue,    higherIsBad: false },
+            { label: 'Investimento Total', value: fmtBRL(summary.investment), desc: periodLabel,                        change: prevChanges.investment, higherIsBad: true  },
+            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),    desc: periodLabel,                        change: prevChanges.revenue,    higherIsBad: false },
             { label: 'ROAS Médio',         value: `${summary.roas.toFixed(1).replace('.', ',')}×`, desc: 'Retorno sobre o investimento', change: prevChanges.roas, higherIsBad: false },
-            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),        desc: 'Custo por aquisição',             change: prevChanges.cpa,        higherIsBad: true  },
+            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),        desc: 'Custo por aquisição',              change: prevChanges.cpa,        higherIsBad: true  },
           ].map(({ label, value, desc, change, higherIsBad }) => (
             <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2">
               <p className="text-zinc-400 text-sm">{label}</p>
@@ -348,7 +558,7 @@ export default function RelatoriosClient() {
         </div>
       )}
 
-      {/* ROAS chart — Google only */}
+      {/* ROAS chart — Google only; hidden for meta channels */}
       {showRoasChart && (
         loading ? (
           <ChartSkeleton />
@@ -363,7 +573,7 @@ export default function RelatoriosClient() {
                 <XAxis dataKey="dia" {...axisProps} />
                 <YAxis
                   {...axisProps}
-                  tickFormatter={(v) => `${v}×`}
+                  tickFormatter={v => `${v}×`}
                   domain={['auto', 'auto']}
                   width={36}
                 />
@@ -412,7 +622,15 @@ export default function RelatoriosClient() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-800">
-                    {['Campanha', 'Status', 'Impressões', 'Cliques', 'CTR', 'CPC Médio', 'Custo', 'Conversões', 'Taxa de Conv.', 'ROAS'].map((col) => (
+                    <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap">
+                      Campanha
+                    </th>
+                    {hasAccountNames && (
+                      <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap">
+                        Conta
+                      </th>
+                    )}
+                    {['Status', 'Impressões', 'Cliques', 'CTR', 'CPC Médio', 'Custo', 'Conversões', 'Taxa de Conv.', 'ROAS'].map(col => (
                       <th
                         key={col}
                         className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap"
@@ -428,27 +646,45 @@ export default function RelatoriosClient() {
                     const cpc      = c.clicks > 0 ? c.cost / c.clicks : 0
                     const convRate = c.clicks > 0 ? (c.conversions / c.clicks) * 100 : 0
                     const roas     = c.cost > 0 ? c.revenue / c.cost : 0
+                    const rowKey   = `${c.platform}-${c.id}-${c.subPlatform ?? ''}-${c.accountName ?? ''}`
                     return (
-                      <tr key={`${c.platform}-${c.id}`} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
+                      <tr key={rowKey} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
+
+                        {/* Campaign name + sub-platform label */}
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-2 min-w-[200px]">
-                            <PlatformIcon platform={c.platform} />
-                            <span className="text-zinc-200 font-medium">{c.name}</span>
+                          <div className="flex items-center gap-2 min-w-[180px]">
+                            <PlatformIcon platform={c.platform} subPlatform={c.subPlatform} />
+                            <div className="min-w-0">
+                              <div className="text-zinc-200 font-medium truncate">{c.name}</div>
+                              {c.subPlatform && (
+                                <div className="text-[10px] text-zinc-500 mt-0.5">
+                                  {c.subPlatform === 'instagram' ? 'Instagram' : 'Facebook'}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
+
+                        {/* Account name column — only when multi-account mode */}
+                        {hasAccountNames && (
+                          <td className="px-4 py-3 whitespace-nowrap max-w-[160px]">
+                            <span className="text-xs text-zinc-400 truncate block">{c.accountName ?? '—'}</span>
+                          </td>
+                        )}
+
+                        {/* Status */}
                         <td className="px-4 py-3 whitespace-nowrap">
                           {c.status === 'active' ? (
                             <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-green-500/15 text-green-400 px-2 py-0.5 rounded-full">
-                              <span className="size-1.5 rounded-full bg-green-400" />
-                              Ativo
+                              <span className="size-1.5 rounded-full bg-green-400" />Ativo
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-zinc-700/50 text-zinc-400 px-2 py-0.5 rounded-full">
-                              <span className="size-1.5 rounded-full bg-zinc-500" />
-                              Pausado
+                              <span className="size-1.5 rounded-full bg-zinc-500" />Pausado
                             </span>
                           )}
                         </td>
+
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.impressions)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.clicks)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{ctr.toFixed(1).replace('.', ',')}%</td>
