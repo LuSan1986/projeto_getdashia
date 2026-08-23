@@ -357,23 +357,10 @@ function HeroPlatforms() {
       <g transform={`translate(${sat.sw.x},${sat.sw.y})`}>
         <g className="hp2-sw">
           <polygon points={H(54)} fill="rgba(5,5,10,0.95)"/>
-          {/* TikTok music note — 3-layer chromatic depth (official brand colors) */}
-          {/* Cyan shadow: #25F4EE, subtle 1.5px diagonal — thin aura behind white */}
-          <g transform="translate(-1.5, 1.5)" opacity="0.75">
-            <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#25F4EE" transform="rotate(-18,-7,13)"/>
-            <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#25F4EE"/>
-            <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#25F4EE" strokeWidth="5" fill="none" strokeLinecap="round"/>
+          {/* TikTok — path oficial Simple Icons (24×24 vbox), scale 1.6×, centrado */}
+          <g transform="scale(1.6) translate(-12,-12)">
+            <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.1-1.43-.06-2.79-.72-3.87-1.55-1.81-1.37-2.98-3.47-3.19-5.64-.01-.32-.01-.65-.01-.97.02-2.71 1.28-5.38 3.4-7.01 1.23-.97 2.79-1.66 4.4-1.6.14 1.43-.03 2.85-.03 4.29-.62-.03-1.23.07-1.78.37-.84.43-1.47 1.24-1.72 2.15-.16.59-.16 1.22-.09 1.83.24 2 2.03 3.72 4.07 3.77 1.37.04 2.76-.53 3.64-1.57.62-.75.91-1.71.92-2.65.02-4.44.01-8.88.02-13.31.01-.12-.03-.22-.01-.34z" fill="white"/>
           </g>
-          {/* Red shadow: #FE2C55, subtle 1.5px diagonal — thin aura behind white */}
-          <g transform="translate(1.5, -1.5)" opacity="0.75">
-            <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#FE2C55" transform="rotate(-18,-7,13)"/>
-            <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#FE2C55"/>
-            <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#FE2C55" strokeWidth="5" fill="none" strokeLinecap="round"/>
-          </g>
-          {/* White main layer */}
-          <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="white" transform="rotate(-18,-7,13)"/>
-          <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="white"/>
-          <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
         </g>
       </g>
       {/* SW label — above hex */}
