@@ -8,12 +8,6 @@ export const fetchCache = 'force-no-store'
 
 const REDIRECT_URI = 'https://www.getdashia.com.br/api/integrations/google/callback'
 
-const PERIOD_MAP: Record<string, string> = {
-  '7d':  'LAST_7_DAYS',
-  '30d': 'LAST_30_DAYS',
-  '90d': 'LAST_90_DAYS',
-}
-
 const MONTH_ABBR = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 
 function formatDate(yyyymmdd: string): string {
@@ -36,6 +30,17 @@ function getPrevDateRange(period: string): { start: string; end: string } {
   return { start: fmt(prevStart), end: fmt(prevEnd) }
 }
 
+function getCurrentDateRange(period: string): { start: string; end: string } {
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90
+  const today = new Date()
+  const end = new Date(today)
+  end.setDate(today.getDate() - 1)
+  const start = new Date(today)
+  start.setDate(today.getDate() - days)
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  return { start: fmt(start), end: fmt(end) }
+}
+
 const ADS_API = 'https://googleads.googleapis.com/v24'
 
 export async function GET(request: NextRequest) {
@@ -44,7 +49,7 @@ export async function GET(request: NextRequest) {
     const period        = searchParams.get('period') ?? '30d'
     const isPrev        = searchParams.get('prev') === 'true'
     const accountIdParam = searchParams.get('account_id')
-    const dateRange     = PERIOD_MAP[period] ?? 'LAST_30_DAYS'
+    const { start: dateStart, end: dateEnd } = getCurrentDateRange(period)
 
     const supabase = await createClient()
 
@@ -179,7 +184,7 @@ export async function GET(request: NextRequest) {
         metrics.conversions,
         metrics.conversions_value
       FROM campaign
-      WHERE segments.date DURING ${dateRange}
+      WHERE segments.date BETWEEN '${dateStart}' AND '${dateEnd}'
         AND campaign.status != 'REMOVED'
       ORDER BY metrics.cost_micros DESC
     `
@@ -190,7 +195,7 @@ export async function GET(request: NextRequest) {
         metrics.cost_micros,
         metrics.conversions_value
       FROM campaign
-      WHERE segments.date DURING ${dateRange}
+      WHERE segments.date BETWEEN '${dateStart}' AND '${dateEnd}'
         AND campaign.status != 'REMOVED'
       ORDER BY segments.date ASC
     `
