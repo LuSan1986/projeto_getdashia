@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 
-const BASE = 'https://projeto-getdashia.vercel.app'
+const BASE = 'https://www.getdashia.com.br'
 const REDIRECT_URI = `${BASE}/api/integrations/meta/callback`
 const SCOPES = ['ads_read', 'ads_management'].join(',')
 const API_VERSION = 'v21.0'
