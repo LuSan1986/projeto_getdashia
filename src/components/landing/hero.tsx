@@ -287,14 +287,13 @@ function HeroPlatforms() {
       {/* ════════════ NW: Google Ads ════════════ */}
       <g transform={`translate(${sat.nw.x},${sat.nw.y})`}>
         <g className="hp2-nw">
-          {/* Outer border ring (blue-tinted) + dark inner fill */}
-          <polygon points={H(60)} fill="rgba(66,133,244,0.30)"/>
-          <polygon points={H(56)} fill="rgba(8,12,30,0.97)"/>
-          {/* Google Ads "A" — two thick rounded strokes meeting at apex */}
-          <line x1="0" y1="-20" x2="-15" y2="17" stroke="#FBBC04" strokeWidth="8" strokeLinecap="round"/>
-          <line x1="0" y1="-20" x2="15"  y2="17" stroke="#4285F4" strokeWidth="8" strokeLinecap="round"/>
-          {/* Green circle at base of yellow arm */}
-          <circle cx="-15" cy="17" r="9" fill="#34A853"/>
+          {/* Neutral dark hex — same tone as TikTok */}
+          <polygon points={H(60)} fill="rgba(7,10,22,0.97)"/>
+          {/* Google Ads "A" — chunky arms, endpoints close so stripes almost touch */}
+          <line x1="0" y1="-20" x2="-11" y2="16" stroke="#FBBC04" strokeWidth="13" strokeLinecap="round"/>
+          <line x1="0" y1="-20" x2="11"  y2="16" stroke="#4285F4" strokeWidth="13" strokeLinecap="round"/>
+          {/* Green circle overlapping base of yellow arm */}
+          <circle cx="-11" cy="16" r="11" fill="#34A853"/>
         </g>
       </g>
       {/* NW label */}
@@ -359,14 +358,14 @@ function HeroPlatforms() {
         <g className="hp2-sw">
           <polygon points={H(54)} fill="rgba(5,5,10,0.95)"/>
           {/* TikTok music note — 3-layer chromatic depth (official brand colors) */}
-          {/* Cyan shadow: #25F4EE, offset 3px left + 3px down */}
-          <g transform="translate(-3, 3)" opacity="0.90">
+          {/* Cyan shadow: #25F4EE, subtle 1.5px diagonal — thin aura behind white */}
+          <g transform="translate(-1.5, 1.5)" opacity="0.75">
             <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#25F4EE" transform="rotate(-18,-7,13)"/>
             <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#25F4EE"/>
             <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#25F4EE" strokeWidth="5" fill="none" strokeLinecap="round"/>
           </g>
-          {/* Red shadow: #FE2C55, offset 3px right + 3px up */}
-          <g transform="translate(3, -3)" opacity="0.90">
+          {/* Red shadow: #FE2C55, subtle 1.5px diagonal — thin aura behind white */}
+          <g transform="translate(1.5, -1.5)" opacity="0.75">
             <ellipse cx="-7" cy="13" rx="10" ry="7.5" fill="#FE2C55" transform="rotate(-18,-7,13)"/>
             <rect x="2" y="-22" width="5" height="36" rx="2.5" fill="#FE2C55"/>
             <path d="M 7,-22 C 26,-16 25,-1 7,3" stroke="#FE2C55" strokeWidth="5" fill="none" strokeLinecap="round"/>
