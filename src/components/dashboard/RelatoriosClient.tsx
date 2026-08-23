@@ -306,13 +306,33 @@ const FUNNEL_COLORS = ['#06B6D4', '#3B82F6', '#818CF8', '#C084FC', '#E879F9']
 
 // ── Funnel chart ──────────────────────────────────────────────────────────────
 
-function FunnelChart({ steps }: { steps: FunnelStep[] }) {
+function FunnelChart({
+  steps,
+  channelLabel,
+  periodLabel,
+  scopeNote,
+}: {
+  steps:        FunnelStep[]
+  channelLabel: string
+  periodLabel:  string
+  scopeNote?:   string
+}) {
   if (steps.length === 0) return null
   const ref = steps[0]?.barValue ?? 1
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-      <p className="text-sm font-medium text-zinc-300 mb-5">Funil de Resultados</p>
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-5">
+        <div>
+          <p className="text-sm font-medium text-zinc-300">Funil de Resultados</p>
+          <p className="text-xs text-zinc-500 mt-0.5">{channelLabel} · {periodLabel}</p>
+        </div>
+        {scopeNote && (
+          <span className="text-[10px] text-zinc-600 bg-zinc-800 border border-zinc-700 px-2 py-1 rounded-lg">
+            {scopeNote}
+          </span>
+        )}
+      </div>
       <div>
         {steps.map((step, i) => {
           const barPct = ref > 0 ? Math.max(12, Math.sqrt(step.barValue / ref) * 100) : 12
@@ -683,10 +703,41 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       )}
 
       {/* Funnel chart */}
-      {loading
-        ? <FunnelSkeleton />
-        : (isConnected && funnelSteps.length > 0 && <FunnelChart steps={funnelSteps} />)
-      }
+      {(() => {
+        const funnelChannelLabel =
+          channel === 'google'    ? 'Google Ads'  :
+          channel === 'facebook'  ? 'Facebook'     :
+          channel === 'instagram' ? 'Instagram'    :
+          channel === 'meta'      ? 'Meta Ads'     :
+          'Todos os canais'
+
+        const googleAccountLabel = selectedGoogleId !== ALL_ACCOUNTS
+          ? (googleAccounts.find(a => a.account_id === selectedGoogleId)?.account_name ?? selectedGoogleId)
+          : null
+        const metaAccountLabel = selectedMetaId !== ALL_ACCOUNTS
+          ? (metaAccounts.find(a => a.account_id === selectedMetaId)?.account_name ?? selectedMetaId)
+          : null
+        const accountLabel = googleAccountLabel ?? metaAccountLabel
+        const channelDisplay = accountLabel
+          ? `${funnelChannelLabel} — ${accountLabel}`
+          : funnelChannelLabel
+
+        const scopeNote =
+          channel === 'meta' ? 'Facebook + Instagram somados' :
+          channel === 'all'  ? 'Google Ads + Meta Ads somados' :
+          undefined
+
+        return loading
+          ? <FunnelSkeleton />
+          : (isConnected && funnelSteps.length > 0 && (
+              <FunnelChart
+                steps={funnelSteps}
+                channelLabel={channelDisplay}
+                periodLabel={periodLabel}
+                scopeNote={scopeNote}
+              />
+            ))
+      })()}
 
       {/* ROAS chart — Google only; hidden for meta channels */}
       {showRoasChart && (
