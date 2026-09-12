@@ -44,9 +44,25 @@ O PRD completo está em `docs/PRD_GetDashia.md` no repositório.
 
 ## 4. ESTADO ATUAL
 
-### Resumo do estado do projeto (atualizado 18/08/2026)
+### Resumo do estado do projeto (atualizado 23/08/2026)
 
-O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem mais captura de waitlist) e uma campanha paga rodando no Meta Ads para gerar os primeiros usuários reais. As integrações com Google Ads e Meta Ads já buscam dados reais (não mock) e agora suportam múltiplas contas de anúncio conectadas por cliente, com seletor no dashboard. O e-mail automático de boas-vindas (Resend) está funcionando na confirmação de cadastro. O dashboard recebeu tema visual cyberpunk (cores/tipografia, sem elementos decorativos extras) e métricas voltadas a gestores de tráfego (CPC médio, taxa de conversão, comparativo com período anterior). A verificação do Meta App Review segue pendente, aguardando ~15 dias de uso real da API (previsão de reenvio: ~24/08/2026) e um novo screencast em inglês.
+O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem mais captura de waitlist) e uma campanha paga rodando no Meta Ads para gerar os primeiros usuários reais. As integrações com Google Ads e Meta Ads já buscam dados reais (não mock) e agora suportam múltiplas contas de anúncio conectadas por cliente, com seletor no dashboard. O e-mail automático de boas-vindas (Resend) está funcionando na confirmação de cadastro. O dashboard recebeu tema visual cyberpunk (cores/tipografia, sem elementos decorativos extras) e métricas voltadas a gestores de tráfego (CPC médio, taxa de conversão, comparativo com período anterior). **A reanálise do Meta App Review foi enviada em 23/08/2026 e está "Em análise" (prazo estimado de até 20 dias)** — volume de chamadas à API já atingido, screencast regravado com legendas em inglês, e um bug crítico de troca de sessão no fluxo OAuth do Meta foi identificado e corrigido nessa sessão.
+
+### Sessão 14 — concluído em 2026-08-23
+
+**Bug crítico corrigido: troca de sessão no OAuth do Meta Ads** ✅
+- Sintoma: ao conectar o Meta Ads estando logado como conta de teste (`teste@getdashia.com.br`), a sessão do app trocava para outra conta de usuário em vez de permanecer logada como a conta original
+- Causa raiz: `meta/connect/route.ts` e `meta/callback/route.ts` usavam a URL de preview da Vercel (`projeto-getdashia.vercel.app`) como base do redirect OAuth, em vez do domínio de produção — o callback rodava em outro domínio, onde o cookie de sessão do Supabase (escopado por domínio) não correspondia à sessão logada em `www.getdashia.com.br`
+- Correção aplicada via Claude Code: ambos os arquivos passaram a usar `https://www.getdashia.com.br` como base do redirect (commit `eb4ba3f`, push para `main`, deploy disparado via webhook)
+- Nova Redirect URI (`https://www.getdashia.com.br/api/integrations/meta/callback`) cadastrada nas configurações de Login do Facebook no Meta for Developers (mantendo a URL antiga do Vercel também na lista)
+- Testado e confirmado: fluxo completo (login → Integrações → Conectar Meta Ads → autorizar → volta logado como a mesma conta → card "Meta Ads" mostra dados reais) funcionando corretamente
+
+**Reanálise do Meta App Review enviada** ✅
+- Etapas concluídas no painel: Verificação, Configurações do app, Uso permitido (3 permissões com screencast novo, legendas em inglês queimadas via ffmpeg), Tratamento de dados, Instruções da análise
+- Credenciais de teste confirmadas funcionando (`teste@getdashia.com.br`) com dados reais visíveis no dashboard após a correção do bug de OAuth acima
+- Campos preenchidos: `instructions-web-2` com passo a passo em inglês do fluxo de login → Integrações → Conectar Meta Ads; `fblogin-web-1` = Sim; campos opcionais de código de cortesia e restrição geográfica deixados em branco
+- Solicitação enviada com sucesso em 23/08/2026 — Status: **Em análise** (prazo estimado até 20 dias)
+- Escopo da solicitação: `Marketing API Access Tier`, `business_management`, `ads_read` (novas solicitações) + `public_profile` (renovação de acesso existente)
 
 ### Sessão 13 — concluído em 2026-08-18
 
@@ -135,7 +151,7 @@ O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem ma
 **App GetDashia rejeitado na revisão da Meta em 2026-08-04 — motivo identificado:**
 - `business_management` e `ads_read`: screencast não mostrou fluxo completo (Meta pede novo vídeo em inglês, com legendas, mostrando login + concessão de permissão + uso real)
 - Marketing API Access Tier: sem chamadas suficientes à API nos últimos 15 dias
-- Ação em andamento: uso real da API do Meta Ads sendo gerado diariamente (lembrete automático configurado às 20h) até completar ~15 dias (previsão: 24/08/2026)
+- Ação concluída na Sessão 14: uso real da API do Meta Ads acumulado, screencast regravado e reanálise enviada
 
 **Dois bugs corrigidos na Visão Geral do dashboard (`/dashboard`)** ✅
 - Bug 1: mensagem "Nenhuma campanha encontrada" aparecia mesmo com campanhas ativas — corrigido criando `DashboardGoogleMetrics.tsx`, reaproveitando a mesma rota `/api/google-ads/campaigns` já usada em Relatórios
@@ -157,7 +173,7 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 - Portfólio empresarial "GetDashia" criado no Meta Business Manager ✅
 - App configurado como Provedor de Tecnologia no Meta Developer Portal ✅
 - Verificação da empresa: ✅ Aprovada
-- Verificação do acesso: ⏳ Em análise na época (concluída/rejeitada na Sessão 10 — ver acima)
+- Verificação do acesso: ⏳ Em análise na época (concluída/rejeitada na Sessão 10, reenviada e aprovação pendente na Sessão 14)
 - Formulário preenchido: Plataforma de SaaS, descrição do serviço, site getdashia.com.br
 
 ### Sessão 7 — concluído em 2026-05-27
@@ -171,7 +187,7 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## Pendente (ordem sugerida)
 
-1. Aguardar completar ~15 dias de uso real da API do Meta Ads (previsão: 24/08/2026), regravar screencast em inglês mostrando login + concessão de permissão + uso real dos dados, e reenviar `business_management` + `ads_read` + Marketing API Access Tier para revisão da Meta
+1. Aguardar resultado da reanálise do Meta App Review (enviada em 23/08/2026, prazo estimado até 20 dias) — não alterar configuração de OAuth/login do app nesse período
 2. Investigar por que o menu lateral do dashboard (Relatórios/Integrações/Configurações) não aparece no navegador mobile real (a confirmar com print tirado direto do celular)
 3. Confirmar se as mensagens de contato já foram enviadas aos 5 leads reais identificados no waitlist
 4. Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
@@ -201,6 +217,8 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
   - Business Manager: "Jessica Cristina" (possui Página GetDashia, conta de anúncios `act_825633728259357` usada pela campanha real, e outras contas de outros clientes como `act_445093580217547` "Jessica 1")
   - Página do Facebook: GetDashia (ID 1261264030411157)
   - Instagram comercial: @getdashia (vinculado à mesma Business Manager)
+  - Redirect URIs OAuth válidas cadastradas: `https://projeto-getdashia.vercel.app/api/integrations/meta/callback` (antiga) e `https://www.getdashia.com.br/api/integrations/meta/callback` (produção, adicionada na Sessão 14)
+  - Reanálise enviada em 23/08/2026 — Status: Em análise
 - Meta Business Manager: Portfólio "GetDashia" — Verificação da empresa ✅ Aprovada (portfólio próprio, sem ativos — ativos reais estão em "Jessica Cristina")
 - MEI: CNPJ 67.845.823/0001-99 — Luciano de Santana Oliveira
 
@@ -227,7 +245,7 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## 8. PRÓXIMO PASSO IMEDIATO
 
-1. Acompanhar a campanha "GetDashia - Divulgação Beta" e o acúmulo de dias de uso real da API do Meta Ads rumo a ~24/08/2026
+1. Acompanhar o status da reanálise do Meta App Review (enviada 23/08/2026, prazo até 20 dias) — sem alterar configuração de OAuth/login do app enquanto estiver em análise
 2. Investigar o menu lateral não aparecendo no mobile real (pedir print direto do celular)
 3. Corrigir logos na seção "Funciona com as ferramentas" da landing page (Google Ads e TikTok Ads não aparecem)
 4. Continuar redesign cyberpunk nas seções restantes da landing page: Preços, FAQ, Footer
