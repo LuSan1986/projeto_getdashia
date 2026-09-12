@@ -107,11 +107,15 @@ export async function GET(request: NextRequest) {
     }
 
     const accountId = integration.account_id
-    const headers = {
+    const loginCustomerId = (integration.login_customer_id as string | null) ?? null
+    console.log('[google-ads/timeseries] calling API | account_id:', accountId, '| login_customer_id:', loginCustomerId ?? '(none)')
+    const headers: Record<string, string> = {
       Authorization: `Bearer ${accessToken}`,
       'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? '',
-      'login-customer-id': process.env.GOOGLE_ADS_MCC_ID ?? '',
       'Content-Type': 'application/json',
+    }
+    if (loginCustomerId) {
+      headers['login-customer-id'] = loginCustomerId
     }
 
     const { start: m6start, end: m6end } = get6MonthsRange()
@@ -167,6 +171,14 @@ export async function GET(request: NextRequest) {
     } else {
       const text = await rev7dRes.text()
       console.error('[google-ads/timeseries] revenue error:', text.substring(0, 300))
+      return NextResponse.json({
+        connected: true,
+        revenue7d: [],
+        clicks6m: [],
+        apiError: true,
+        errorDetail: text.substring(0, 1000),
+        debugInfo: { accountId, loginCustomerId },
+      })
     }
 
     // Clicks 6m — aggregate by YYYY-MM
@@ -187,6 +199,14 @@ export async function GET(request: NextRequest) {
     } else {
       const text = await clicks6mRes.text()
       console.error('[google-ads/timeseries] clicks6m error:', text.substring(0, 300))
+      return NextResponse.json({
+        connected: true,
+        revenue7d,
+        clicks6m: [],
+        apiError: true,
+        errorDetail: text.substring(0, 1000),
+        debugInfo: { accountId, loginCustomerId },
+      })
     }
 
     return NextResponse.json({ connected: true, revenue7d, clicks6m })

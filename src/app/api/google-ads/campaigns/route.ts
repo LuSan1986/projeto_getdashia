@@ -133,11 +133,15 @@ export async function GET(request: NextRequest) {
 
     const accountId = integration.account_id
     const devToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? ''
-    const headers = {
+    const loginCustomerId = (integration.login_customer_id as string | null) ?? null
+    console.log('[google-ads/campaigns] calling API | account_id:', accountId, '| login_customer_id:', loginCustomerId ?? '(none)')
+    const headers: Record<string, string> = {
       Authorization: `Bearer ${accessToken}`,
       'developer-token': devToken,
-      'login-customer-id': process.env.GOOGLE_ADS_MCC_ID ?? '',
       'Content-Type': 'application/json',
+    }
+    if (loginCustomerId) {
+      headers['login-customer-id'] = loginCustomerId
     }
 
     // Previous period summary — returns aggregate only, no campaign detail
@@ -217,8 +221,16 @@ export async function GET(request: NextRequest) {
     ])
 
     if (!campaignRes.ok) {
-      console.error('[google-ads/campaigns] campaign query error:', JSON.stringify(campaignBody).substring(0, 500))
-      return NextResponse.json({ connected: true, campaigns: [], roasData: [], apiError: true })
+      const errorDetail = JSON.stringify(campaignBody).substring(0, 1000)
+      console.error('[google-ads/campaigns] campaign query error:', errorDetail)
+      return NextResponse.json({
+        connected: true,
+        campaigns: [],
+        roasData: [],
+        apiError: true,
+        errorDetail,
+        debugInfo: { accountId, loginCustomerId },
+      })
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

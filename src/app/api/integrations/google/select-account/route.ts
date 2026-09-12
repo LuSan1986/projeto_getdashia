@@ -3,13 +3,17 @@ import { createClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { customerId } = await req.json() as { customerId: string }
+    const { customerId, mccId } = await req.json() as {
+      customerId: string
+      mccId?: string | null
+    }
 
     if (!customerId || typeof customerId !== 'string') {
       return NextResponse.json({ error: 'customerId inválido' }, { status: 400 })
     }
 
     const cleanId = customerId.replace(/-/g, '')
+    const loginCustomerId = mccId ? mccId.replace(/-/g, '') : null
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -56,7 +60,12 @@ export async function POST(req: NextRequest) {
 
     const { error: updateError } = await supabase
       .from('integrations')
-      .update({ account_id: cleanId, status: 'active', is_default: isDefault })
+      .update({
+        account_id: cleanId,
+        status: 'active',
+        is_default: isDefault,
+        login_customer_id: loginCustomerId,
+      })
       .eq('id', pendingIntegration.id)
 
     if (updateError) {

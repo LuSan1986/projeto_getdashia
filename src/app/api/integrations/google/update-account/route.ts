@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       .update({ account_id: cleanId })
       .eq('organization_id', membership.organization_id)
       .eq('platform', 'google_ads')
+      .eq('account_id', 'pending')
 
     if (updateError) {
       return NextResponse.json({ error: 'Erro ao atualizar' }, { status: 500 })

@@ -8,6 +8,7 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 interface AccountInfo {
   id: string
   name: string
+  mccId: string | null
 }
 
 function formatCustomerId(id: string): string {
@@ -39,14 +40,14 @@ export default function SelecionarContaPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function handleSelect(accountId: string) {
-    setConnecting(accountId)
+  async function handleSelect(account: AccountInfo) {
+    setConnecting(account.id)
     setError(null)
     try {
       const res = await fetch('/api/integrations/google/select-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: accountId }),
+        body: JSON.stringify({ customerId: account.id, mccId: account.mccId }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -121,7 +122,7 @@ export default function SelecionarContaPage() {
                 <p className="text-xs text-zinc-500 mt-0.5">Customer ID</p>
               </div>
               <button
-                onClick={() => handleSelect(account.id)}
+                onClick={() => handleSelect(account)}
                 disabled={connecting !== null}
                 className="flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm font-semibold text-white transition"
               >
