@@ -64,6 +64,16 @@ O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem ma
 - Solicitação enviada com sucesso em 23/08/2026 — Status: **Em análise** (prazo estimado até 20 dias)
 - Escopo da solicitação: `Marketing API Access Tier`, `business_management`, `ads_read` (novas solicitações) + `public_profile` (renovação de acesso existente)
 
+### Sessão 14 — concluído em 2026-09-12
+
+**Correção completa do fluxo multi-conta do Google Ads** ✅
+- Bug: race condition em accounts/route.ts fazia o mccId de uma conta variar dependendo da ordem de resposta das chamadas paralelas à API — corrigido processando expansões de MCC antes de contas top-level, garantindo que o mccId correto sempre prevalece
+- Bug: update-account/route.ts sobrescrevia contas já conectadas ao processar uma nova conexão — corrigido restringindo o UPDATE apenas a linhas com account_id = 'pending'
+- Removido input manual de Customer ID no PendingAccountBanner (rota perigosa) — substituído por link direto ao seletor de contas
+- Descoberto e corrigido: contas de Google Ads podem ser "standalone" (acesso direto, sem MCC) — nesses casos login_customer_id deve ser NULL, não uma MCC qualquer. Conta de teste "ConectaWeb" (2588417691) confirmada como standalone via endpoint de diagnóstico temporário (removido após uso)
+- Adicionado errorDetail nas respostas de erro de /api/google-ads/campaigns e /api/google-ads/timeseries para facilitar diagnósticos futuros (antes falhas eram engolidas silenciosamente)
+- Conta GetDashia (530-781-4497) segue pausada no Google Ads aguardando verificação de anunciante (prazo já vencido) — ação pendente do lado do Google, não é bug do GetDashia
+
 ### Sessão 13 — concluído em 2026-08-18
 
 **Bug corrigido: conta errada do Meta Ads na integração**
@@ -200,6 +210,7 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 11. Adicionar gestor de tráfego como Testador no Meta Developer Portal
 12. Migrar Stripe para produção com CNPJ do MEI antes de cobrar de verdade — nesse momento, também migrar hosting do plano Vercel Hobby (gratuito, uso comercial não permitido) para o plano Pro (~$20/mês) e revisar limites gratuitos de Supabase/Resend caso o volume cresça
 13. Remover card "Plano Grátis" após período de testes beta
+14. Concluir verificação de anunciante da conta Google Ads GetDashia (530-781-4497), pausada por prazo vencido — botão "Corrigir" disponível no Google Ads Manager
 
 ## 5. CREDENCIAIS E CONTAS IMPORTANTES
 
