@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { encrypt } from '@/lib/crypto'
 
-const BASE = 'https://www.getdashia.com.br'
+const BASE = 'https://getdashia.com.br'
 const REDIRECT_URI = `${BASE}/api/integrations/meta/callback`
 const API_VERSION = 'v21.0'
 
