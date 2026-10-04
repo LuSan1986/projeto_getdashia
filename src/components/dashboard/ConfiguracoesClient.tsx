@@ -17,7 +17,7 @@ function SaveButton({ loading, disabled }: { loading: boolean; disabled: boolean
       disabled={loading || disabled}
       className="mt-4 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-5 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
     >
-      {loading ? 'Salvando…' : 'Salvar alterações'}
+      {loading ? 'Saving…' : 'Save changes'}
     </button>
   )
 }
@@ -53,14 +53,14 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
       const json = await res.json()
       if (!res.ok) {
         setNameOk(false)
-        setNameMsg(json.error ?? 'Erro desconhecido')
+        setNameMsg(json.error ?? 'Unknown error')
       } else {
         setNameOk(true)
-        setNameMsg('Perfil atualizado com sucesso.')
+        setNameMsg('Profile updated successfully.')
       }
     } catch {
       setNameOk(false)
-      setNameMsg('Erro de conexão. Tente novamente.')
+      setNameMsg('Connection error. Please try again.')
     } finally {
       setNameLoading(false)
     }
@@ -79,14 +79,14 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
       const json = await res.json()
       if (!res.ok) {
         setOrgOk(false)
-        setOrgMsg(json.error ?? 'Erro desconhecido')
+        setOrgMsg(json.error ?? 'Unknown error')
       } else {
         setOrgOk(true)
-        setOrgMsg('Organização atualizada com sucesso.')
+        setOrgMsg('Organization updated successfully.')
       }
     } catch {
       setOrgOk(false)
-      setOrgMsg('Erro de conexão. Tente novamente.')
+      setOrgMsg('Connection error. Please try again.')
     } finally {
       setOrgLoading(false)
     }
@@ -95,29 +95,28 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
   return (
     <div className="p-6 md:p-8 max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Configurações</h1>
-        <p className="text-zinc-500 text-sm mt-1">Gerencie seus dados pessoais e da empresa</p>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-zinc-500 text-sm mt-1">Manage your personal and organization details</p>
       </div>
 
       <div className="flex flex-col gap-6">
-        {/* Perfil */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold text-zinc-100">Perfil</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">Profile</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleProfileSave} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-400">Nome completo</label>
+                <label className="text-xs font-medium text-zinc-400">Full name</label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Seu nome"
+                  placeholder="Your name"
                   className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-cyan-500"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-400">E-mail</label>
+                <label className="text-xs font-medium text-zinc-400">Email</label>
                 <Input
                   value={email}
                   disabled
@@ -130,19 +129,18 @@ export default function ConfiguracoesClient({ fullName, email, orgName }: Props)
           </CardContent>
         </Card>
 
-        {/* Organização */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold text-zinc-100">Organização</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">Organization</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleOrgSave} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-400">Nome da empresa</label>
+                <label className="text-xs font-medium text-zinc-400">Company name</label>
                 <Input
                   value={org}
                   onChange={(e) => setOrg(e.target.value)}
-                  placeholder="Nome da sua empresa"
+                  placeholder="Your company name"
                   className="bg-zinc-950 border-zinc-700 text-zinc-100 placeholder-zinc-600 focus-visible:ring-cyan-500"
                 />
               </div>

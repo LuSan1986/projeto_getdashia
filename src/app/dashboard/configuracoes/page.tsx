@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 import ConfiguracoesClient from '@/components/dashboard/ConfiguracoesClient'
 
 export const metadata: Metadata = {
-  title: 'Configurações | GetDashia',
+  title: 'Settings | GetDashia',
 }
 
 export default async function ConfiguracoesPage() {

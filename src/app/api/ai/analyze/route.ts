@@ -12,27 +12,27 @@ interface Metrics {
   impressions: number
 }
 
-const SYSTEM_PROMPT = `Você é um consultor especialista em mídia paga (Google Ads e Meta Ads) para e-commerce brasileiro.
-Analise os dados abaixo e responda EXATAMENTE neste formato JSON:
+const SYSTEM_PROMPT = `You are an expert paid media consultant (Google Ads and Meta Ads) for e-commerce businesses.
+Analyze the data below and respond EXACTLY in this JSON format:
 {
-  "diagnostico": "diagnóstico geral em 2-3 frases",
-  "pontos_positivos": ["ponto 1", "ponto 2", "ponto 3"],
-  "oportunidades": ["ação concreta 1", "ação concreta 2", "ação concreta 3"],
-  "prioridade": "uma recomendação prioritária urgente"
+  "diagnostico": "general diagnosis in 2-3 sentences",
+  "pontos_positivos": ["highlight 1", "highlight 2", "highlight 3"],
+  "oportunidades": ["concrete action 1", "concrete action 2", "concrete action 3"],
+  "prioridade": "one urgent priority recommendation"
 }
-Seja direto, prático e use números dos dados fornecidos nas suas análises.`
+Be direct, practical and use numbers from the provided data in your analysis. Respond entirely in English.`
 
 function buildPrompt(m: Metrics): string {
   return `${SYSTEM_PROMPT}
 
-Dados dos últimos 30 dias:
-- Custo total: R$ ${m.cost.toFixed(2)}
-- Receita atribuída: ${m.revenue > 0 ? `R$ ${m.revenue.toFixed(2)}` : 'não disponível'}
-- ROAS: ${m.roas > 0 ? `${m.roas.toFixed(2)}×` : 'não disponível'}
-- CPA: ${m.cpa > 0 ? `R$ ${m.cpa.toFixed(2)}` : 'não disponível'}
-- Cliques: ${m.clicks.toLocaleString('pt-BR')}
-- Conversões: ${m.conversions.toLocaleString('pt-BR')}
-- Impressões: ${m.impressions.toLocaleString('pt-BR')}
+Data from the last 30 days:
+- Total cost: R$ ${m.cost.toFixed(2)}
+- Attributed revenue: ${m.revenue > 0 ? `R$ ${m.revenue.toFixed(2)}` : 'not available'}
+- ROAS: ${m.roas > 0 ? `${m.roas.toFixed(2)}×` : 'not available'}
+- CPA: ${m.cpa > 0 ? `R$ ${m.cpa.toFixed(2)}` : 'not available'}
+- Clicks: ${m.clicks.toLocaleString('en-US')}
+- Conversions: ${m.conversions.toLocaleString('en-US')}
+- Impressions: ${m.impressions.toLocaleString('en-US')}
 - CTR: ${m.impressions > 0 ? ((m.clicks / m.impressions) * 100).toFixed(2) : 0}%`
 }
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
     const { metrics } = await req.json() as { metrics: Metrics }
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'Chave da API não configurada' }, { status: 500 })
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -82,6 +82,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(analysis)
   } catch (err) {
     console.error('[ai/analyze]', err)
-    return NextResponse.json({ error: 'Erro ao gerar análise' }, { status: 500 })
+    return NextResponse.json({ error: 'Error generating analysis' }, { status: 500 })
   }
 }

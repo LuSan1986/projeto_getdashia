@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase-server'
 import type { AccountInfo } from '@/app/dashboard/page'
 
 export const metadata: Metadata = {
-  title: 'Relatórios | GetDashia',
-  description: 'Análise detalhada das suas campanhas de Google Ads e Meta Ads.',
+  title: 'Reports | GetDashia',
+  description: 'Detailed analysis of your Google Ads and Meta Ads campaigns.',
 }
 
 export default async function RelatoriosPage() {

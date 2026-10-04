@@ -30,7 +30,7 @@ interface Channel {
   id: ChannelId
   name: string
   renderIcon: () => ReactNode
-  metaChannel: boolean  // true = depende de Meta conectado
+  metaChannel: boolean
 }
 
 const channels: Channel[] = [
@@ -50,14 +50,13 @@ export default function ChannelsSection({ metaConnected = false, googleConnected
 
   const activeChannel = channels.find(c => c.id === selected)!
 
-  // Mensagem customizada por canal
   function getMsg() {
     if (activeChannel.id === 'google' && googleConnected) {
       return {
         show: true,
-        title: 'Google Ads — conectado',
-        sub: 'Sua conta Google Ads está conectada. Os dados são exibidos acima.',
-        badge: 'Conectado',
+        title: 'Google Ads — connected',
+        sub: 'Your Google Ads account is connected. Data is shown above.',
+        badge: 'Connected',
         badgeColor: 'text-green-400 bg-green-500/10 border-green-500/30',
       }
     }
@@ -67,29 +66,27 @@ export default function ChannelsSection({ metaConnected = false, googleConnected
     if (activeChannel.metaChannel && metaConnected) {
       return {
         show: true,
-        title: `${activeChannel.name} — conectado`,
-        sub: `Sua conta Meta está conectada. Os dados de ${activeChannel.name} estarão disponíveis em breve.`,
-        badge: 'Conectado',
+        title: `${activeChannel.name} — connected`,
+        sub: `Your Meta account is connected. ${activeChannel.name} data will be available soon.`,
+        badge: 'Connected',
         badgeColor: 'text-green-400 bg-green-500/10 border-green-500/30',
       }
     }
     return {
       show: true,
-      title: `${activeChannel.name} — integração em breve`,
-      sub: `Em breve você poderá visualizar campanhas do ${activeChannel.name} aqui.`,
-      badge: 'Em breve',
+      title: `${activeChannel.name} — coming soon`,
+      sub: `You'll be able to view ${activeChannel.name} campaigns here soon.`,
+      badge: 'Coming soon',
       badgeColor: 'text-zinc-400 bg-zinc-800 border-zinc-700',
     }
   }
 
   const msg = getMsg()
-  const available = activeChannel.id === 'google'
 
   return (
     <div className="mt-6">
-      <p className="text-sm font-medium text-zinc-300 mb-3">Canais</p>
+      <p className="text-sm font-medium text-zinc-300 mb-3">Channels</p>
 
-      {/* Tabs */}
       <div className="flex flex-wrap gap-3">
         {channels.map(({ id, name, renderIcon }) => (
           <button
@@ -107,7 +104,6 @@ export default function ChannelsSection({ metaConnected = false, googleConnected
         ))}
       </div>
 
-      {/* Mensagem de status do canal */}
       {msg.show && (
         <div className="mt-4 rounded-xl bg-zinc-900 border border-zinc-800 px-5 py-6 text-center">
           <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mb-3 ${msg.badgeColor}`}>

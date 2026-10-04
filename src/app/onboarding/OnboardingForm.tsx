@@ -20,22 +20,22 @@ function gerarSlug(nome: string): string {
 
 export default function OnboardingForm() {
   const router = useRouter()
-  const [nome, setNome] = useState('')
-  const [erro, setErro] = useState('')
-  const [carregando, setCarregando] = useState(false)
+  const [companyName, setCompanyName] = useState('')
+  const [errorMsg,    setErrorMsg]    = useState('')
+  const [loading,     setLoading]     = useState(false)
 
-  const slug = gerarSlug(nome)
+  const slug = gerarSlug(companyName)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setErro('')
+    setErrorMsg('')
 
-    if (nome.trim().length < 2) {
-      setErro('O nome da empresa deve ter pelo menos 2 caracteres.')
+    if (companyName.trim().length < 2) {
+      setErrorMsg('Company name must be at least 2 characters.')
       return
     }
 
-    setCarregando(true)
+    setLoading(true)
     const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -44,17 +44,17 @@ export default function OnboardingForm() {
       return
     }
 
-    const { error } = await supabase
+    const { error: dbError } = await supabase
       .from('organizations')
-      .insert({ name: nome.trim(), slug, owner_id: user.id })
+      .insert({ name: companyName.trim(), slug, owner_id: user.id })
 
-    if (error) {
-      if (error.code === '23505') {
-        setErro('Já existe uma empresa com esse nome. Tente um nome diferente.')
+    if (dbError) {
+      if (dbError.code === '23505') {
+        setErrorMsg('A company with this name already exists. Please try a different name.')
       } else {
-        setErro('Não foi possível criar a empresa. Tente novamente.')
+        setErrorMsg('Could not create the organization. Please try again.')
       }
-      setCarregando(false)
+      setLoading(false)
       return
     }
 
@@ -65,9 +65,9 @@ export default function OnboardingForm() {
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Bem-vindo ao GetDashia</CardTitle>
+          <CardTitle className="text-2xl text-white">Welcome to GetDashia</CardTitle>
           <CardDescription className="text-zinc-400">
-            Para começar, diga o nome da empresa ou cliente que você vai gerenciar.
+            To get started, enter the name of the company or client you&apos;ll manage.
           </CardDescription>
         </CardHeader>
 
@@ -75,31 +75,31 @@ export default function OnboardingForm() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="text-sm text-zinc-300 mb-1 block">
-                Nome da empresa
+                Company name
               </label>
               <Input
                 type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
                 required
-                placeholder="Ex: Loja da Maria"
+                placeholder="E.g.: Maria's Store"
                 className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
               />
               {slug && (
                 <p className="text-zinc-500 text-xs mt-1">
-                  Identificador: <span className="text-zinc-400">{slug}</span>
+                  Identifier: <span className="text-zinc-400">{slug}</span>
                 </p>
               )}
             </div>
 
-            {erro && <p className="text-red-400 text-sm">{erro}</p>}
+            {errorMsg && <p className="text-red-400 text-sm">{errorMsg}</p>}
 
             <Button
               type="submit"
-              disabled={carregando || nome.trim().length < 2}
+              disabled={loading || companyName.trim().length < 2}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
             >
-              {carregando ? 'Criando...' : 'Criar e entrar no painel'}
+              {loading ? 'Creating...' : 'Create and go to dashboard'}
             </Button>
           </form>
         </CardContent>

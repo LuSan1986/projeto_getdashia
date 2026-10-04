@@ -15,11 +15,11 @@ interface Props {
 }
 
 function fmtBRL(n: number) {
-  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(n)
 }
 
 function fmtInt(n: number) {
-  return n.toLocaleString('pt-BR')
+  return n.toLocaleString('en-US')
 }
 
 function CardSkeleton() {
@@ -59,10 +59,10 @@ export default function DashboardGoogleMetrics({ accountId }: Props) {
   )
 
   const cards = [
-    { label: 'Custo Total',  value: fmtBRL(totals.cost),              desc: 'Últimos 30 dias — Google Ads' },
-    { label: 'Cliques',      value: fmtInt(totals.clicks),             desc: 'Últimos 30 dias — Google Ads' },
-    { label: 'Conversões',   value: fmtInt(totals.conversions),        desc: 'Últimos 30 dias — Google Ads' },
-    { label: 'Impressões',   value: fmtInt(totals.impressions),        desc: 'Últimos 30 dias — Google Ads' },
+    { label: 'Total Cost',   value: fmtBRL(totals.cost),        desc: 'Last 30 days — Google Ads' },
+    { label: 'Clicks',       value: fmtInt(totals.clicks),       desc: 'Last 30 days — Google Ads' },
+    { label: 'Conversions',  value: fmtInt(totals.conversions),  desc: 'Last 30 days — Google Ads' },
+    { label: 'Impressions',  value: fmtInt(totals.impressions),  desc: 'Last 30 days — Google Ads' },
   ]
 
   if (loading) {
@@ -77,7 +77,7 @@ export default function DashboardGoogleMetrics({ accountId }: Props) {
     <>
       {connected && campaigns.length === 0 && (
         <p className="mb-4 text-yellow-500 text-xs">
-          Nenhuma campanha encontrada no período — conectado à conta {accountId}
+          No campaigns found for the period — connected to account {accountId}
         </p>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

@@ -86,7 +86,7 @@ function AccountSelector({
               <span className="truncate text-zinc-100">{a.account_name ?? a.account_id}</span>
               {a.is_default && (
                 <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full">
-                  padrão
+                  default
                 </span>
               )}
             </button>
@@ -134,22 +134,22 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
     if (selected === 'google' && googleConnected) return null
     if (selected === 'google' && !googleConnected) {
       return {
-        text:       'Google Ads não conectado. Conecte sua conta em Integrações.',
-        badge:      'Não conectado',
+        text:       'Google Ads not connected. Connect your account in Integrations.',
+        badge:      'Not connected',
         badgeClass: 'text-zinc-400 bg-zinc-800 border-zinc-700',
       }
     }
     if (isMetaChannel && metaConnected) return null
     if (isMetaChannel && !metaConnected) {
       return {
-        text:       'Meta Ads não conectado. Conecte sua conta em Integrações.',
-        badge:      'Não conectado',
+        text:       'Meta Ads not connected. Connect your account in Integrations.',
+        badge:      'Not connected',
         badgeClass: 'text-zinc-400 bg-zinc-800 border-zinc-700',
       }
     }
     return {
-      text:       'TikTok Ads — integração em breve.',
-      badge:      'Em breve',
+      text:       'TikTok Ads — integration coming soon.',
+      badge:      'Coming soon',
       badgeClass: 'text-zinc-400 bg-zinc-800 border-zinc-700',
     }
   }
@@ -160,7 +160,7 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
     <>
       {/* Channel tabs */}
       <div className="mb-6">
-        <p className="text-sm font-medium text-zinc-300 mb-3">Canais</p>
+        <p className="text-sm font-medium text-zinc-300 mb-3">Channels</p>
         <div className="flex flex-wrap gap-3">
           {CHANNELS.map(({ id, name, renderIcon }) => (
             <button
@@ -181,7 +181,7 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
         {/* Account selector — only when 2+ accounts for the selected platform */}
         {(showGoogleSelector || showMetaSelector) && (
           <div className="mt-3 flex items-center gap-2">
-            <span className="text-xs text-zinc-500">Conta:</span>
+            <span className="text-xs text-zinc-500">Account:</span>
             {showGoogleSelector && (
               <AccountSelector
                 accounts={googleAccounts}

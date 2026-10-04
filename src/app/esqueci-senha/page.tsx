@@ -8,92 +8,92 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default function EsqueciSenhaPage() {
-  const [email, setEmail] = useState('')
-  const [enviado, setEnviado] = useState(false)
-  const [erro, setErro] = useState('')
-  const [carregando, setCarregando] = useState(false)
+  const [email,    setEmail]    = useState('')
+  const [sent,     setSent]     = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [loading,  setLoading]  = useState(false)
 
-  async function handleEnviar(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setCarregando(true)
-    setErro('')
+    setLoading(true)
+    setErrorMsg('')
 
     const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: process.env.NEXT_PUBLIC_SITE_URL + '/auth/reset-password',
     })
 
-    if (error) {
-      setErro('Não foi possível enviar o e-mail. Verifique o endereço e tente novamente.')
-      setCarregando(false)
+    if (authError) {
+      setErrorMsg('Could not send the email. Please check the address and try again.')
+      setLoading(false)
       return
     }
 
-    setEnviado(true)
-    setCarregando(false)
+    setSent(true)
+    setLoading(false)
   }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Esqueci minha senha</CardTitle>
+          <CardTitle className="text-2xl text-white">Forgot my password</CardTitle>
           <CardDescription className="text-zinc-400">
-            {enviado
-              ? 'Verifique seu e-mail para continuar.'
-              : 'Digite seu e-mail para receber o link de redefinição.'}
+            {sent
+              ? 'Check your email to continue.'
+              : 'Enter your email to receive the reset link.'}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          {enviado ? (
+          {sent ? (
             <div className="flex flex-col gap-4">
               <p className="text-zinc-300 text-sm">
-                Enviamos um link de redefinição de senha para{' '}
-                <span className="text-indigo-400 font-medium">{email}</span>. Acesse seu e-mail e
-                clique no link para criar uma nova senha.
+                We sent a password reset link to{' '}
+                <span className="text-indigo-400 font-medium">{email}</span>. Access your email and
+                click the link to create a new password.
               </p>
               <p className="text-zinc-500 text-xs">
-                Não recebeu? Verifique a pasta de spam ou{' '}
+                Didn&apos;t receive it? Check your spam folder or{' '}
                 <button
-                  onClick={() => setEnviado(false)}
+                  onClick={() => setSent(false)}
                   className="text-indigo-400 hover:underline"
                 >
-                  tente novamente
+                  try again
                 </button>
                 .
               </p>
             </div>
           ) : (
-            <form onSubmit={handleEnviar} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="text-sm text-zinc-300 mb-1 block">E-mail</label>
+                <label className="text-sm text-zinc-300 mb-1 block">Email</label>
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="seu@email.com"
+                  placeholder="your@email.com"
                   className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
                 />
               </div>
 
-              {erro && <p className="text-red-400 text-sm">{erro}</p>}
+              {errorMsg && <p className="text-red-400 text-sm">{errorMsg}</p>}
 
               <Button
                 type="submit"
-                disabled={carregando}
+                disabled={loading}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
               >
-                {carregando ? 'Enviando...' : 'Enviar link de redefinição'}
+                {loading ? 'Sending...' : 'Send reset link'}
               </Button>
             </form>
           )}
 
           <p className="text-zinc-500 text-sm mt-6 text-center">
-            Lembrou a senha?{' '}
+            Remembered your password?{' '}
             <Link href="/login" className="text-indigo-400 hover:underline">
-              Voltar ao login
+              Back to sign in
             </Link>
           </p>
         </CardContent>

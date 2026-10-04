@@ -21,15 +21,15 @@ import type { DataSource } from './DashboardMetricsCards'
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 
-const MONTH_LC  = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
-const MONTH_CAP = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const MONTH_LC  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const MONTH_CAP = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 function lastNDayLabels(n: number): string[] {
   const today = new Date()
   return Array.from({ length: n }, (_, i) => {
     const d = new Date(today)
     d.setDate(today.getDate() - (n - 1) + i)
-    return `${String(d.getDate()).padStart(2, '0')}/${MONTH_LC[d.getMonth()]}`
+    return `${MONTH_LC[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')}`
   })
 }
 
@@ -64,8 +64,8 @@ const PIE_COLORS = ['#06B6D4', '#A855F7', '#E879F9', '#22d3ee']
 const ZERO_CONVERSION_DATA = [
   { name: 'Google Ads', value: 0 },
   { name: 'Meta Ads',   value: 0 },
-  { name: 'Orgânico',   value: 0 },
-  { name: 'Direto',     value: 0 },
+  { name: 'Organic',    value: 0 },
+  { name: 'Direct',     value: 0 },
 ]
 
 const tooltipProps = {
@@ -236,9 +236,9 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
 
-      {/* Área — Receita (período selecionável) */}
+      {/* Area — Total Revenue (selectable period) */}
       <ChartCard
-        title={`Receita Total — últimos ${revDays} dias`}
+        title={`Total Revenue — last ${revDays} days`}
         headerRight={
           <div className="flex gap-1">
             {([7, 15, 30] as const).map(d => (
@@ -276,7 +276,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               {...tooltipProps}
               formatter={(v: unknown) => {
                 const num = typeof v === 'number' ? v : 0
-                return [`R$ ${num.toLocaleString('pt-BR')}`, 'Receita']
+                return [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(num), 'Revenue']
               }}
             />
             <Area
@@ -292,8 +292,8 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
         </ResponsiveContainer>
       </ChartCard>
 
-      {/* Barras — Cliques por canal, últimos 6 meses */}
-      <ChartCard title="Cliques por Canal — últimos 6 meses">
+      {/* Bars — Clicks by channel, last 6 months */}
+      <ChartCard title="Clicks by Channel — last 6 months">
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={clicksData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -308,7 +308,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               formatter={(v: unknown, name: unknown) => {
                 const num = typeof v === 'number' ? v : 0
                 const label = typeof name === 'string' ? name : ''
-                return [num.toLocaleString('pt-BR'), label]
+                return [num.toLocaleString('en-US'), label]
               }}
             />
             <Legend content={(props) => <BarLegend payload={props.payload as Array<{ value: string }>} />} />
@@ -318,8 +318,8 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
         </ResponsiveContainer>
       </ChartCard>
 
-      {/* Pizza — Distribuição de conversões por fonte */}
-      <ChartCard title="Conversões por Fonte">
+      {/* Pie — Conversions by source */}
+      <ChartCard title="Conversions by Source">
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
@@ -340,7 +340,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               formatter={(v: unknown, name: unknown) => {
                 const num = typeof v === 'number' ? v : 0
                 const label = typeof name === 'string' ? name : ''
-                return [num.toLocaleString('pt-BR'), label]
+                return [num.toLocaleString('en-US'), label]
               }}
             />
             <Legend content={(props) => <PieLegend payload={props.payload as Array<{ value: string; color: string }>} />} />

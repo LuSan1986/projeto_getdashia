@@ -7,50 +7,46 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
-type Estado = 'carregando' | 'valido' | 'invalido'
+type State = 'loading' | 'valid' | 'invalid'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const [estado, setEstado] = useState<Estado>('carregando')
-  const [senha, setSenha] = useState('')
-  const [confirmarSenha, setConfirmarSenha] = useState('')
-  const [erro, setErro] = useState('')
-  const [carregando, setCarregando] = useState(false)
+  const [state,           setState]           = useState<State>('loading')
+  const [password,        setPassword]        = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errorMsg,        setErrorMsg]        = useState('')
+  const [loading,         setLoading]         = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('session:', JSON.stringify(session))
-      if (session) {
-        setEstado('valido')
-      } else {
-        setEstado('invalido')
-      }
+      setState(session ? 'valid' : 'invalid')
     })
   }, [])
 
-  async function handleRedefinir(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setErro('')
+    setErrorMsg('')
 
-    if (senha.length < 6) {
-      setErro('A senha deve ter pelo menos 6 caracteres.')
+    if (password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.')
       return
     }
 
-    if (senha !== confirmarSenha) {
-      setErro('As senhas não coincidem.')
+    if (password !== confirmPassword) {
+      setErrorMsg('Passwords do not match.')
       return
     }
 
-    setCarregando(true)
+    setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({ password: senha })
+    const { error: authError } = await supabase.auth.updateUser({ password })
 
-    if (error) {
-      console.error('updateUser error:', JSON.stringify(error))
-      setErro('Não foi possível redefinir a senha. Tente solicitar um novo link.')
-      setCarregando(false)
+    if (authError) {
+      console.error('updateUser error:', JSON.stringify(authError))
+      setErrorMsg('Could not reset password. Please request a new link.')
+      setLoading(false)
       return
     }
 
@@ -61,67 +57,67 @@ export default function ResetPasswordPage() {
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Criar nova senha</CardTitle>
+          <CardTitle className="text-2xl text-white">Create new password</CardTitle>
           <CardDescription className="text-zinc-400">
-            {estado === 'carregando' && 'Verificando sessão...'}
-            {estado === 'valido' && 'Escolha uma senha segura para sua conta GetDashia.'}
-            {estado === 'invalido' && 'Link inválido ou expirado.'}
+            {state === 'loading' && 'Checking session...'}
+            {state === 'valid'   && 'Choose a secure password for your GetDashia account.'}
+            {state === 'invalid' && 'Invalid or expired link.'}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          {estado === 'carregando' && (
-            <p className="text-zinc-400 text-sm">Aguarde...</p>
+          {state === 'loading' && (
+            <p className="text-zinc-400 text-sm">Please wait...</p>
           )}
 
-          {estado === 'invalido' && (
+          {state === 'invalid' && (
             <div className="flex flex-col gap-4">
               <p className="text-zinc-300 text-sm">
-                Este link de redefinição não é válido ou já expirou. Solicite um novo link para continuar.
+                This reset link is invalid or has expired. Request a new link to continue.
               </p>
               <Button
                 onClick={() => router.push('/esqueci-senha')}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
               >
-                Solicitar novo link
+                Request new link
               </Button>
             </div>
           )}
 
-          {estado === 'valido' && (
-            <form onSubmit={handleRedefinir} className="flex flex-col gap-4">
+          {state === 'valid' && (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="text-sm text-zinc-300 mb-1 block">Nova senha</label>
+                <label className="text-sm text-zinc-300 mb-1 block">New password</label>
                 <Input
                   type="password"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Minimum 6 characters"
                   className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-zinc-300 mb-1 block">Confirmar nova senha</label>
+                <label className="text-sm text-zinc-300 mb-1 block">Confirm new password</label>
                 <Input
                   type="password"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Repita a senha"
+                  placeholder="Repeat password"
                   className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
                 />
               </div>
 
-              {erro && <p className="text-red-400 text-sm">{erro}</p>}
+              {errorMsg && <p className="text-red-400 text-sm">{errorMsg}</p>}
 
               <Button
                 type="submit"
-                disabled={carregando}
+                disabled={loading}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
               >
-                {carregando ? 'Salvando...' : 'Salvar nova senha'}
+                {loading ? 'Saving...' : 'Save new password'}
               </Button>
             </form>
           )}

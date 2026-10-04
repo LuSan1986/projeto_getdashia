@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 import IntegracoesClient, { type PlatformState } from '@/components/dashboard/IntegracoesClient'
 
 export const metadata: Metadata = {
-  title: 'Integrações | GetDashia',
+  title: 'Integrations | GetDashia',
 }
 
 async function fetchPlatformState(

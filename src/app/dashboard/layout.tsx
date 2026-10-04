@@ -43,7 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               type="submit"
               className="text-sm bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg transition"
             >
-              Sair
+              Sign out
             </button>
           </form>
         </div>

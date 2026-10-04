@@ -13,11 +13,11 @@ interface Campaign {
 }
 
 function fmtBRL(n: number) {
-  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(n)
 }
 
 function fmtInt(n: number) {
-  return n.toLocaleString('pt-BR')
+  return n.toLocaleString('en-US')
 }
 
 function CardSkeleton() {
@@ -86,13 +86,13 @@ export default function DashboardMetricsCards({
     source === 'meta' && metaPlatform === 'facebook'  ? 'Facebook Ads' :
     source === 'meta' && metaPlatform === 'instagram' ? 'Instagram Ads' :
     source === 'meta' ? 'Meta Ads' : ''
-  const cardDesc = connected ? `Últimos 30 dias — ${platformLabel}` : 'Canal não conectado'
+  const cardDesc = connected ? `Last 30 days — ${platformLabel}` : 'Channel not connected'
 
   const cards = [
-    { label: 'Custo Total', value: connected ? fmtBRL(totals.cost)       : 'R$ 0,00' },
-    { label: 'Cliques',     value: connected ? fmtInt(totals.clicks)      : '0'       },
-    { label: 'Conversões',  value: connected ? fmtInt(totals.conversions) : '0'       },
-    { label: 'Impressões',  value: connected ? fmtInt(totals.impressions) : '0'       },
+    { label: 'Total Cost',    value: connected ? fmtBRL(totals.cost)       : fmtBRL(0)  },
+    { label: 'Clicks',        value: connected ? fmtInt(totals.clicks)      : '0'        },
+    { label: 'Conversions',   value: connected ? fmtInt(totals.conversions) : '0'        },
+    { label: 'Impressions',   value: connected ? fmtInt(totals.impressions) : '0'        },
   ]
 
   return (

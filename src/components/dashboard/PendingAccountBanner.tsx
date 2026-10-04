@@ -7,13 +7,13 @@ export default function PendingAccountBanner() {
       <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-400" />
       <div className="flex-1">
         <p className="text-sm font-medium text-amber-200">
-          Selecione qual conta Google Ads deseja conectar para começar a ver seus dados.
+          Select which Google Ads account you want to connect to start seeing your data.
         </p>
         <Link
           href="/dashboard/integracoes/google-ads/selecionar-conta"
           className="mt-3 inline-block rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-amber-400"
         >
-          Selecionar conta
+          Select account
         </Link>
       </div>
     </div>
