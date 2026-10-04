@@ -9,6 +9,53 @@ export const metadata: Metadata = {
 
 const secoes = [
   {
+    titulo: "Meta Ads Integration — ads_read permission (English summary)",
+    conteudo: (
+      <>
+        <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-5 py-4 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400 mb-3">
+            English summary · required for Meta App Review
+          </p>
+          <p className="mb-3">
+            GetDashia connects to the Meta Marketing API using the <strong className="text-zinc-100">ads_read</strong> permission only.
+            This is a <strong className="text-zinc-100">read-only</strong> permission — we never create, modify, or delete
+            any campaigns, ad sets, ads, or any other Meta resource on your behalf.
+          </p>
+          <p className="mb-3"><strong className="text-zinc-100">What we read:</strong></p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>Campaign-level performance metrics: impressions, clicks, spend, conversions, and revenue.</li>
+            <li>The list of ad accounts accessible under your Meta Business portfolio.</li>
+          </ul>
+          <p className="mb-3"><strong className="text-zinc-100">Why we read it:</strong></p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>To display consolidated campaign performance in your GetDashia dashboard.</li>
+            <li>To generate attribution reports comparing Google Ads and Meta Ads results.</li>
+          </ul>
+          <p className="mb-3"><strong className="text-zinc-100">What we do NOT do:</strong></p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>We do not sell, share, or transfer your Meta data to any third party.</li>
+            <li>We do not use your data for advertising, profiling, or any purpose beyond the dashboard.</li>
+            <li>We do not access your personal Facebook profile, friends, posts, or messages.</li>
+          </ul>
+          <p className="mb-3">
+            The OAuth access token is stored encrypted in our database (Supabase/AWS) and is never
+            exposed to the frontend or to any external service other than the Meta Marketing API.
+          </p>
+          <p>
+            To revoke access or request data deletion, see our{' '}
+            <Link href="/exclusao-de-dados" className="text-indigo-400 hover:text-indigo-300 underline">
+              Data Deletion Instructions
+            </Link>{' '}
+            page or email{' '}
+            <a href="mailto:luciano@getdashia.com.br" className="text-indigo-400 hover:text-indigo-300">
+              luciano@getdashia.com.br
+            </a>.
+          </p>
+        </div>
+      </>
+    ),
+  },
+  {
     titulo: "1. Quem somos",
     conteudo: (
       <>
