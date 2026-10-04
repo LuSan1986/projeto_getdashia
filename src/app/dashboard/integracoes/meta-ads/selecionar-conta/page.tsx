@@ -29,7 +29,7 @@ export default function SelecionarContaMetaPage() {
           setAccounts(data.accounts ?? [])
         }
       })
-      .catch(() => setError('Erro ao carregar contas. Tente novamente.'))
+      .catch(() => setError('Error loading accounts. Please try again.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -44,13 +44,13 @@ export default function SelecionarContaMetaPage() {
       })
       const json = await res.json()
       if (!res.ok) {
-        setError(json.error ?? 'Erro ao conectar conta')
+        setError(json.error ?? 'Error connecting account')
         setConnecting(null)
         return
       }
       router.push('/dashboard')
     } catch {
-      setError('Erro de conexão. Tente novamente.')
+      setError('Connection error. Please try again.')
       setConnecting(null)
     }
   }
@@ -62,9 +62,9 @@ export default function SelecionarContaMetaPage() {
           <SiFacebook color="#0082FB" size={20} />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Selecionar conta Meta Ads</h1>
+          <h1 className="text-xl font-bold text-white">Select Meta Ads account</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Escolha qual conta deseja conectar ao GetDashia
+            Choose which account you want to connect to GetDashia
           </p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function SelecionarContaMetaPage() {
       {loading && (
         <div className="flex items-center gap-2 py-12 text-zinc-400">
           <Loader2 size={18} className="animate-spin" />
-          <span className="text-sm">Buscando contas acessíveis…</span>
+          <span className="text-sm">Loading accessible accounts…</span>
         </div>
       )}
 
@@ -85,7 +85,7 @@ export default function SelecionarContaMetaPage() {
               href="/api/integrations/meta/connect"
               className="mt-2 inline-block text-xs text-red-400 underline hover:text-red-300"
             >
-              Tentar reconectar
+              Try reconnecting
             </a>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function SelecionarContaMetaPage() {
         <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-900/20 px-5 py-4">
           <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-400" />
           <p className="text-sm text-amber-300">
-            Nenhuma conta Meta Ads encontrada para este usuário.
+            No Meta Ads accounts found for this user.
           </p>
         </div>
       )}
@@ -125,12 +125,12 @@ export default function SelecionarContaMetaPage() {
                 {connecting === account.id ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    Conectando…
+                    Connecting…
                   </>
                 ) : (
                   <>
                     <CheckCircle size={14} />
-                    Conectar
+                    Connect
                   </>
                 )}
               </button>

@@ -58,7 +58,7 @@ Todas as seções da landing foram redesenhadas com estética cyberpunk:
 ### Meta Ads
 - OAuth flow: `/api/integrations/meta/connect` → callback → salva em `integrations` (platform: `meta_ads`)
 - App em revisão na Meta (submetido, até 20 dias úteis)
-- Permissões solicitadas: `ads_read`, `business_management`
+- Permissões solicitadas: `ads_read` (somente leitura; `business_management` removido — não utilizado)
 
 ---
 

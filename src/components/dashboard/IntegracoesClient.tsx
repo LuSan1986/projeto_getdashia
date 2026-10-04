@@ -29,35 +29,35 @@ function StatusBadge({ status }: { status: ChannelStatus }) {
   if (status === 'connected') {
     return (
       <span className="text-xs font-semibold bg-green-500/15 text-green-400 px-2.5 py-1 rounded-full">
-        Conectado
+        Connected
       </span>
     )
   }
   if (status === 'pending') {
     return (
       <span className="text-xs font-semibold bg-amber-500/15 text-amber-400 px-2.5 py-1 rounded-full">
-        Pendente
+        Pending
       </span>
     )
   }
   if (status === 'inactive') {
     return (
       <span className="text-xs font-semibold bg-zinc-700 text-zinc-400 px-2.5 py-1 rounded-full">
-        Desconectado
+        Disconnected
       </span>
     )
   }
   return (
     <span className="text-xs font-semibold bg-zinc-800 text-zinc-500 px-2.5 py-1 rounded-full">
-      Em breve
+      Coming soon
     </span>
   )
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
     day: '2-digit',
-    month: '2-digit',
     year: 'numeric',
   })
 }
@@ -85,13 +85,13 @@ function AccountRow({
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        setError((body as { error?: string }).error ?? 'Erro ao desconectar')
+        setError((body as { error?: string }).error ?? 'Error disconnecting')
         return
       }
       setConfirmOpen(false)
       router.refresh()
     } catch {
-      setError('Erro ao conectar ao servidor')
+      setError('Server connection error')
     } finally {
       setLoading(false)
     }
@@ -107,14 +107,14 @@ function AccountRow({
             <span className="text-sm text-zinc-100 truncate">{label}</span>
             {account.isDefault && (
               <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full border border-cyan-500/30">
-                padrão
+                default
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-zinc-500 truncate">{account.accountId}</span>
             <span className="text-xs text-zinc-600">·</span>
-            <span className="text-xs text-zinc-500 shrink-0">desde {formatDate(account.connectedAt)}</span>
+            <span className="text-xs text-zinc-500 shrink-0">since {formatDate(account.connectedAt)}</span>
           </div>
         </div>
         {!confirmOpen && (
@@ -122,7 +122,7 @@ function AccountRow({
             onClick={() => setConfirmOpen(true)}
             className="shrink-0 text-xs text-zinc-400 hover:text-red-400 transition px-3 py-1.5 rounded-lg hover:bg-red-500/10"
           >
-            Desconectar
+            Disconnect
           </button>
         )}
       </div>
@@ -138,13 +138,13 @@ function AccountRow({
               disabled={loading}
               className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
             >
-              {loading ? 'Desconectando…' : 'Confirmar'}
+              {loading ? 'Disconnecting…' : 'Confirm'}
             </button>
             <button
               onClick={() => { setConfirmOpen(false); setError(null) }}
               className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
             >
-              Cancelar
+              Cancel
             </button>
           </div>
         </div>
@@ -196,7 +196,7 @@ function PlatformCard({
       {/* Pending warning */}
       {hasPending && (
         <p className="text-xs text-amber-400 bg-amber-500/10 rounded-xl px-4 py-3">
-          Aguardando seleção de conta no painel principal.
+          Waiting for account selection in the main dashboard.
         </p>
       )}
 
@@ -220,14 +220,14 @@ function PlatformCard({
             href={connectHref}
             className="block text-center rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-400 hover:opacity-90 px-4 py-2 text-sm font-semibold text-white transition"
           >
-            Conectar
+            Connect
           </a>
         ) : (
           <a
             href={connectHref}
             className="block text-center rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition"
           >
-            + Conectar outra conta
+            + Connect another account
           </a>
         )}
       </div>
@@ -259,7 +259,7 @@ function ComingSoonCard({ icon: Icon, name, description }: {
           disabled
           className="w-full rounded-xl bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-500 cursor-not-allowed"
         >
-          Em breve
+          Coming soon
         </button>
       </div>
     </div>
@@ -270,9 +270,9 @@ export default function IntegracoesClient({ google, meta }: Props) {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Integrações</h1>
+        <h1 className="text-2xl font-bold text-white">Integrations</h1>
         <p className="text-zinc-500 text-sm mt-1">
-          Conecte suas plataformas de anúncios para importar dados automaticamente
+          Connect your ad platforms to automatically import data
         </p>
       </div>
 
@@ -281,7 +281,7 @@ export default function IntegracoesClient({ google, meta }: Props) {
           icon={SiGoogleads}
           iconColor="#4285F4"
           name="Google Ads"
-          description="Importe campanhas, cliques e conversões do Google Ads"
+          description="Import campaigns, clicks and conversions from Google Ads"
           state={google}
           connectHref="/api/integrations/google/connect"
           disconnectApiRoute="/api/integrations/google/disconnect"
@@ -291,7 +291,7 @@ export default function IntegracoesClient({ google, meta }: Props) {
           icon={SiMeta}
           iconColor="#0082FB"
           name="Meta Ads"
-          description="Facebook e Instagram Ads"
+          description="Facebook and Instagram Ads"
           state={meta}
           connectHref="/api/integrations/meta/connect"
           disconnectApiRoute="/api/integrations/meta/disconnect"
@@ -300,13 +300,13 @@ export default function IntegracoesClient({ google, meta }: Props) {
         <ComingSoonCard
           icon={SiGoogleanalytics}
           name="Google Analytics"
-          description="Dados de tráfego orgânico e comportamento do usuário"
+          description="Organic traffic data and user behavior"
         />
 
         <ComingSoonCard
           icon={SiTiktok}
           name="TikTok Ads"
-          description="Campanhas e métricas do TikTok for Business"
+          description="Campaigns and metrics from TikTok for Business"
         />
       </div>
     </div>

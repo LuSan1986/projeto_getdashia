@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 
 const BASE = 'https://www.getdashia.com.br'
 const REDIRECT_URI = `${BASE}/api/integrations/meta/callback`
-const SCOPES = ['ads_read', 'ads_management'].join(',')
+const SCOPES = ['ads_read'].join(',')
 const API_VERSION = 'v21.0'
 
 export async function GET() {
