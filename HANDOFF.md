@@ -44,9 +44,38 @@ O PRD completo está em `docs/PRD_GetDashia.md` no repositório.
 
 ## 4. ESTADO ATUAL
 
-### Resumo do estado do projeto (atualizado 23/08/2026)
+### Resumo do estado do projeto (atualizado 05/10/2026)
 
-O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem mais captura de waitlist) e uma campanha paga rodando no Meta Ads para gerar os primeiros usuários reais. As integrações com Google Ads e Meta Ads já buscam dados reais (não mock) e agora suportam múltiplas contas de anúncio conectadas por cliente, com seletor no dashboard. O e-mail automático de boas-vindas (Resend) está funcionando na confirmação de cadastro. O dashboard recebeu tema visual cyberpunk (cores/tipografia, sem elementos decorativos extras) e métricas voltadas a gestores de tráfego (CPC médio, taxa de conversão, comparativo com período anterior). **A reanálise do Meta App Review foi enviada em 23/08/2026 e está "Em análise" (prazo estimado de até 20 dias)** — volume de chamadas à API já atingido, screencast regravado com legendas em inglês, e um bug crítico de troca de sessão no fluxo OAuth do Meta foi identificado e corrigido nessa sessão.
+O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem mais captura de waitlist) e uma campanha paga rodando no Meta Ads para gerar os primeiros usuários reais. As integrações com Google Ads e Meta Ads já buscam dados reais (não mock) e agora suportam múltiplas contas de anúncio conectadas por cliente, com seletor no dashboard. O e-mail automático de boas-vindas (Resend) está funcionando na confirmação de cadastro. O dashboard recebeu tema visual cyberpunk (cores/tipografia, sem elementos decorativos extras) e métricas voltadas a gestores de tráfego (CPC médio, taxa de conversão, comparativo com período anterior). A UI foi traduzida para inglês para o Meta App Review. **Em 05/10/2026 reenviamos o pedido de revisão somente para `ads_read` — status: "Análise em andamento" (prazo típico de até 20 dias).** Páginas legais (/privacidade, /termos, /exclusao-de-dados) atualizadas com operador MEI/CNPJ, citação da OpenAI e outros ajustes de conformidade.
+
+### Sessão 15 — concluído em 2026-10-05
+
+**Meta App Review: nova submissão com apenas `ads_read`** ✅
+- App ID: 1291266016409615. Permissão solicitada: somente `ads_read`
+- `business_management` abandonado de propósito — o código usa apenas `/me/adaccounts`, `/{act}/campaigns` e `/{act}/insights`, sem endpoints de Business Manager; não pedir de novo a menos que surja necessidade de agências com contas de clientes dentro do Business Manager
+- Motivo da rejeição anterior: screencast não mostrava fluxo completo (login Meta, concessão de permissão, experiência completa, interface em inglês, legendas)
+- Enviado: screencast contínuo em inglês (`GetDashia_screencast_captions_only_v2.mp4`), no domínio oficial, com legendas; texto de uso; instruções para o revisor; login de teste (senha não registrada aqui)
+- Marketing API Access Tier: aprovado. `public_profile`: renovado
+- Status: **Análise em andamento** (prazo típico de até 20 dias a partir de 05/10/2026)
+
+**Configurações no painel da Meta** ✅
+- Domínio do app: `getdashia.com.br` (sem www)
+- URL de exclusão de dados: `https://getdashia.com.br/exclusao-de-dados`
+- URIs de redirecionamento OAuth: três URIs cadastradas — vercel.app, www e sem www (todas com caminho `/api/integrations/meta/callback`)
+- Manipulação de dados declarada: processadores Vercel, Supabase e OpenAI (OpenAI recebe apenas 7 métricas numéricas agregadas — spend, clicks, impressions, conversions, revenue, ROAS, CPA — sem IDs, nomes de campanha ou tokens); resposta "Nenhuma das acima" para políticas de pedidos de autoridades
+
+**UI traduzida para inglês** ✅
+- Login, sidebar, Integrations, seleção de conta Meta, Reports, Overview e título da página agora em inglês
+- ⚠️ Regra anterior "UI em pt-BR" (Diretriz 6) suspensa durante revisão da Meta — confirmar se volta ao pt-BR após aprovação
+
+**OAuth Meta: escopo reduzido** ✅
+- SCOPES: apenas `['ads_read']` — `ads_management` removido
+- BASE da URL de callback alterada para `getdashia.com.br` (sem www), commit `2405cd0`
+
+**Páginas legais atualizadas** ✅
+- `/privacidade`: label "required for Meta App Review" removido do resumo em inglês; bullet de ad accounts corrigido; OpenAI citada com escopo exato; operador atualizado para MEI/CNPJ 67.845.823/0001-99; data outubro de 2026
+- `/termos` e `/exclusao-de-dados`: nome padronizado para "Luciano de Santana Oliveira", MEI e CNPJ adicionados; exclusao-de-dados alinhada com a política de privacidade atualizada
+- Commits relevantes: `6f687d8`, `bddccb5`, `2405cd0`, `ac603b6`, `d16009b`
 
 ### Sessão 14 — concluído em 2026-08-23
 
@@ -197,20 +226,25 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## Pendente (ordem sugerida)
 
-1. Aguardar resultado da reanálise do Meta App Review (enviada em 23/08/2026, prazo estimado até 20 dias) — não alterar configuração de OAuth/login do app nesse período
-2. Investigar por que o menu lateral do dashboard (Relatórios/Integrações/Configurações) não aparece no navegador mobile real (a confirmar com print tirado direto do celular)
-3. Confirmar se as mensagens de contato já foram enviadas aos 5 leads reais identificados no waitlist
-4. Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
-5. Considerar criar alerta (e-mail/WhatsApp) para avisar sobre novos cadastros confirmados no GetDashia
-6. Instalar o Pixel do Meta no site (adiado deliberadamente até agora)
-7. Retomar/concluir o conector Supermetrics Facebook Ads (FA) — ficou autenticado mas com 503 persistente; útil para criar campanhas futuras direto no Claude
-8. Corrigir logos na seção "Ferramentas" da landing page — Google Ads e TikTok Ads não aparecem
-9. Redesign das seções restantes da landing page: Preços, FAQ, Footer
-10. TikTok Ads API — avaliar depois que Meta for aprovado
-11. Adicionar gestor de tráfego como Testador no Meta Developer Portal
-12. Migrar Stripe para produção com CNPJ do MEI antes de cobrar de verdade — nesse momento, também migrar hosting do plano Vercel Hobby (gratuito, uso comercial não permitido) para o plano Pro (~$20/mês) e revisar limites gratuitos de Supabase/Resend caso o volume cresça
-13. Remover card "Plano Grátis" após período de testes beta
-14. Concluir verificação de anunciante da conta Google Ads GetDashia (530-781-4497), pausada por prazo vencido — botão "Corrigir" disponível no Google Ads Manager
+1. Aguardar resultado do App Review (nova submissão 05/10/2026, somente `ads_read`) — não alterar telas, textos nem o fluxo do Facebook durante a revisão; responder rápido se a Meta pedir algo.
+2. Manter conta de teste do GetDashia funcionando durante a revisão; trocar a senha após a aprovação.
+3. Desligar o lembrete diário (scheduled task) do Meta Ads.
+4. Após aprovação: testar com pessoa de fora (outra conta do Facebook) e com conta de agência/Business Manager para verificar limitação do business_management.
+5. Acompanhar renovação periódica de acesso da Meta (Data Use Checklist) para não perder a permissão.
+6. Melhorias opcionais: adicionar parâmetro `state` no OAuth; corrigir landing page que mostra TikTok como "Conectado"; revisar afirmação sobre contratos de proteção de dados na política de privacidade.
+7. Investigar por que o menu lateral do dashboard (Relatórios/Integrações/Configurações) não aparece no navegador mobile real (a confirmar com print tirado direto do celular)
+8. Confirmar se as mensagens de contato já foram enviadas aos 5 leads reais identificados no waitlist
+9. Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
+10. Considerar criar alerta (e-mail/WhatsApp) para avisar sobre novos cadastros confirmados no GetDashia
+11. Instalar o Pixel do Meta no site (adiado deliberadamente até agora)
+12. Retomar/concluir o conector Supermetrics Facebook Ads (FA) — ficou autenticado mas com 503 persistente; útil para criar campanhas futuras direto no Claude
+13. Corrigir logos na seção "Ferramentas" da landing page — Google Ads e TikTok Ads não aparecem
+14. Redesign das seções restantes da landing page: Preços, FAQ, Footer
+15. TikTok Ads API — avaliar depois que Meta for aprovado
+16. Adicionar gestor de tráfego como Testador no Meta Developer Portal
+17. Migrar Stripe para produção com CNPJ do MEI antes de cobrar de verdade — nesse momento, também migrar hosting do plano Vercel Hobby (gratuito, uso comercial não permitido) para o plano Pro (~$20/mês) e revisar limites gratuitos de Supabase/Resend caso o volume cresça
+18. Remover card "Plano Grátis" após período de testes beta
+19. Concluir verificação de anunciante da conta Google Ads GetDashia (530-781-4497), pausada por prazo vencido — botão "Corrigir" disponível no Google Ads Manager
 
 ## 5. CREDENCIAIS E CONTAS IMPORTANTES
 
@@ -228,8 +262,8 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
   - Business Manager: "Jessica Cristina" (possui Página GetDashia, conta de anúncios `act_825633728259357` usada pela campanha real, e outras contas de outros clientes como `act_445093580217547` "Jessica 1")
   - Página do Facebook: GetDashia (ID 1261264030411157)
   - Instagram comercial: @getdashia (vinculado à mesma Business Manager)
-  - Redirect URIs OAuth válidas cadastradas: `https://projeto-getdashia.vercel.app/api/integrations/meta/callback` (antiga) e `https://www.getdashia.com.br/api/integrations/meta/callback` (produção, adicionada na Sessão 14)
-  - Reanálise enviada em 23/08/2026 — Status: Em análise
+  - Redirect URIs OAuth válidas cadastradas: `https://projeto-getdashia.vercel.app/api/integrations/meta/callback` (antiga), `https://www.getdashia.com.br/api/integrations/meta/callback` e `https://getdashia.com.br/api/integrations/meta/callback` (sem www — BASE atual do código, commit `2405cd0`)
+  - Nova submissão em 05/10/2026 (somente `ads_read`) — Status: **Análise em andamento**
 - Meta Business Manager: Portfólio "GetDashia" — Verificação da empresa ✅ Aprovada (portfólio próprio, sem ativos — ativos reais estão em "Jessica Cristina")
 - MEI: CNPJ 67.845.823/0001-99 — Luciano de Santana Oliveira
 
@@ -248,7 +282,7 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 3. Multi-tenancy — todas as queries ao Supabase filtram por `organization_id`.
 4. Segurança — chaves e secrets nunca em código; sempre `process.env`.
 5. Mobile-first — layout pensado primeiro para telas pequenas.
-6. Português brasileiro — toda interface voltada ao usuário final em pt-BR.
+6. Português brasileiro — toda interface voltada ao usuário final em pt-BR. ⚠️ Excepcionalmente traduzida para inglês durante o Meta App Review (Sessão 15) — confirmar se volta ao pt-BR após aprovação.
 7. Foco no MVP — não antecipar funcionalidades futuras.
 8. Commits semânticos — `tipo(escopo): descrição` em inglês.
 9. Build local antes do push — `npm run build` sem erros antes do `git push`.
@@ -256,10 +290,17 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## 8. PRÓXIMO PASSO IMEDIATO
 
-1. Acompanhar o status da reanálise do Meta App Review (enviada 23/08/2026, prazo até 20 dias) — sem alterar configuração de OAuth/login do app enquanto estiver em análise
-2. Investigar o menu lateral não aparecendo no mobile real (pedir print direto do celular)
-3. Corrigir logos na seção "Funciona com as ferramentas" da landing page (Google Ads e TikTok Ads não aparecem)
-4. Continuar redesign cyberpunk nas seções restantes da landing page: Preços, FAQ, Footer
+1. Acompanhar o App Review (nova submissão 05/10/2026, somente `ads_read`) — não alterar nada durante a análise
+2. Após aprovação: testar com conta externa (outra conta do Facebook) e com conta de agência/Business Manager
+3. Desligar o lembrete diário (scheduled task) do Meta Ads
+4. Investigar menu lateral não aparecendo no mobile real (pedir print direto do celular)
+5. Corrigir logos na seção "Funciona com as ferramentas" da landing page (Google Ads e TikTok Ads não aparecem)
+
+## 9. NOTAS E APRENDIZADOS
+
+- **Gravar screencast do fluxo Facebook:** antes de gravar, remover o GetDashia em `facebook.com/settings?tab=business_tools`; caso contrário aparece só "Continue as…" sem a tela de concessão de permissão.
+- **Idioma ao gravar:** o Chrome traduz a interface automaticamente; usar o idioma inglês tanto no Chrome quanto na conta do Facebook ao gravar, para que o screencast apareça em inglês.
+- **`git push` rejeitado (non-fast-forward):** usar `git pull --rebase origin main` antes de tentar o push novamente; nunca usar `--force`.
 
 ---
 
