@@ -14,7 +14,7 @@ const secoes = [
       <>
         <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-5 py-4 mb-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400 mb-3">
-            English summary · required for Meta App Review
+            English summary
           </p>
           <p className="mb-3">
             GetDashia connects to the Meta Marketing API using the <strong className="text-zinc-100">ads_read</strong> permission only.
@@ -24,7 +24,7 @@ const secoes = [
           <p className="mb-3"><strong className="text-zinc-100">What we read:</strong></p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
             <li>Campaign-level performance metrics: impressions, clicks, spend, conversions, and revenue.</li>
-            <li>The list of ad accounts accessible under your Meta Business portfolio.</li>
+            <li>The list of ad accounts your Facebook user has access to.</li>
           </ul>
           <p className="mb-3"><strong className="text-zinc-100">Why we read it:</strong></p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
@@ -33,7 +33,7 @@ const secoes = [
           </ul>
           <p className="mb-3"><strong className="text-zinc-100">What we do NOT do:</strong></p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
-            <li>We do not sell, share, or transfer your Meta data to any third party.</li>
+            <li>We do not sell your Meta data. When you click &lsquo;Analyze my campaigns&rsquo;, only aggregated numeric metrics (spend, clicks, impressions, conversions, revenue, ROAS and CPA) are sent to OpenAI to generate the analysis. No campaign names, ad account IDs, user IDs or access tokens are sent.</li>
             <li>We do not use your data for advertising, profiling, or any purpose beyond the dashboard.</li>
             <li>We do not access your personal Facebook profile, friends, posts, or messages.</li>
           </ul>
@@ -61,8 +61,8 @@ const secoes = [
       <>
         <p>
           O GetDashia é uma plataforma SaaS de análise de marketing digital,
-          operada por <strong>Luciano De Santana Oliveira</strong>, pessoa
-          física, com endereço em Rua &quot;A&quot;, nº 167, Mogi das Cruzes —
+          operada por <strong>Luciano de Santana Oliveira</strong>, microempreendedor
+          individual (MEI), CNPJ 67.845.823/0001-99, com endereço em Rua &quot;A&quot;, nº 167, Mogi das Cruzes —
           SP, CEP 08766-520.
         </p>
         <p className="mt-3">
@@ -114,6 +114,7 @@ const secoes = [
         <li>Exibir métricas consolidadas de campanhas no painel.</li>
         <li>Enviar comunicações transacionais (confirmação de e-mail, etc.).</li>
         <li>Melhorar a plataforma com base em dados agregados de uso.</li>
+        <li>Gerar análises automáticas das métricas agregadas das campanhas, por meio de inteligência artificial, apenas quando o usuário solicitar.</li>
         <li>Cumprir obrigações legais e regulatórias.</li>
       </ul>
     ),
@@ -149,6 +150,11 @@ const secoes = [
           <li>
             <strong>Google LLC / Meta Platforms</strong> — apenas para leitura
             de dados via APIs autorizadas por você.
+          </li>
+          <li>
+            <strong>OpenAI</strong> — análise por inteligência artificial. Recebe apenas métricas numéricas
+            agregadas das campanhas (sem nomes de campanhas, IDs de contas, IDs de usuários ou tokens),
+            somente quando o usuário aciona o recurso &ldquo;Analyze my campaigns&rdquo;.
           </li>
         </ul>
         <p className="mt-3">
@@ -223,7 +229,10 @@ const secoes = [
     conteudo: (
       <ul className="space-y-1">
         <li>
-          <strong>Responsável:</strong> Luciano De Santana Oliveira
+          <strong>Responsável:</strong> Luciano de Santana Oliveira
+        </li>
+        <li>
+          <strong>CNPJ:</strong> 67.845.823/0001-99
         </li>
         <li>
           <strong>Endereço:</strong> Rua &quot;A&quot;, nº 167, Mogi das Cruzes
@@ -256,7 +265,7 @@ export default function PoliticaDePrivacidade() {
 
         <h1 className="mb-2 text-3xl font-bold">Política de Privacidade</h1>
         <p className="mb-10 text-sm text-zinc-500">
-          Última atualização: maio de 2026
+          Última atualização: outubro de 2026
         </p>
 
         <div className="space-y-10">

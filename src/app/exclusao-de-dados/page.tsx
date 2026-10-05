@@ -133,7 +133,7 @@ export default function DataDeletionPage() {
                 Read campaign-level metrics: impressions, clicks, cost, conversions, and revenue
                 from the Meta Marketing API.
               </li>
-              <li>List the ad accounts accessible under your Meta Business portfolio.</li>
+              <li>List the ad accounts your Facebook user has access to.</li>
             </ul>
             <p className="mt-3">
               We do <strong>not</strong>:
@@ -141,7 +141,7 @@ export default function DataDeletionPage() {
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>Create, edit, pause, or delete any campaigns, ad sets, or ads.</li>
               <li>Access your personal Facebook profile, friends, posts, or messages.</li>
-              <li>Share or sell your data to any third party.</li>
+              <li>Sell your data or share identifiable data with any third party. (When you trigger the AI analysis feature, only aggregated numeric metrics — spend, clicks, impressions, conversions, revenue, ROAS, CPA — are sent to OpenAI.)</li>
               <li>Use your data for advertising or profiling purposes.</li>
             </ul>
           </section>
@@ -150,7 +150,8 @@ export default function DataDeletionPage() {
           <section>
             <h2 className="mb-3 text-xl font-semibold text-zinc-100">Contact</h2>
             <ul className="space-y-1">
-              <li><strong>Responsible:</strong> Luciano De Santana Oliveira</li>
+              <li><strong>Responsible:</strong> Luciano de Santana Oliveira</li>
+              <li><strong>CNPJ:</strong> 67.845.823/0001-99</li>
               <li>
                 <strong>Email:</strong>{' '}
                 <a

@@ -15,7 +15,8 @@ const secoes = [
         Ao criar uma conta ou utilizar o GetDashia, você concorda integralmente
         com estes Termos de Uso. Se não concordar, não utilize a plataforma.
         Estes termos regem a relação entre você e{" "}
-        <strong>Luciano De Santana Oliveira</strong>, operador do GetDashia.
+        <strong>Luciano de Santana Oliveira</strong>, microempreendedor individual (MEI),
+        CNPJ 67.845.823/0001-99, operador do GetDashia.
       </p>
     ),
   },
@@ -149,7 +150,7 @@ const secoes = [
     conteudo: (
       <p>
         Todo o conteúdo da plataforma — interface, código-fonte, marca,
-        logotipo e textos — é de propriedade exclusiva de Luciano De Santana
+        logotipo e textos — é de propriedade exclusiva de Luciano de Santana
         Oliveira. Os dados de campanhas pertencem ao respectivo anunciante.
         Nenhuma licença implícita é concedida além do uso necessário para operar
         a plataforma.
@@ -212,7 +213,10 @@ const secoes = [
     conteudo: (
       <ul className="space-y-1">
         <li>
-          <strong>Responsável:</strong> Luciano De Santana Oliveira
+          <strong>Responsável:</strong> Luciano de Santana Oliveira
+        </li>
+        <li>
+          <strong>CNPJ:</strong> 67.845.823/0001-99
         </li>
         <li>
           <strong>Endereço:</strong> Rua &quot;A&quot;, nº 167, Mogi das Cruzes
