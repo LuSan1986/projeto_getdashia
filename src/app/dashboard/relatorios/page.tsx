@@ -28,7 +28,7 @@ export default async function RelatoriosPage() {
       const [{ data: googleRows }, { data: metaRows }] = await Promise.all([
         supabase
           .from('integrations')
-          .select('id, account_id, account_name, is_default')
+          .select('id, account_id, account_name, is_default, conversion_value')
           .eq('organization_id', orgId)
           .eq('platform', 'google_ads')
           .eq('status', 'active')
@@ -36,7 +36,7 @@ export default async function RelatoriosPage() {
           .order('is_default', { ascending: false }),
         supabase
           .from('integrations')
-          .select('id, account_id, account_name, is_default')
+          .select('id, account_id, account_name, is_default, conversion_value')
           .eq('organization_id', orgId)
           .eq('platform', 'meta_ads')
           .eq('status', 'active')

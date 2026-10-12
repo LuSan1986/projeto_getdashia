@@ -551,11 +551,13 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
   const funnelSteps = useMemo<FunnelStep[]>(() => {
     if (campaigns.length === 0) return []
 
-    const impressions = campaigns.reduce((s, c) => s + c.impressions,        0)
-    const clicks      = campaigns.reduce((s, c) => s + c.clicks,             0)
-    const conversions = campaigns.reduce((s, c) => s + c.conversions,        0)
-    const revenue     = campaigns.reduce((s, c) => s + c.revenue,            0)
-    const leads       = campaigns.reduce((s, c) => s + (c.leads ?? 0),       0)
+    const impressions   = campaigns.reduce((s, c) => s + c.impressions,               0)
+    const clicks        = campaigns.reduce((s, c) => s + c.clicks,                    0)
+    const conversions   = campaigns.reduce((s, c) => s + c.conversions,               0)
+    const leads         = campaigns.reduce((s, c) => s + (c.leads ?? 0),              0)
+    const effRevResults = campaigns.map(c => getEffectiveRevenue(c))
+    const revenue       = effRevResults.reduce((s, r) => s + r.value,                 0)
+    const revenueEst    = effRevResults.some(r => r.isEstimated)
 
     if (impressions === 0) return []
 
@@ -566,14 +568,14 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     const leadRate  = clicks > 0 && showLeads ? `${fmtPct(leads / clicks * 100)} viraram leads` : null
     const convBase  = showLeads ? leads : clicks
     const convRate  = convBase > 0 ? `${fmtPct(conversions / convBase * 100)} converteram` : null
-    const avgTicket = conversions > 0 ? `Ticket médio: ${fmtBRL(revenue / conversions)}` : null
+    const avgTicket = conversions > 0 ? `Ticket médio: ${fmtBRL(revenue / conversions)}${revenueEst ? ' (est.)' : ''}` : null
 
     const steps: FunnelStep[] = [
-      { key: 'impressions', label: 'Impressões',  barValue: impressions,  displayed: fmtInt(impressions),  rateFromPrev: null       },
-      { key: 'clicks',      label: 'Cliques',     barValue: clicks,       displayed: fmtInt(clicks),       rateFromPrev: ctr        },
+      { key: 'impressions', label: 'Impressões',                                  barValue: impressions,  displayed: fmtInt(impressions),  rateFromPrev: null       },
+      { key: 'clicks',      label: 'Cliques',                                     barValue: clicks,       displayed: fmtInt(clicks),       rateFromPrev: ctr        },
       ...(showLeads ? [{ key: 'leads', label: 'Leads', barValue: leads, displayed: fmtInt(leads), rateFromPrev: leadRate }] : []),
-      { key: 'conversions', label: 'Conversões',  barValue: conversions,  displayed: fmtInt(conversions),  rateFromPrev: convRate   },
-      { key: 'revenue',     label: 'Receita',     barValue: conversions,  displayed: fmtBRL(revenue),      rateFromPrev: avgTicket  },
+      { key: 'conversions', label: 'Conversões',                                  barValue: conversions,  displayed: fmtInt(conversions),  rateFromPrev: convRate   },
+      { key: 'revenue',     label: revenueEst ? 'Receita Estimada' : 'Receita',   barValue: conversions,  displayed: fmtBRL(revenue),      rateFromPrev: avgTicket  },
     ]
 
     return steps
