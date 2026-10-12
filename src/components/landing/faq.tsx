@@ -8,7 +8,7 @@ const perguntas = [
     valor: "q1",
     pergunta: "Preciso saber programar para usar o GetDashia?",
     resposta:
-      "Não. O GetDashia foi feito para gestores de tráfego, não para desenvolvedores. A conexão com Google Ads, Meta Ads e e-commerce é feita em poucos cliques, sem instalar nada ou mexer em código.",
+      "Não. O GetDashia foi feito para gestores de tráfego, não para desenvolvedores. A conexão com Google Ads e Meta Ads é feita em poucos cliques, sem instalar nada ou mexer em código.",
   },
   {
     valor: "q2",
@@ -20,7 +20,7 @@ const perguntas = [
     valor: "q3",
     pergunta: "Tem período de teste gratuito?",
     resposta:
-      "O produto está em fase beta. Ao garantir seu lugar na lista de espera, você terá acesso antecipado com condições especiais antes do lançamento oficial. Os detalhes chegam por e-mail quando o acesso abrir.",
+      "O GetDashia está em beta gratuito: crie sua conta e use sem cartão. Antes de começarmos a cobrar, avisaremos por e-mail.",
   },
   {
     valor: "q4",
@@ -38,7 +38,7 @@ const perguntas = [
     valor: "q6",
     pergunta: "O que é atribuição multi-touch e por que importa?",
     resposta:
-      'É a capacidade de identificar todos os canais que contribuíram para uma venda — não só o último clique. Isso impede que Google Ads e Meta Ads "roubem" o crédito da mesma venda entre si, dando a você uma visão real do que está funcionando.',
+      'É a capacidade de identificar todos os canais que contribuíram para uma venda — não só o último clique. Isso impede que Google Ads e Meta Ads "roubem" o crédito da mesma venda entre si. Esse recurso está em desenvolvimento no GetDashia.',
   },
 ];
 

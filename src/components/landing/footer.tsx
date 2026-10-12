@@ -14,9 +14,7 @@ const colunas = [
   {
     titulo: "Empresa",
     links: [
-      { label: "Sobre nós", href: "/sobre" },
-      { label: "Blog", href: "/blog" },
-      { label: "Contato", href: "/contato" },
+      { label: "Contato", href: "mailto:luciano@getdashia.com.br" },
     ],
   },
   {
@@ -98,7 +96,7 @@ export default function Footer() {
               <ul className="space-y-3">
                 {coluna.links.map((link) => (
                   <li key={link.label}>
-                    {link.href.startsWith("#") ? (
+                    {link.href.startsWith("#") || link.href.startsWith("mailto:") ? (
                       <a
                         href={link.href}
                         className="text-sm transition-all duration-200"

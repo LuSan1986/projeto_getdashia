@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Minus } from "lucide-react";
-import CheckoutButton from "./CheckoutButton";
+import { Check } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Planos e Preços | GetDashia",
@@ -9,18 +8,12 @@ export const metadata: Metadata = {
     "Escolha o plano ideal para centralizar suas métricas de Google Ads e Meta Ads. Comece grátis por 7 dias.",
 };
 
-interface Feature {
-  texto: string;
-  incluso: boolean;
-}
-
 interface Plano {
   nome: string;
   preco: string;
   descricao: string;
-  lookupKey: string;
   destaque: boolean;
-  features: Feature[];
+  features: string[];
 }
 
 const planos: Plano[] = [
@@ -28,43 +21,34 @@ const planos: Plano[] = [
     nome: "Starter",
     preco: "R$ 59,90",
     descricao: "Para gestores que estão começando a profissionalizar os relatórios.",
-    lookupKey: "starter_mensal",
     destaque: false,
     features: [
-      { texto: "1 integração (Google Ads ou Meta Ads)", incluso: true },
-      { texto: "Dashboard básico com métricas de campanha", incluso: true },
-      { texto: "Dados dos últimos 30 dias", incluso: true },
-      { texto: "1 organização", incluso: true },
-      { texto: "7 dias grátis para testar", incluso: true },
+      "Google Ads ou Meta Ads",
+      "Dashboard com métricas de campanha",
+      "Comparativo com período anterior",
     ],
   },
   {
     nome: "Pro",
     preco: "R$ 97,00",
     descricao: "Para gestores com carteira de clientes que precisam escalar.",
-    lookupKey: "pro_mensal",
     destaque: true,
     features: [
-      { texto: "Google Ads + Meta Ads conectados", incluso: true },
-      { texto: "Dashboard completo com CPA e ROAS", incluso: true },
-      { texto: "Dados dos últimos 90 dias", incluso: true },
-      { texto: "1 organização", incluso: true },
-      { texto: "7 dias grátis para testar", incluso: true },
+      "Google Ads + Meta Ads conectados",
+      "Dashboard com CPA, ROAS e métricas de campanha",
+      "Comparativo com período anterior",
     ],
   },
   {
     nome: "Business",
     preco: "R$ 197,00",
     descricao: "Para agências e times com múltiplos clientes e alto volume.",
-    lookupKey: "business_mensal",
     destaque: false,
     features: [
-      { texto: "Google Ads + Meta Ads conectados", incluso: true },
-      { texto: "Dashboard completo com CPA e ROAS", incluso: true },
-      { texto: "Histórico completo de dados", incluso: true },
-      { texto: "Múltiplas organizações", incluso: true },
-      { texto: "Suporte prioritário", incluso: true },
-      { texto: "7 dias grátis para testar", incluso: true },
+      "Google Ads + Meta Ads conectados",
+      "Dashboard com CPA, ROAS e métricas de campanha",
+      "Comparativo com período anterior",
+      "Suporte prioritário",
     ],
   },
 ];
@@ -95,7 +79,7 @@ export default function PrecosPage() {
             Planos e <span className="text-indigo-400">preços</span>
           </h1>
           <p className="mt-4 text-lg text-zinc-400">
-            7 dias grátis em todos os planos. Sem cartão de crédito para começar.
+            Beta gratuito. Sem cartão de crédito para começar.
           </p>
         </div>
 
@@ -163,50 +147,41 @@ export default function PrecosPage() {
 
               <ul className="mb-6 flex-1 space-y-3">
                 {plano.features.map((feature) => (
-                  <li key={feature.texto} className="flex items-center gap-3">
-                    {feature.incluso ? (
-                      <Check className="size-4 shrink-0 text-indigo-400" />
-                    ) : (
-                      <Minus className="size-4 shrink-0 text-zinc-600" />
-                    )}
-                    <span
-                      className={
-                        feature.incluso
-                          ? "text-sm text-zinc-300"
-                          : "text-sm text-zinc-600"
-                      }
-                    >
-                      {feature.texto}
-                    </span>
+                  <li key={feature} className="flex items-center gap-3">
+                    <Check className="size-4 shrink-0 text-indigo-400" />
+                    <span className="text-sm text-zinc-300">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <CheckoutButton
-                lookupKey={plano.lookupKey}
+              <Link
+                href="/cadastro"
                 className={
                   plano.destaque
-                    ? "w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:opacity-60"
-                    : "w-full rounded-lg border border-zinc-700 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-60"
+                    ? "w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 text-center block"
+                    : "w-full rounded-lg border border-zinc-700 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-zinc-100 text-center block"
                 }
               >
-                Começar grátis
-              </CheckoutButton>
+                Criar conta grátis
+              </Link>
             </div>
           ))}
         </div>
 
         {/* Rodapé informativo */}
         <p className="mt-10 text-center text-sm text-zinc-600">
+          Planos disponíveis após o beta. Durante o beta, todos os recursos estão liberados gratuitamente.
+        </p>
+        <p className="mt-3 text-center text-sm text-zinc-700">
           Ao assinar, você concorda com nossos{" "}
-          <Link href="/termos" className="text-zinc-500 underline hover:text-zinc-300">
+          <Link href="/termos" className="text-zinc-600 underline hover:text-zinc-300">
             Termos de Uso
           </Link>{" "}
           e{" "}
-          <Link href="/privacidade" className="text-zinc-500 underline hover:text-zinc-300">
+          <Link href="/privacidade" className="text-zinc-600 underline hover:text-zinc-300">
             Política de Privacidade
           </Link>
-          . Cancele quando quiser.
+          .
         </p>
       </div>
     </div>

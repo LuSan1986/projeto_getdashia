@@ -491,8 +491,8 @@ export function StatsBar() {
           <path d="M3 10h18M8 3v4M16 3v4" stroke="#A855F7" strokeWidth="1.8" strokeLinecap="round"/>
         </svg>
       ),
-      value: '7 dias',
-      label: 'Trial gratuito',
+      value: 'Beta',
+      label: 'Gratuito agora',
       sub: 'Sem cartão de crédito',
     },
     {

@@ -26,11 +26,9 @@ const planos: Plano[] = [
     borderColor: "rgba(6,182,212,0.30)",
     glowColor: "rgba(6,182,212,0.10)",
     features: [
-      "1 integração (Google Ads ou Meta Ads)",
-      "Dashboard básico com métricas de campanha",
-      "Dados dos últimos 30 dias",
-      "1 organização",
-      "7 dias grátis para testar",
+      "Google Ads ou Meta Ads",
+      "Dashboard com métricas de campanha",
+      "Comparativo com período anterior",
     ],
   },
   {
@@ -44,10 +42,8 @@ const planos: Plano[] = [
     glowColor: "rgba(232,121,249,0.15)",
     features: [
       "Google Ads + Meta Ads conectados",
-      "Dashboard completo com CPA e ROAS",
-      "Dados dos últimos 90 dias",
-      "1 organização",
-      "7 dias grátis para testar",
+      "Dashboard com CPA, ROAS e métricas de campanha",
+      "Comparativo com período anterior",
     ],
   },
   {
@@ -61,10 +57,9 @@ const planos: Plano[] = [
     glowColor: "rgba(168,85,247,0.10)",
     features: [
       "Google Ads + Meta Ads conectados",
-      "Dashboard completo com CPA e ROAS",
-      "Histórico completo de dados",
+      "Dashboard com CPA, ROAS e métricas de campanha",
+      "Comparativo com período anterior",
       "Suporte prioritário",
-      "7 dias grátis para testar",
     ],
   },
 ];
@@ -255,7 +250,7 @@ export default function Planos() {
 
         {/* Rodapé */}
         <p className="mt-10 text-center text-sm" style={{ color: "#475569" }}>
-          Todos os planos incluem 7 dias grátis. Sem cartão de crédito para começar.
+          Planos disponíveis após o beta. Durante o beta, todos os recursos estão liberados gratuitamente.
         </p>
       </div>
     </section>

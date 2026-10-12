@@ -83,7 +83,7 @@ const itens: ItemFuncionalidade[] = [
     Icone: SlidersHorizontal,
     nome: "Filtros e comparativos",
     descricao:
-      "Filtre por período, canal, campanha e ROAS mínimo. Compare resultados lado a lado em segundos.",
+      "Filtre por período (7, 30 ou 90 dias) e canal. Veja os resultados de Google Ads e Meta Ads no mesmo painel.",
     cor: "#F59E0B",
     glowFull: "rgba(245,158,11,0.85)",
     glowSoft: "rgba(245,158,11,0.10)",
