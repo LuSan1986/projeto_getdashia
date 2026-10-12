@@ -18,18 +18,18 @@ import {
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 import type { DataSource } from './DashboardMetricsCards'
+import { fmtBRL, fmtInt } from '@/lib/format'
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 
-const MONTH_LC  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-const MONTH_CAP = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const MONTH_PT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 
 function lastNDayLabels(n: number): string[] {
   const today = new Date()
   return Array.from({ length: n }, (_, i) => {
     const d = new Date(today)
     d.setDate(today.getDate() - (n - 1) + i)
-    return `${MONTH_LC[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')}`
+    return `${String(d.getDate()).padStart(2, '0')}/${MONTH_PT[d.getMonth()]}`
   })
 }
 
@@ -37,7 +37,7 @@ function last6MonthLabels(): string[] {
   const today = new Date()
   return Array.from({ length: 6 }, (_, i) => {
     const d = new Date(today.getFullYear(), today.getMonth() - 5 + i, 1)
-    return MONTH_CAP[d.getMonth()]
+    return MONTH_PT[d.getMonth()]
   })
 }
 
@@ -276,7 +276,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               {...tooltipProps}
               formatter={(v: unknown) => {
                 const num = typeof v === 'number' ? v : 0
-                return [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(num), 'Receita']
+                return [fmtBRL(num), 'Receita']
               }}
             />
             <Area
@@ -308,7 +308,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               formatter={(v: unknown, name: unknown) => {
                 const num = typeof v === 'number' ? v : 0
                 const label = typeof name === 'string' ? name : ''
-                return [num.toLocaleString('en-US'), label]
+                return [fmtInt(num), label]
               }}
             />
             <Legend content={(props) => <BarLegend payload={props.payload as Array<{ value: string }>} />} />
@@ -340,7 +340,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               formatter={(v: unknown, name: unknown) => {
                 const num = typeof v === 'number' ? v : 0
                 const label = typeof name === 'string' ? name : ''
-                return [num.toLocaleString('en-US'), label]
+                return [fmtInt(num), label]
               }}
             />
             <Legend content={(props) => <PieLegend payload={props.payload as Array<{ value: string; color: string }>} />} />

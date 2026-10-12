@@ -36,7 +36,7 @@ export default function SelecionarContaPage() {
           setAccounts(data.accounts ?? [])
         }
       })
-      .catch(() => setError('Error loading accounts. Please try again.'))
+      .catch(() => setError('Erro ao carregar contas. Tente novamente.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -47,17 +47,17 @@ export default function SelecionarContaPage() {
       const res = await fetch('/api/integrations/google/select-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: account.id, mccId: account.mccId }),
+        body: JSON.stringify({ customerId: account.id, mccId: account.mccId, accountName: account.name }),
       })
       const json = await res.json()
       if (!res.ok) {
-        setError(json.error ?? 'Error connecting account')
+        setError(json.error ?? 'Erro ao conectar conta')
         setConnecting(null)
         return
       }
       router.push('/dashboard')
     } catch {
-      setError('Connection error. Please try again.')
+      setError('Erro de conexão. Tente novamente.')
       setConnecting(null)
     }
   }
@@ -69,9 +69,9 @@ export default function SelecionarContaPage() {
           <SiGoogleads color="#4285F4" size={20} />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Select Google Ads account</h1>
+          <h1 className="text-xl font-bold text-white">Selecione sua conta do Google Ads</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Choose which account to connect to GetDashia
+            Escolha qual conta conectar ao GetDashia
           </p>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function SelecionarContaPage() {
       {loading && (
         <div className="flex items-center gap-2 py-12 text-zinc-400">
           <Loader2 size={18} className="animate-spin" />
-          <span className="text-sm">Loading accessible accounts…</span>
+          <span className="text-sm">Carregando contas disponíveis…</span>
         </div>
       )}
 
@@ -92,7 +92,7 @@ export default function SelecionarContaPage() {
               href="/api/integrations/google/connect"
               className="mt-2 inline-block text-xs text-red-400 underline hover:text-red-300"
             >
-              Try reconnecting
+              Tentar reconectar
             </a>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function SelecionarContaPage() {
         <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-900/20 px-5 py-4">
           <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-400" />
           <p className="text-sm text-amber-300">
-            No Google Ads accounts found for this user.
+            Nenhuma conta do Google Ads encontrada para este usuário.
           </p>
         </div>
       )}
@@ -129,12 +129,12 @@ export default function SelecionarContaPage() {
                 {connecting === account.id ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    Connecting…
+                    Conectando…
                   </>
                 ) : (
                   <>
                     <CheckCircle size={14} />
-                    Connect
+                    Conectar
                   </>
                 )}
               </button>

@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { SiGoogleads, SiMeta, SiFacebook } from 'react-icons/si'
 import { ChevronDown, Eye, MousePointerClick, Users, CheckCircle2, CircleDollarSign } from 'lucide-react'
+import { fmtBRL, fmtInt, fmtPct, fmtRoas, convValueUnconfigured } from '@/lib/format'
 import AIConsultant from '@/components/dashboard/AIConsultant'
 import type { AccountInfo } from '@/app/dashboard/page'
 
@@ -77,10 +78,6 @@ const periodOptions: { value: Period; label: string }[] = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function fmtBRL(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(n)
-}
-function fmtInt(n: number) { return n.toLocaleString('en-US') }
 function pct(current: number, prev: number): number | null {
   if (prev === 0) return null
   return ((current - prev) / prev) * 100
@@ -233,7 +230,7 @@ function ChangeIndicator({ change, higherIsBad }: { change: number | null; highe
   const isGood = higherIsBad ? !isUp : isUp
   return (
     <span className={`text-xs font-medium ${isGood ? 'text-green-400' : 'text-red-400'}`}>
-      {isUp ? '▲' : '▼'} {Math.abs(change).toFixed(1)}% vs. período anterior
+      {isUp ? '▲' : '▼'} {fmtPct(Math.abs(change))} vs. período anterior
     </span>
   )
 }
@@ -528,6 +525,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     }
   }, [campaigns])
 
+  const revenueUnconfigured = convValueUnconfigured(
+    summary.revenue,
+    campaigns.reduce((s, c) => s + c.conversions, 0)
+  )
+
   const funnelSteps = useMemo<FunnelStep[]>(() => {
     if (campaigns.length === 0) return []
 
@@ -541,8 +543,6 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
 
     const isMetaChannel = channel === 'meta' || channel === 'facebook' || channel === 'instagram'
     const showLeads     = isMetaChannel && leads > 0
-
-    const fmtPct = (n: number) => `${n.toFixed(1)}%`
 
     const ctr       = impressions > 0 ? `${fmtPct(clicks / impressions * 100)} clicaram (CTR)` : null
     const leadRate  = clicks > 0 && showLeads ? `${fmtPct(leads / clicks * 100)} viraram leads` : null
@@ -687,16 +687,25 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Investimento Total', value: fmtBRL(summary.investment),       desc: periodLabel,                    change: prevChanges.investment, higherIsBad: true  },
-            { label: 'Receita Gerada',    value: fmtBRL(summary.revenue),          desc: periodLabel,                    change: prevChanges.revenue,    higherIsBad: false },
-            { label: 'ROAS Médio',        value: `${summary.roas.toFixed(1)}×`,    desc: 'Retorno sobre investimento',   change: prevChanges.roas,       higherIsBad: false },
-            { label: 'CPA Médio',         value: fmtBRL(summary.cpa),              desc: 'Custo por aquisição',          change: prevChanges.cpa,        higherIsBad: true  },
-          ].map(({ label, value, desc, change, higherIsBad }) => (
+            { label: 'Investimento Total', value: fmtBRL(summary.investment),  desc: periodLabel,                  change: prevChanges.investment, higherIsBad: true,  warn: false },
+            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),     desc: periodLabel,                  change: prevChanges.revenue,    higherIsBad: false, warn: revenueUnconfigured },
+            { label: 'ROAS Médio',         value: fmtRoas(summary.roas),       desc: 'Retorno sobre investimento', change: prevChanges.roas,       higherIsBad: false, warn: revenueUnconfigured },
+            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),         desc: 'Custo por aquisição',        change: prevChanges.cpa,        higherIsBad: true,  warn: false },
+          ].map(({ label, value, desc, change, higherIsBad, warn }) => (
             <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2">
               <p className="text-zinc-400 text-sm">{label}</p>
-              <p className="text-3xl font-bold text-white">{value}</p>
-              <p className="text-zinc-500 text-xs">{desc}</p>
-              <ChangeIndicator change={change} higherIsBad={higherIsBad} />
+              {warn ? (
+                <>
+                  <p className="text-sm font-medium text-zinc-500 leading-snug">Valor de conversão não configurado</p>
+                  <p className="text-zinc-600 text-xs">Configure o valor de conversão no Google Ads para ver este dado.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-white">{value}</p>
+                  <p className="text-zinc-500 text-xs">{desc}</p>
+                  <ChangeIndicator change={change} higherIsBad={higherIsBad} />
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -743,6 +752,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       {showRoasChart && (
         loading ? (
           <ChartSkeleton />
+        ) : revenueUnconfigured ? (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+            <p className="text-sm font-medium text-zinc-300 mb-3">Evolução do ROAS — {periodLabel}</p>
+            <p className="text-sm text-zinc-500">Valor de conversão não configurado. Configure o valor de conversão no Google Ads para ver a evolução do ROAS.</p>
+          </div>
         ) : (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
             <p className="text-sm font-medium text-zinc-300 mb-5">
@@ -763,7 +777,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                   cursor={{ stroke: 'rgba(6,182,212,0.3)', strokeWidth: 1 }}
                   formatter={(v: unknown) => {
                     const n = typeof v === 'number' ? v : 0
-                    return [`${n.toFixed(1)}×`, 'ROAS']
+                    return [fmtRoas(n), 'ROAS']
                   }}
                 />
                 <Line
@@ -868,15 +882,19 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
 
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.impressions)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.clicks)}</td>
-                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{ctr.toFixed(1)}%</td>
+                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtPct(ctr)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtBRL(cpc)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtBRL(c.cost)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.conversions)}</td>
-                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{convRate.toFixed(2)}%</td>
+                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtPct(convRate, 2)}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`font-semibold ${roas >= 5 ? 'text-green-400' : roas >= 3.5 ? 'text-yellow-400' : 'text-red-400'}`}>
-                            {roas.toFixed(1)}×
-                          </span>
+                          {convValueUnconfigured(c.revenue, c.conversions) ? (
+                            <span className="text-xs text-zinc-500">—</span>
+                          ) : (
+                            <span className={`font-semibold ${roas >= 5 ? 'text-green-400' : roas >= 3.5 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {fmtRoas(roas)}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     )

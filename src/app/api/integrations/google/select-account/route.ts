@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { customerId, mccId } = await req.json() as {
+    const { customerId, mccId, accountName } = await req.json() as {
       customerId: string
       mccId?: string | null
+      accountName?: string | null
     }
 
     if (!customerId || typeof customerId !== 'string') {
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
       .from('integrations')
       .update({
         account_id: cleanId,
+        account_name: accountName ?? null,
         status: 'active',
         is_default: isDefault,
         login_customer_id: loginCustomerId,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { TrendingUp } from 'lucide-react'
+import { fmtBRL, fmtInt } from '@/lib/format'
 
 export type DataSource = 'google' | 'meta' | 'none'
 
@@ -10,14 +11,6 @@ interface Campaign {
   clicks: number
   conversions: number
   impressions: number
-}
-
-function fmtBRL(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(n)
-}
-
-function fmtInt(n: number) {
-  return n.toLocaleString('en-US')
 }
 
 function CardSkeleton() {

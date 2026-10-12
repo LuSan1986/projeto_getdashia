@@ -55,11 +55,7 @@ function StatusBadge({ status }: { status: ChannelStatus }) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
-  })
+  return new Date(iso).toLocaleDateString('pt-BR')
 }
 
 function AccountRow({

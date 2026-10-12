@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { accountId } = await req.json() as { accountId: string }
+    const { accountId, accountName } = await req.json() as { accountId: string; accountName?: string | null }
 
     if (!accountId || typeof accountId !== 'string') {
       return NextResponse.json({ error: 'accountId inválido' }, { status: 400 })
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     const { error: updateError } = await supabase
       .from('integrations')
-      .update({ account_id: accountId, status: 'active', is_default: isDefault })
+      .update({ account_id: accountId, account_name: accountName ?? null, status: 'active', is_default: isDefault })
       .eq('id', pendingIntegration.id)
 
     if (updateError) {
