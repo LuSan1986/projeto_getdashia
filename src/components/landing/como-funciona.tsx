@@ -20,7 +20,7 @@ const passos: Passo[] = [
     Icone: PlugZap,
     titulo: "Conecte suas plataformas",
     descricao:
-      "Vincule Google Ads, Meta Ads e sua loja em menos de 5 minutos. Sem código, sem planilha, sem dor de cabeça.",
+      "Vincule Google Ads e Meta Ads em menos de 5 minutos. Sem código, sem planilha, sem dor de cabeça.",
     cor: "#06B6D4",
     glowFull: "rgba(6,182,212,0.85)",
     glowMid:  "rgba(6,182,212,0.40)",
@@ -34,7 +34,7 @@ const passos: Passo[] = [
     Icone: LayoutDashboard,
     titulo: "Visualize a jornada real",
     descricao:
-      "Veja quais canais tocaram cada cliente antes da compra — e qual deles foi decisivo para fechar a venda.",
+      "Veja CPC, taxa de conversão, gasto total e comparativo com período anterior de cada canal — tudo no mesmo painel.",
     cor: "#E879F9",
     glowFull: "rgba(232,121,249,0.85)",
     glowMid:  "rgba(232,121,249,0.40)",
@@ -46,9 +46,9 @@ const passos: Passo[] = [
   {
     numero: 3,
     Icone: FileDown,
-    titulo: "Exporte e impressione",
+    titulo: "Apresente e impressione",
     descricao:
-      "Gere relatórios em PDF com sua marca e envie pro cliente automaticamente toda semana ou todo mês.",
+      "Abra o painel e mostre ao cliente os resultados em tempo real — sem planilha, sem exportação manual.",
     cor: "#A855F7",
     glowFull: "rgba(168,85,247,0.85)",
     glowMid:  "rgba(168,85,247,0.40)",

@@ -365,12 +365,9 @@ function HeroPlatforms() {
       </g>
       {/* SW label — above hex */}
       <g transform={`translate(${sat.sw.x}, ${sat.sw.y - 54 * .866 - 22})`}>
-        <circle cx="-38" cy="-2" r="4" fill="#22C55E">
-          <animate attributeName="r"       values="4;5.5;4"   dur="2.4s" repeatCount="indefinite" begin="1.2s"/>
-          <animate attributeName="opacity" values="1;0.5;1"   dur="2.4s" repeatCount="indefinite" begin="1.2s"/>
-        </circle>
+        <circle cx="-38" cy="-2" r="4" fill="rgba(148,163,184,0.35)"/>
         <text x="-28" y="2"  fontSize="10" fontWeight="700" fill="rgba(255,255,255,0.85)">TikTok</text>
-        <text x="-28" y="15" fontSize="8.5" fill="rgba(34,197,94,0.75)">Conectado</text>
+        <text x="-28" y="15" fontSize="8.5" fill="rgba(148,163,184,0.55)">Em breve</text>
       </g>
     </svg>
   )
@@ -389,7 +386,7 @@ export function HowItWorksStrip() {
       ),
       color: '#06B6D4',
       title: 'Conecte',
-      desc: 'Google Ads, Meta e TikTok em menos de 5 minutos. Sem código.',
+      desc: 'Google Ads e Meta Ads em menos de 5 minutos. Sem código.',
     },
     {
       icon: (
@@ -792,8 +789,8 @@ export default function Hero() {
           </h1>
 
           <p className="hfu-3 mt-6 max-w-xl text-lg leading-relaxed" style={{ color:'#94A3B8' }}>
-            GetDashia centraliza Google Ads, Meta Ads e e-commerce em um painel
-            único. Você vê qual canal gerou cada venda — em minutos, não em horas.
+            GetDashia centraliza Google Ads e Meta Ads em um painel único.
+            Veja CPC, taxa de conversão e comparativo com período anterior — em minutos, não em horas.
           </p>
 
           <div className="hfu-4 mt-10 flex flex-col items-center lg:items-start gap-4 sm:flex-row">

@@ -1,9 +1,9 @@
 const plataformas = [
-  { nome: "Google Ads",       logo: "/logos/google-ads.jpeg" },
-  { nome: "Meta Ads",         logo: "/logos/meta-ads.png" },
-  { nome: "Google Analytics", logo: "/logos/google-analytics.png" },
-  { nome: "TikTok Ads",       logo: "/logos/tiktok-ads.webp" },
-] as const;
+  { nome: "Google Ads",       logo: "/logos/google-ads.jpeg",      emBreve: false },
+  { nome: "Meta Ads",         logo: "/logos/meta-ads.png",         emBreve: false },
+  { nome: "Google Analytics", logo: "/logos/google-analytics.png", emBreve: true  },
+  { nome: "TikTok Ads",       logo: "/logos/tiktok-ads.webp",      emBreve: true  },
+];
 
 export default function ProvaSocial() {
   return (
@@ -119,7 +119,7 @@ export default function ProvaSocial() {
 
           {/* Cards — z-index 1 para cobrir as linhas internas */}
           <div className="relative grid grid-cols-2 gap-6" style={{ zIndex: 1 }}>
-            {plataformas.map(({ nome, logo }) => (
+            {plataformas.map(({ nome, logo, emBreve }) => (
               <div key={nome} className="integ-card flex items-center gap-4 px-6 py-5">
                 <div style={{
                   background: 'white',
@@ -139,9 +139,28 @@ export default function ProvaSocial() {
                     style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                   />
                 </div>
-                <span className="text-left font-semibold" style={{ color: "#F1F5F9", fontSize: "1.1rem" }}>
-                  {nome}
-                </span>
+                <div className="flex flex-col gap-1 text-left">
+                  <span className="font-semibold" style={{ color: "#F1F5F9", fontSize: "1.1rem" }}>
+                    {nome}
+                  </span>
+                  {emBreve && (
+                    <span style={{
+                      display: "inline-block",
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      padding: "2px 7px",
+                      borderRadius: "999px",
+                      border: "1px solid rgba(6,182,212,0.35)",
+                      color: "#06B6D4",
+                      background: "rgba(6,182,212,0.08)",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      width: "fit-content",
+                    }}>
+                      Em breve
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

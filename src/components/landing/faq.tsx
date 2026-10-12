@@ -14,7 +14,7 @@ const perguntas = [
     valor: "q2",
     pergunta: "Funciona com múltiplos clientes?",
     resposta:
-      "Sim. Nos planos Pro e Agência você gerencia vários clientes em painéis completamente isolados — cada um com suas próprias contas e usuários. Nenhum dado de um cliente aparece para outro.",
+      "Sim. No plano Business você pode gerenciar várias contas de Google Ads e Meta Ads no mesmo painel, organizadas separadamente. Painéis completamente isolados por cliente estão em desenvolvimento.",
   },
   {
     valor: "q3",
@@ -32,7 +32,7 @@ const perguntas = [
     valor: "q5",
     pergunta: "Funciona com Hotmart e Kiwify?",
     resposta:
-      "A integração com Hotmart e Kiwify está no roadmap e será entregue ainda em 2026. O MVP inicial foca em Google Ads, Meta Ads e Google Analytics. Infoprodutores podem garantir lugar na lista de espera para acesso antecipado.",
+      "A integração com Hotmart e Kiwify está no roadmap e será entregue ainda em 2026. O MVP inicial foca em Google Ads e Meta Ads. Infoprodutores podem garantir lugar na lista de espera para acesso antecipado.",
   },
   {
     valor: "q6",

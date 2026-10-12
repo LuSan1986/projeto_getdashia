@@ -63,7 +63,6 @@ const planos: Plano[] = [
       "Google Ads + Meta Ads conectados",
       "Dashboard completo com CPA e ROAS",
       "Histórico completo de dados",
-      "Múltiplas organizações",
       "Suporte prioritário",
       "7 dias grátis para testar",
     ],

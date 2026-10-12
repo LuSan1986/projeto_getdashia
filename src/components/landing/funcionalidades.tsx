@@ -17,6 +17,7 @@ interface ItemFuncionalidade {
   glowSoft: string;
   iconBg: string;
   iconBorder: string;
+  badge?: string;
 }
 
 const itens: ItemFuncionalidade[] = [
@@ -24,12 +25,13 @@ const itens: ItemFuncionalidade[] = [
     Icone: Network,
     nome: "Atribuição multi-touch",
     descricao:
-      "5 modelos de atribuição mostram qual canal realmente gerou cada venda na jornada completa do cliente.",
+      "5 modelos de atribuição vão mostrar qual canal realmente gerou cada venda na jornada completa do cliente.",
     cor: "#06B6D4",
     glowFull: "rgba(6,182,212,0.85)",
     glowSoft: "rgba(6,182,212,0.10)",
     iconBg:   "rgba(6,182,212,0.10)",
     iconBorder: "rgba(6,182,212,0.30)",
+    badge: "Em breve",
   },
   {
     Icone: Gauge,
@@ -52,12 +54,13 @@ const itens: ItemFuncionalidade[] = [
     glowSoft: "rgba(168,85,247,0.10)",
     iconBg:   "rgba(168,85,247,0.10)",
     iconBorder: "rgba(168,85,247,0.30)",
+    badge: "Em breve",
   },
   {
     Icone: Users,
-    nome: "Gestão multi-cliente",
+    nome: "Múltiplas contas de anúncio",
     descricao:
-      "Cada cliente em seu próprio painel isolado — nenhum dado se mistura, nenhuma confusão de contas.",
+      "Gerencie várias contas de Google Ads e Meta Ads no mesmo painel — sem trocar de ferramenta.",
     cor: "#3B82F6",
     glowFull: "rgba(59,130,246,0.85)",
     glowSoft: "rgba(59,130,246,0.10)",
@@ -74,6 +77,7 @@ const itens: ItemFuncionalidade[] = [
     glowSoft: "rgba(16,185,129,0.10)",
     iconBg:   "rgba(16,185,129,0.10)",
     iconBorder: "rgba(16,185,129,0.30)",
+    badge: "Em breve",
   },
   {
     Icone: SlidersHorizontal,
@@ -207,7 +211,7 @@ export default function Funcionalidades() {
 
         {/* ── Grid de cards ── */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {itens.map(({ Icone, nome, descricao, cor, glowFull, glowSoft, iconBg, iconBorder }) => (
+          {itens.map(({ Icone, nome, descricao, cor, glowFull, glowSoft, iconBg, iconBorder, badge }) => (
             <div key={nome} className="func-card rounded-2xl p-6">
               {/* Ícone */}
               <div
@@ -229,10 +233,26 @@ export default function Funcionalidades() {
 
               {/* Texto */}
               <h3
-                className="mb-2 text-base leading-snug"
+                className="mb-2 text-base leading-snug flex items-center gap-2 flex-wrap"
                 style={{ color: "#F1F5F9", fontWeight: 600 }}
               >
                 {nome}
+                {badge && (
+                  <span style={{
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                    padding: "2px 7px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(6,182,212,0.35)",
+                    color: "#06B6D4",
+                    background: "rgba(6,182,212,0.08)",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    flexShrink: 0,
+                  }}>
+                    {badge}
+                  </span>
+                )}
               </h3>
               <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}>
                 {descricao}
