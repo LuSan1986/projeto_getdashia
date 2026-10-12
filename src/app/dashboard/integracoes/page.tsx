@@ -13,7 +13,7 @@ async function fetchPlatformState(
 ): Promise<PlatformState> {
   const { data: rows } = await supabase
     .from('integrations')
-    .select('id, account_id, account_name, is_default, status, created_at')
+    .select('id, account_id, account_name, is_default, conversion_value, status, created_at')
     .eq('organization_id', organizationId)
     .eq('platform', platform)
     .eq('status', 'active')
@@ -31,6 +31,7 @@ async function fetchPlatformState(
       accountName: (r.account_name as string | null) ?? null,
       isDefault: (r.is_default as boolean) ?? false,
       connectedAt: r.created_at as string,
+      conversionValue: (r.conversion_value as number | null) ?? null,
     }))
 
   const hasPending = rows.some(r => r.account_id === 'pending')

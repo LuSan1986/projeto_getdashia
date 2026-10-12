@@ -30,18 +30,19 @@ type Period      = '7d' | '30d' | '90d'
 type Channel     = 'all' | 'google' | 'meta' | 'instagram' | 'facebook'
 
 interface Campaign {
-  id:           string | number
-  platform:     Platform
-  subPlatform?: SubPlatform
-  accountName?: string
-  name:         string
-  status:       Status
-  impressions:  number
-  clicks:       number
-  cost:         number
-  conversions:  number
-  revenue:      number
-  leads?:       number
+  id:              string | number
+  platform:        Platform
+  subPlatform?:    SubPlatform
+  accountName?:    string
+  conversionValue?: number | null
+  name:            string
+  status:          Status
+  impressions:     number
+  clicks:          number
+  cost:            number
+  conversions:     number
+  revenue:         number
+  leads?:          number
 }
 
 interface RoasPoint   { dia: string; roas: number }
@@ -428,6 +429,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       for (const acct of googleAcctsToFetch) {
         const accountName = multiGoogle ? (acct.account_name ?? acct.account_id) : undefined
         const base = `/api/google-ads/campaigns?period=${period}&account_id=${encodeURIComponent(acct.account_id)}`
+        const acctConvValue = acct.conversion_value ?? null
         fetches.push(
           Promise.all([
             fetch(base).then(r => r.json()),
@@ -436,6 +438,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
             campaigns: (data.campaigns ?? []).map((c: Campaign) => ({
               ...c,
               ...(accountName ? { accountName } : {}),
+              conversionValue: acctConvValue,
             })),
             roasData:    data.roasData ?? [],
             connected:   data.connected ?? false,
@@ -450,6 +453,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
         for (const plat of metaPlats) {
           const accountName = multiMeta ? (acct.account_name ?? acct.account_id) : undefined
           const base = `/api/meta-ads/campaigns?period=${period}&account_id=${encodeURIComponent(acct.account_id)}&platform=${plat}`
+          const acctConvValueMeta = acct.conversion_value ?? null
           fetches.push(
             Promise.all([
               fetch(base).then(r => r.json()),
@@ -459,6 +463,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                 ...c,
                 subPlatform: plat,
                 ...(accountName ? { accountName } : {}),
+                conversionValue: acctConvValueMeta,
               })),
               roasData:    [],
               connected:   data.connected ?? false,
@@ -513,10 +518,17 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     return [...googleCampaigns, ...metaCampaigns]
   }, [channel, googleCampaigns, metaCampaigns])
 
+  function getEffectiveRevenue(c: Campaign): { value: number; isEstimated: boolean } {
+    if (!convValueUnconfigured(c.revenue, c.conversions)) return { value: c.revenue, isEstimated: false }
+    const cv = c.conversionValue
+    if (cv != null && cv > 0) return { value: c.conversions * cv, isEstimated: true }
+    return { value: 0, isEstimated: false }
+  }
+
   const summary = useMemo(() => {
     const cost        = campaigns.reduce((s, c) => s + c.cost, 0)
-    const revenue     = campaigns.reduce((s, c) => s + c.revenue, 0)
     const conversions = campaigns.reduce((s, c) => s + c.conversions, 0)
+    const revenue     = campaigns.reduce((s, c) => s + getEffectiveRevenue(c).value, 0)
     return {
       investment: cost,
       revenue,
@@ -525,10 +537,16 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     }
   }, [campaigns])
 
-  const revenueUnconfigured = convValueUnconfigured(
-    summary.revenue,
-    campaigns.reduce((s, c) => s + c.conversions, 0)
-  )
+  const revenueMode: 'real' | 'estimated' | 'unconfigured' = useMemo(() => {
+    if (campaigns.length === 0) return 'real'
+    const anyEstimated     = campaigns.some(c => getEffectiveRevenue(c).isEstimated)
+    const anyUnconfigured  = campaigns.some(c => convValueUnconfigured(c.revenue, c.conversions) && !getEffectiveRevenue(c).isEstimated)
+    if (anyEstimated)    return 'estimated'
+    if (anyUnconfigured) return 'unconfigured'
+    return 'real'
+  }, [campaigns])
+
+  const revenueUnconfigured = revenueMode === 'unconfigured'
 
   const funnelSteps = useMemo<FunnelStep[]>(() => {
     if (campaigns.length === 0) return []
@@ -687,17 +705,37 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Investimento Total', value: fmtBRL(summary.investment),  desc: periodLabel,                  change: prevChanges.investment, higherIsBad: true,  warn: false },
-            { label: 'Receita Gerada',     value: fmtBRL(summary.revenue),     desc: periodLabel,                  change: prevChanges.revenue,    higherIsBad: false, warn: revenueUnconfigured },
-            { label: 'ROAS Médio',         value: fmtRoas(summary.roas),       desc: 'Retorno sobre investimento', change: prevChanges.roas,       higherIsBad: false, warn: revenueUnconfigured },
-            { label: 'CPA Médio',          value: fmtBRL(summary.cpa),         desc: 'Custo por aquisição',        change: prevChanges.cpa,        higherIsBad: true,  warn: false },
-          ].map(({ label, value, desc, change, higherIsBad, warn }) => (
+            { label: 'Investimento Total',
+              value: fmtBRL(summary.investment),
+              desc: periodLabel,
+              change: prevChanges.investment,
+              higherIsBad: true,
+              mode: 'real' as const },
+            { label: revenueMode === 'estimated' ? 'Receita Estimada' : 'Receita Gerada',
+              value: fmtBRL(summary.revenue),
+              desc: revenueMode === 'estimated' ? 'Baseado no valor por conversão configurado' : periodLabel,
+              change: revenueMode !== 'unconfigured' ? prevChanges.revenue : null,
+              higherIsBad: false,
+              mode: revenueMode },
+            { label: revenueMode === 'estimated' ? 'ROAS Estimado' : 'ROAS Médio',
+              value: fmtRoas(summary.roas),
+              desc: revenueMode === 'estimated' ? 'Baseado no valor por conversão configurado' : 'Retorno sobre investimento',
+              change: revenueMode !== 'unconfigured' ? prevChanges.roas : null,
+              higherIsBad: false,
+              mode: revenueMode },
+            { label: 'CPA Médio',
+              value: fmtBRL(summary.cpa),
+              desc: 'Custo por aquisição',
+              change: prevChanges.cpa,
+              higherIsBad: true,
+              mode: 'real' as const },
+          ].map(({ label, value, desc, change, higherIsBad, mode }) => (
             <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2">
               <p className="text-zinc-400 text-sm">{label}</p>
-              {warn ? (
+              {mode === 'unconfigured' ? (
                 <>
                   <p className="text-sm font-medium text-zinc-500 leading-snug">Valor de conversão não configurado</p>
-                  <p className="text-zinc-600 text-xs">Configure o valor de conversão no Google Ads para ver este dado.</p>
+                  <p className="text-zinc-600 text-xs">Configure em Integrações para ver este dado.</p>
                 </>
               ) : (
                 <>
@@ -749,21 +787,33 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       })()}
 
       {/* ROAS chart — Google only; hidden for meta channels */}
-      {showRoasChart && (
-        loading ? (
+      {showRoasChart && (() => {
+        // For estimated ROAS: multiply each daily roas by the first account's conversion_value
+        // (roasData is only set when single Google account is selected)
+        const singleCvMultiplier = (() => {
+          if (revenueMode !== 'estimated') return 1
+          const cv = campaigns.find(c => c.conversionValue != null)?.conversionValue
+          return (cv != null && cv > 0) ? cv : 1
+        })()
+        const displayRoasData = singleCvMultiplier !== 1
+          ? roasData.map(d => ({ ...d, roas: d.roas * singleCvMultiplier }))
+          : roasData
+        const roasChartTitle = revenueMode === 'estimated'
+          ? `ROAS Estimado — ${periodLabel}`
+          : `Evolução do ROAS — ${periodLabel}`
+
+        return loading ? (
           <ChartSkeleton />
         ) : revenueUnconfigured ? (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
             <p className="text-sm font-medium text-zinc-300 mb-3">Evolução do ROAS — {periodLabel}</p>
-            <p className="text-sm text-zinc-500">Valor de conversão não configurado. Configure o valor de conversão no Google Ads para ver a evolução do ROAS.</p>
+            <p className="text-sm text-zinc-500">Valor de conversão não configurado. Configure em Integrações para ver a evolução do ROAS.</p>
           </div>
         ) : (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-            <p className="text-sm font-medium text-zinc-300 mb-5">
-              Evolução do ROAS — {periodLabel}
-            </p>
+            <p className="text-sm font-medium text-zinc-300 mb-5">{roasChartTitle}</p>
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={roasData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <LineChart data={displayRoasData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                 <XAxis dataKey="dia" {...axisProps} />
                 <YAxis
@@ -777,7 +827,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                   cursor={{ stroke: 'rgba(6,182,212,0.3)', strokeWidth: 1 }}
                   formatter={(v: unknown) => {
                     const n = typeof v === 'number' ? v : 0
-                    return [fmtRoas(n), 'ROAS']
+                    return [fmtRoas(n), revenueMode === 'estimated' ? 'ROAS estimado' : 'ROAS']
                   }}
                 />
                 <Line
@@ -792,7 +842,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
             </ResponsiveContainer>
           </div>
         )
-      )}
+      })()}
 
       {/* Campaign table */}
       {loading ? (
@@ -888,13 +938,18 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtInt(c.conversions)}</td>
                         <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">{fmtPct(convRate, 2)}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {convValueUnconfigured(c.revenue, c.conversions) ? (
-                            <span className="text-xs text-zinc-500">—</span>
-                          ) : (
-                            <span className={`font-semibold ${roas >= 5 ? 'text-green-400' : roas >= 3.5 ? 'text-yellow-400' : 'text-red-400'}`}>
-                              {fmtRoas(roas)}
-                            </span>
-                          )}
+                          {(() => {
+                            const eff = getEffectiveRevenue(c)
+                            if (convValueUnconfigured(c.revenue, c.conversions) && !eff.isEstimated) {
+                              return <span className="text-xs text-zinc-500">—</span>
+                            }
+                            const effRoas = c.cost > 0 ? eff.value / c.cost : 0
+                            return (
+                              <span className={`font-semibold ${effRoas >= 5 ? 'text-green-400' : effRoas >= 3.5 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                {fmtRoas(effRoas)}{eff.isEstimated ? '*' : ''}
+                              </span>
+                            )
+                          })()}
                         </td>
                       </tr>
                     )

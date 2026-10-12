@@ -12,6 +12,7 @@ export interface AccountInfo {
   account_id: string
   account_name: string | null
   is_default: boolean
+  conversion_value: number | null
 }
 
 export default async function DashboardPage() {
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
       const [{ data: googleRows }, { data: metaRows }, { data: pendingRow }] = await Promise.all([
         supabase
           .from('integrations')
-          .select('id, account_id, account_name, is_default')
+          .select('id, account_id, account_name, is_default, conversion_value')
           .eq('organization_id', orgId)
           .eq('platform', 'google_ads')
           .eq('status', 'active')
@@ -45,7 +46,7 @@ export default async function DashboardPage() {
 
         supabase
           .from('integrations')
-          .select('id, account_id, account_name, is_default')
+          .select('id, account_id, account_name, is_default, conversion_value')
           .eq('organization_id', orgId)
           .eq('platform', 'meta_ads')
           .eq('status', 'active')

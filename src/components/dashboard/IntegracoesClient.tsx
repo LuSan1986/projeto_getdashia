@@ -11,6 +11,7 @@ export interface ConnectedAccount {
   accountName: string | null
   isDefault: boolean
   connectedAt: string
+  conversionValue: number | null
 }
 
 export interface PlatformState {
@@ -66,13 +67,21 @@ function AccountRow({
   disconnectApiRoute: string
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [disconnecting, setDisconnecting] = useState(false)
+  const [disconnectError, setDisconnectError] = useState<string | null>(null)
+
+  const [cvInput, setCvInput] = useState(
+    account.conversionValue != null ? String(account.conversionValue) : ''
+  )
+  const [cvSaving, setCvSaving] = useState(false)
+  const [cvError, setCvError] = useState<string | null>(null)
+  const [cvSaved, setCvSaved] = useState(false)
+
   const router = useRouter()
 
   async function handleDisconnect() {
-    setLoading(true)
-    setError(null)
+    setDisconnecting(true)
+    setDisconnectError(null)
     try {
       const res = await fetch(disconnectApiRoute, {
         method: 'POST',
@@ -81,15 +90,45 @@ function AccountRow({
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        setError((body as { error?: string }).error ?? 'Error disconnecting')
+        setDisconnectError((body as { error?: string }).error ?? 'Erro ao desconectar')
         return
       }
       setConfirmOpen(false)
       router.refresh()
     } catch {
-      setError('Server connection error')
+      setDisconnectError('Erro de conexão')
     } finally {
-      setLoading(false)
+      setDisconnecting(false)
+    }
+  }
+
+  async function handleSaveConversionValue() {
+    const trimmed = cvInput.trim()
+    const parsed = trimmed === '' ? null : parseFloat(trimmed.replace(',', '.'))
+    if (parsed !== null && (isNaN(parsed) || parsed < 0)) {
+      setCvError('Valor inválido. Use um número >= 0.')
+      return
+    }
+    setCvSaving(true)
+    setCvError(null)
+    setCvSaved(false)
+    try {
+      const res = await fetch('/api/integrations/update-conversion-value', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integrationId: account.id, value: parsed }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setCvError((body as { error?: string }).error ?? 'Erro ao salvar')
+        return
+      }
+      setCvSaved(true)
+      setTimeout(() => setCvSaved(false), 2500)
+    } catch {
+      setCvError('Erro de conexão')
+    } finally {
+      setCvSaving(false)
     }
   }
 
@@ -123,21 +162,47 @@ function AccountRow({
         )}
       </div>
 
+      {/* Conversion value field */}
+      <div className="bg-zinc-800/30 rounded-xl px-4 py-3 flex flex-col gap-2">
+        <label className="text-xs font-medium text-zinc-300">Valor por conversão (R$)</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={cvInput}
+            onChange={e => { setCvInput(e.target.value); setCvError(null); setCvSaved(false) }}
+            placeholder="Ex.: 50,00"
+            className="flex-1 min-w-0 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500/60 transition"
+          />
+          <button
+            onClick={handleSaveConversionValue}
+            disabled={cvSaving}
+            className="shrink-0 text-xs font-semibold bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 border border-cyan-500/30 disabled:opacity-50 px-3 py-1.5 rounded-lg transition"
+          >
+            {cvSaving ? 'Salvando…' : cvSaved ? 'Salvo ✓' : 'Salvar'}
+          </button>
+        </div>
+        {cvError && <p className="text-xs text-red-400">{cvError}</p>}
+        <p className="text-[11px] text-zinc-600 leading-relaxed">
+          Usado para estimar Receita e ROAS quando a plataforma não informa o valor das conversões.
+        </p>
+      </div>
+
       {confirmOpen && (
         <div className="flex flex-col gap-2 px-1">
-          {error && (
-            <p className="text-xs text-red-400 bg-red-500/10 rounded-xl px-3 py-2">{error}</p>
+          {disconnectError && (
+            <p className="text-xs text-red-400 bg-red-500/10 rounded-xl px-3 py-2">{disconnectError}</p>
           )}
           <div className="flex gap-2">
             <button
               onClick={handleDisconnect}
-              disabled={loading}
+              disabled={disconnecting}
               className="flex-1 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 px-4 py-2 text-sm font-semibold text-white transition"
             >
-              {loading ? 'Desconectando…' : 'Confirmar'}
+              {disconnecting ? 'Desconectando…' : 'Confirmar'}
             </button>
             <button
-              onClick={() => { setConfirmOpen(false); setError(null) }}
+              onClick={() => { setConfirmOpen(false); setDisconnectError(null) }}
               className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition"
             >
               Cancelar

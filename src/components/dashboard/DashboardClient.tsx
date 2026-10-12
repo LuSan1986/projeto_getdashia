@@ -122,6 +122,12 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
     isMetaChannel         ? selectedMetaId   :
     null
 
+  const currentConversionValue: number | null = (() => {
+    const accounts = selected === 'google' ? googleAccounts : isMetaChannel ? metaAccounts : []
+    const acct = accounts.find(a => a.account_id === currentAccountId) ?? accounts[0]
+    return acct?.conversion_value ?? null
+  })()
+
   const metaPlatform: 'facebook' | 'instagram' | undefined =
     selected === 'facebook'  ? 'facebook'  :
     selected === 'instagram' ? 'instagram' :
@@ -210,10 +216,10 @@ export default function DashboardClient({ googleAccounts, metaAccounts }: Props)
       </div>
 
       {/* Metric cards — react to selected channel + account */}
-      <DashboardMetricsCards source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} />
+      <DashboardMetricsCards source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} conversionValue={currentConversionValue} />
 
       {/* Charts — react to selected channel + account */}
-      <Charts source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} />
+      <Charts source={dataSource} accountId={currentAccountId} metaPlatform={metaPlatform} conversionValue={currentConversionValue} />
     </>
   )
 }

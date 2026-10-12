@@ -144,7 +144,7 @@ function ChartCard({ title, children, headerRight }: { title: string; children: 
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function Charts({ source = 'none', accountId, metaPlatform }: { source?: DataSource | 'all'; accountId?: string | null; metaPlatform?: 'facebook' | 'instagram' }) {
+export default function Charts({ source = 'none', accountId, metaPlatform, conversionValue }: { source?: DataSource | 'all'; accountId?: string | null; metaPlatform?: 'facebook' | 'instagram'; conversionValue?: number | null }) {
   const monthLabels = last6MonthLabels()
 
   const [revDays,          setRevDays]          = useState<7 | 15 | 30>(7)
@@ -217,10 +217,12 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
   // ── Build chart data ────────────────────────────────────────────────────────
 
   const revLabels   = lastNDayLabels(revDays)
+  const cvMultiplier = (conversionValue != null && conversionValue > 0) ? conversionValue : 1
   const revenueData = revLabels.map((dia, i) => ({
     dia,
-    receita: liveRevenue[i],
+    receita: liveRevenue[i] * cvMultiplier,
   }))
+  const revenueIsEstimated = cvMultiplier !== 1
 
   // Only include columns for the channels visible in this source
   const showGoogle = source !== 'meta'
@@ -238,7 +240,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
 
       {/* Area — Total Revenue (selectable period) */}
       <ChartCard
-        title={`Receita Total — últimos ${revDays} dias`}
+        title={`Receita ${revenueIsEstimated ? 'Estimada' : 'Total'} — últimos ${revDays} dias`}
         headerRight={
           <div className="flex gap-1">
             {([7, 15, 30] as const).map(d => (
