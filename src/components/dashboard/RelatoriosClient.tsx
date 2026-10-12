@@ -62,11 +62,12 @@ interface Props {
 }
 
 type FetchResult = {
-  campaigns:   Campaign[]
-  roasData:    RoasPoint[]
-  connected:   boolean
-  prevSummary: PrevSummary | null
-  source:      'google' | 'meta'
+  campaigns:       Campaign[]
+  roasData:        RoasPoint[]
+  connected:       boolean
+  prevSummary:     PrevSummary | null
+  source:          'google' | 'meta'
+  conversionValue: number | null
 }
 
 // ── Options ───────────────────────────────────────────────────────────────────
@@ -86,12 +87,22 @@ function pct(current: number, prev: number): number | null {
 function sumPrevResults(results: FetchResult[]): PrevSummary | null {
   const withData = results.filter(r => r.prevSummary)
   if (withData.length === 0) return null
-  return withData.reduce<PrevSummary>((acc, r) => ({
-    investment:  acc.investment  + (r.prevSummary!.investment  ?? 0),
-    revenue:     acc.revenue     + (r.prevSummary!.revenue     ?? 0),
-    clicks:      acc.clicks      + (r.prevSummary!.clicks      ?? 0),
-    conversions: acc.conversions + (r.prevSummary!.conversions ?? 0),
-  }), { investment: 0, revenue: 0, clicks: 0, conversions: 0 })
+  return withData.reduce<PrevSummary>((acc, r) => {
+    const prev = r.prevSummary!
+    const cv   = r.conversionValue
+    // Apply the same estimation rule as getEffectiveRevenue so that
+    // "vs. período anterior" compares estimated vs estimated (not estimated vs R$1 raw).
+    let effRevenue = prev.revenue
+    if (cv != null && cv > 0 && prev.conversions > 0 && (prev.revenue / prev.conversions) < cv) {
+      effRevenue = prev.conversions * cv
+    }
+    return {
+      investment:  acc.investment  + (prev.investment  ?? 0),
+      revenue:     acc.revenue     + effRevenue,
+      clicks:      acc.clicks      + (prev.clicks      ?? 0),
+      conversions: acc.conversions + (prev.conversions ?? 0),
+    }
+  }, { investment: 0, revenue: 0, clicks: 0, conversions: 0 })
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -440,10 +451,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
               ...(accountName ? { accountName } : {}),
               conversionValue: acctConvValue,
             })),
-            roasData:    data.roasData ?? [],
-            connected:   data.connected ?? false,
-            prevSummary: (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
-            source:      'google' as const,
+            roasData:        data.roasData ?? [],
+            connected:       data.connected ?? false,
+            prevSummary:     (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
+            source:          'google' as const,
+            conversionValue: acctConvValue,
           }))
         )
       }
@@ -465,10 +477,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                 ...(accountName ? { accountName } : {}),
                 conversionValue: acctConvValueMeta,
               })),
-              roasData:    [],
-              connected:   data.connected ?? false,
-              prevSummary: (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
-              source:      'meta' as const,
+              roasData:        [],
+              connected:       data.connected ?? false,
+              prevSummary:     (prevData as { prevSummary?: PrevSummary } | null)?.prevSummary ?? null,
+              source:          'meta' as const,
+              conversionValue: acctConvValueMeta,
             }))
           )
         }
@@ -518,11 +531,19 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     return [...googleCampaigns, ...metaCampaigns]
   }, [channel, googleCampaigns, metaCampaigns])
 
+  // Revenue rule:
+  // If conversion_value is configured and the platform's avg revenue/conversion is below
+  // that value (R$1 default, zero, or a mixed period where some conversions are still at
+  // R$1), prefer the estimate (conversions × conversion_value).
+  // Otherwise trust the platform. If no conversion_value is set and revenue looks like
+  // the R$1 default, the caller marks the mode as 'unconfigured'.
   function getEffectiveRevenue(c: Campaign): { value: number; isEstimated: boolean } {
-    if (!convValueUnconfigured(c.revenue, c.conversions)) return { value: c.revenue, isEstimated: false }
     const cv = c.conversionValue
-    if (cv != null && cv > 0) return { value: c.conversions * cv, isEstimated: true }
-    return { value: 0, isEstimated: false }
+    if (cv != null && cv > 0 && c.conversions > 0) {
+      const avgPerConv = c.revenue / c.conversions
+      if (avgPerConv < cv) return { value: c.conversions * cv, isEstimated: true }
+    }
+    return { value: c.revenue, isEstimated: false }
   }
 
   const summary = useMemo(() => {

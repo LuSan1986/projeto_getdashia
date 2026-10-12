@@ -85,17 +85,22 @@ export default function DashboardMetricsCards({
     source === 'meta' ? 'Meta Ads' : ''
   const cardDesc = connected ? `Últimos 30 dias — ${platformLabel}` : 'Canal não conectado'
 
-  // Revenue / ROAS estimation
-  const unconfigured = connected && convValueUnconfigured(totals.revenue, totals.conversions)
+  // Revenue rule:
+  // Use estimated when: cv configured AND platform avg rev/conv < cv
+  // (covers R$1 default, zero, and mixed periods where some conversions still tracked at R$1)
+  // Unconfigured (no fallback): no cv set AND revenue looks like the R$1 default
   const hasConvValue = conversionValue != null && conversionValue > 0
-  const estimatedRevenue = unconfigured && hasConvValue ? totals.conversions * conversionValue! : null
-  const effectiveRevenue = unconfigured ? (estimatedRevenue ?? 0) : totals.revenue
+  const avgRevPerConv = connected && totals.conversions > 0 ? totals.revenue / totals.conversions : 0
+  const shouldEstimate = connected && hasConvValue && totals.conversions > 0 && avgRevPerConv < conversionValue!
+  const unconfiguredNoFallback = connected && !hasConvValue && convValueUnconfigured(totals.revenue, totals.conversions)
+
+  const effectiveRevenue = shouldEstimate ? totals.conversions * conversionValue! : totals.revenue
   const effectiveRoas    = totals.cost > 0 ? effectiveRevenue / totals.cost : 0
   const revenueMode: 'real' | 'estimated' | 'unconfigured' =
-    !connected           ? 'real' :
-    !unconfigured        ? 'real' :
-    hasConvValue         ? 'estimated' :
-    'unconfigured'
+    !connected             ? 'real' :
+    shouldEstimate         ? 'estimated' :
+    unconfiguredNoFallback ? 'unconfigured' :
+    'real'
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
