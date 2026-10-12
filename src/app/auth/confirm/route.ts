@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { sendWelcomeEmail } from '@/lib/emails/welcome'
+import { sendAdminAlert } from '@/lib/emails/admin-alert'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest) {
           sendWelcomeEmail(user.email).catch((err) =>
             console.error('[auth/confirm] welcome email failed:', err)
           )
+          sendAdminAlert(
+            'Novo cadastro no GetDashia',
+            [`E-mail: ${user.email}`],
+            user.email
+          ).catch(console.error)
         }
       }
 

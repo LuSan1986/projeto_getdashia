@@ -3,6 +3,7 @@ import type { Credentials } from 'google-auth-library'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { encrypt } from '@/lib/crypto'
+import { sendAdminAlert } from '@/lib/emails/admin-alert'
 
 const REDIRECT_URI = 'https://www.getdashia.com.br/api/integrations/google/callback'
 const BASE = 'https://www.getdashia.com.br'
@@ -150,6 +151,14 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error('[google/callback] failed to save integration:', err)
     return NextResponse.redirect(`${BASE}/dashboard?error=integration_failed`)
+  }
+
+  if (!needsAccountSelection && accountId !== 'pending') {
+    sendAdminAlert(
+      'Nova integração conectada',
+      [`E-mail: ${user.email}`, `Plataforma: Google Ads`, `Conta ID: ${accountId}`],
+      user.email
+    ).catch(console.error)
   }
 
   const redirectUrl = needsAccountSelection

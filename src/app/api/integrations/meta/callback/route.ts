@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { encrypt } from '@/lib/crypto'
+import { sendAdminAlert } from '@/lib/emails/admin-alert'
 
 const BASE = 'https://getdashia.com.br'
 const REDIRECT_URI = `${BASE}/api/integrations/meta/callback`
@@ -161,6 +162,13 @@ export async function GET(request: NextRequest) {
       console.error('[meta/callback] failed to save integration:', err)
       return NextResponse.redirect(`${BASE}/dashboard/integracoes?error=meta_failed`)
     }
+
+    sendAdminAlert(
+      'Nova integração conectada',
+      [`E-mail: ${user.email}`, `Plataforma: Meta Ads`, `Conta: ${adAccounts[0].name} (${accountId})`],
+      user.email
+    ).catch(console.error)
+
     return NextResponse.redirect(`${BASE}/dashboard/integracoes?success=meta_connected`)
   }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { sendAdminAlert } from '@/lib/emails/admin-alert'
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,6 +62,12 @@ export async function POST(req: NextRequest) {
       console.error('[meta/select-account] update error:', updateError)
       return NextResponse.json({ error: 'Erro ao salvar conta selecionada' }, { status: 500 })
     }
+
+    sendAdminAlert(
+      'Nova integração conectada',
+      [`E-mail: ${user.email}`, `Plataforma: Meta Ads`, `Conta: ${accountName ?? accountId}`],
+      user.email
+    ).catch(console.error)
 
     return NextResponse.json({ success: true })
   } catch {
