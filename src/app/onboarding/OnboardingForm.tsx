@@ -31,7 +31,7 @@ export default function OnboardingForm() {
     setErrorMsg('')
 
     if (companyName.trim().length < 2) {
-      setErrorMsg('Company name must be at least 2 characters.')
+      setErrorMsg('O nome da empresa deve ter pelo menos 2 caracteres.')
       return
     }
 
@@ -50,9 +50,9 @@ export default function OnboardingForm() {
 
     if (dbError) {
       if (dbError.code === '23505') {
-        setErrorMsg('A company with this name already exists. Please try a different name.')
+        setErrorMsg('Já existe uma empresa com esse nome. Tente um nome diferente.')
       } else {
-        setErrorMsg('Could not create the organization. Please try again.')
+        setErrorMsg('Não foi possível criar a organização. Tente novamente.')
       }
       setLoading(false)
       return
@@ -65,9 +65,9 @@ export default function OnboardingForm() {
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Welcome to GetDashia</CardTitle>
+          <CardTitle className="text-2xl text-white">Bem-vindo ao GetDashia</CardTitle>
           <CardDescription className="text-zinc-400">
-            To get started, enter the name of the company or client you&apos;ll manage.
+            Para começar, informe o nome da empresa ou cliente que você vai gerenciar.
           </CardDescription>
         </CardHeader>
 
@@ -75,19 +75,19 @@ export default function OnboardingForm() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="text-sm text-zinc-300 mb-1 block">
-                Company name
+                Nome da empresa
               </label>
               <Input
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 required
-                placeholder="E.g.: Maria's Store"
+                placeholder="Ex.: Loja da Maria"
                 className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
               />
               {slug && (
                 <p className="text-zinc-500 text-xs mt-1">
-                  Identifier: <span className="text-zinc-400">{slug}</span>
+                  Identificador: <span className="text-zinc-400">{slug}</span>
                 </p>
               )}
             </div>
@@ -99,7 +99,7 @@ export default function OnboardingForm() {
               disabled={loading || companyName.trim().length < 2}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
             >
-              {loading ? 'Creating...' : 'Create and go to dashboard'}
+              {loading ? 'Criando...' : 'Criar e ir para o painel'}
             </Button>
           </form>
         </CardContent>

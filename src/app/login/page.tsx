@@ -21,7 +21,7 @@ export default function LoginPage() {
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (authError) {
-      setErrorMsg('Incorrect email or password.')
+      setErrorMsg('E-mail ou senha incorretos.')
       setLoading(false)
       return
     }
@@ -32,12 +32,12 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
-        <h1 className="text-2xl font-bold text-white mb-2">Sign in</h1>
-        <p className="text-zinc-400 mb-6 text-sm">Access your GetDashia dashboard</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Entrar</h1>
+        <p className="text-zinc-400 mb-6 text-sm">Acesse seu painel GetDashia</p>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm text-zinc-300 mb-1 block">Email</label>
+            <label className="text-sm text-zinc-300 mb-1 block">E-mail</label>
             <input
               type="email"
               value={email}
@@ -48,7 +48,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="text-sm text-zinc-300 mb-1 block">Password</label>
+            <label className="text-sm text-zinc-300 mb-1 block">Senha</label>
             <input
               type="password"
               value={password}
@@ -65,20 +65,20 @@ export default function LoginPage() {
             disabled={loading}
             className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
         <p className="text-zinc-500 text-sm mt-4 text-center">
           <Link href="/esqueci-senha" className="text-indigo-400 hover:underline">
-            Forgot your password?
+            Esqueceu sua senha?
           </Link>
         </p>
 
         <p className="text-zinc-500 text-sm mt-3 text-center">
-          Don&apos;t have an account?{' '}
+          Não tem conta?{' '}
           <Link href="/cadastro" className="text-indigo-400 hover:underline">
-            Sign up
+            Cadastre-se
           </Link>
         </p>
       </div>

@@ -70,9 +70,9 @@ type FetchResult = {
 // ── Options ───────────────────────────────────────────────────────────────────
 
 const periodOptions: { value: Period; label: string }[] = [
-  { value: '7d',  label: 'Last 7 days'  },
-  { value: '30d', label: 'Last 30 days' },
-  { value: '90d', label: 'Last 90 days' },
+  { value: '7d',  label: 'Últimos 7 dias'  },
+  { value: '30d', label: 'Últimos 30 dias' },
+  { value: '90d', label: 'Últimos 90 dias' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ function AccountSelectorWithAll({
 }) {
   const [open, setOpen] = useState(false)
   const label = selectedId === ALL_ACCOUNTS
-    ? 'All accounts'
+    ? 'Todas as contas'
     : (accounts.find(a => a.account_id === selectedId)?.account_name ?? selectedId)
 
   return (
@@ -171,7 +171,7 @@ function AccountSelectorWithAll({
             className={`w-full flex items-center px-4 py-3 text-sm text-left hover:bg-zinc-800 transition
               ${selectedId === ALL_ACCOUNTS ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-300'}`}
           >
-            All accounts
+            Todas as contas
           </button>
           {accounts.map(a => (
             <button
@@ -183,7 +183,7 @@ function AccountSelectorWithAll({
               <span className="truncate text-zinc-100">{a.account_name ?? a.account_id}</span>
               {a.is_default && (
                 <span className="shrink-0 text-[10px] font-semibold bg-cyan-500/15 text-cyan-400 px-1.5 py-0.5 rounded-full">
-                  default
+                  padrão
                 </span>
               )}
             </button>
@@ -233,7 +233,7 @@ function ChangeIndicator({ change, higherIsBad }: { change: number | null; highe
   const isGood = higherIsBad ? !isUp : isUp
   return (
     <span className={`text-xs font-medium ${isGood ? 'text-green-400' : 'text-red-400'}`}>
-      {isUp ? '▲' : '▼'} {Math.abs(change).toFixed(1)}% vs. prior period
+      {isUp ? '▲' : '▼'} {Math.abs(change).toFixed(1)}% vs. período anterior
     </span>
   )
 }
@@ -324,7 +324,7 @@ function FunnelChart({
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
       <div className="flex flex-wrap items-start justify-between gap-2 mb-5">
         <div>
-          <p className="text-sm font-medium text-zinc-300">Results Funnel</p>
+          <p className="text-sm font-medium text-zinc-300">Funil de Resultados</p>
           <p className="text-xs text-zinc-500 mt-0.5">{channelLabel} · {periodLabel}</p>
         </div>
         {scopeNote && (
@@ -502,7 +502,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
     }
 
     load().catch(() => {
-      if (!cancelled) setError('Error loading campaigns.')
+      if (!cancelled) setError('Erro ao carregar campanhas.')
     }).finally(() => {
       if (!cancelled) setLoading(false)
     })
@@ -544,18 +544,18 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
 
     const fmtPct = (n: number) => `${n.toFixed(1)}%`
 
-    const ctr       = impressions > 0 ? `${fmtPct(clicks / impressions * 100)} clicked (CTR)` : null
-    const leadRate  = clicks > 0 && showLeads ? `${fmtPct(leads / clicks * 100)} became leads` : null
+    const ctr       = impressions > 0 ? `${fmtPct(clicks / impressions * 100)} clicaram (CTR)` : null
+    const leadRate  = clicks > 0 && showLeads ? `${fmtPct(leads / clicks * 100)} viraram leads` : null
     const convBase  = showLeads ? leads : clicks
-    const convRate  = convBase > 0 ? `${fmtPct(conversions / convBase * 100)} converted` : null
-    const avgTicket = conversions > 0 ? `Avg. ticket: ${fmtBRL(revenue / conversions)}` : null
+    const convRate  = convBase > 0 ? `${fmtPct(conversions / convBase * 100)} converteram` : null
+    const avgTicket = conversions > 0 ? `Ticket médio: ${fmtBRL(revenue / conversions)}` : null
 
     const steps: FunnelStep[] = [
-      { key: 'impressions', label: 'Impressions', barValue: impressions,  displayed: fmtInt(impressions),  rateFromPrev: null       },
-      { key: 'clicks',      label: 'Clicks',      barValue: clicks,       displayed: fmtInt(clicks),       rateFromPrev: ctr        },
+      { key: 'impressions', label: 'Impressões',  barValue: impressions,  displayed: fmtInt(impressions),  rateFromPrev: null       },
+      { key: 'clicks',      label: 'Cliques',     barValue: clicks,       displayed: fmtInt(clicks),       rateFromPrev: ctr        },
       ...(showLeads ? [{ key: 'leads', label: 'Leads', barValue: leads, displayed: fmtInt(leads), rateFromPrev: leadRate }] : []),
-      { key: 'conversions', label: 'Conversions', barValue: conversions,  displayed: fmtInt(conversions),  rateFromPrev: convRate   },
-      { key: 'revenue',     label: 'Revenue',     barValue: conversions,  displayed: fmtBRL(revenue),      rateFromPrev: avgTicket  },
+      { key: 'conversions', label: 'Conversões',  barValue: conversions,  displayed: fmtInt(conversions),  rateFromPrev: convRate   },
+      { key: 'revenue',     label: 'Receita',     barValue: conversions,  displayed: fmtBRL(revenue),      rateFromPrev: avgTicket  },
     ]
 
     return steps
@@ -586,9 +586,9 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
   const periodLabel       = periodOptions.find(o => o.value === period)?.label ?? ''
 
   const notConnectedMessage =
-    channel === 'google'                                                      ? 'Google Ads not connected.' :
-    (channel === 'meta' || channel === 'facebook' || channel === 'instagram') ? 'Meta Ads not connected.'   :
-    'No integrations connected.'
+    channel === 'google'                                                      ? 'Google Ads não conectado.' :
+    (channel === 'meta' || channel === 'facebook' || channel === 'instagram') ? 'Meta Ads não conectado.'   :
+    'Nenhuma integração conectada.'
 
   const prevChanges = {
     investment: prevSummary ? pct(summary.investment, prevSummary.investment) : null,
@@ -611,11 +611,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
   const showMetaSelector   = channel !== 'google' && metaAccounts.length > 1
 
   const channelOptions: { value: Channel; label: string; icon?: ReactNode }[] = [
-    { value: 'all',       label: 'All channels' },
-    { value: 'google',    label: 'Google Ads',  icon: <SiGoogleads  color="#4285F4" size={12} /> },
-    { value: 'meta',      label: 'Meta Ads',    icon: <SiMeta       color="#0082FB" size={12} /> },
-    { value: 'facebook',  label: 'Facebook',    icon: <SiFacebook   color="#1877F2" size={12} /> },
-    { value: 'instagram', label: 'Instagram',   icon: <InstagramIcon size={12} /> },
+    { value: 'all',       label: 'Todos os canais' },
+    { value: 'google',    label: 'Google Ads',      icon: <SiGoogleads  color="#4285F4" size={12} /> },
+    { value: 'meta',      label: 'Meta Ads',        icon: <SiMeta       color="#0082FB" size={12} /> },
+    { value: 'facebook',  label: 'Facebook',        icon: <SiFacebook   color="#1877F2" size={12} /> },
+    { value: 'instagram', label: 'Instagram',       icon: <InstagramIcon size={12} /> },
   ]
 
   return (
@@ -623,8 +623,8 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Reports</h1>
-        <p className="text-zinc-500 text-sm mt-1">Detailed analysis of your campaigns</p>
+        <h1 className="text-2xl font-bold text-white">Relatórios</h1>
+        <p className="text-zinc-500 text-sm mt-1">Análise detalhada das suas campanhas</p>
       </div>
 
       {/* Period + channel filters */}
@@ -639,7 +639,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
           {showGoogleSelector && (
             <div className="flex items-center gap-2">
               <SiGoogleads color="#4285F4" size={13} />
-              <span className="text-xs text-zinc-500">Account:</span>
+              <span className="text-xs text-zinc-500">Conta:</span>
               <AccountSelectorWithAll
                 accounts={googleAccounts}
                 selectedId={selectedGoogleId}
@@ -650,7 +650,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
           {showMetaSelector && (
             <div className="flex items-center gap-2">
               <SiMeta color="#0082FB" size={13} />
-              <span className="text-xs text-zinc-500">Meta account:</span>
+              <span className="text-xs text-zinc-500">Conta Meta:</span>
               <AccountSelectorWithAll
                 accounts={metaAccounts}
                 selectedId={selectedMetaId}
@@ -667,7 +667,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
         <div className="mb-6 rounded-xl bg-yellow-500/10 border border-yellow-500/30 px-4 py-3 text-yellow-400 text-sm">
           {notConnectedMessage}{' '}
           <a href="/dashboard/integracoes" className="underline font-medium">
-            Go to Integrations to connect.
+            Acesse Integrações para conectar.
           </a>
         </div>
       )}
@@ -687,10 +687,10 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Total Investment',  value: fmtBRL(summary.investment),       desc: periodLabel,              change: prevChanges.investment, higherIsBad: true  },
-            { label: 'Revenue Generated', value: fmtBRL(summary.revenue),          desc: periodLabel,              change: prevChanges.revenue,    higherIsBad: false },
-            { label: 'Average ROAS',      value: `${summary.roas.toFixed(1)}×`,    desc: 'Return on investment',   change: prevChanges.roas,       higherIsBad: false },
-            { label: 'Average CPA',       value: fmtBRL(summary.cpa),              desc: 'Cost per acquisition',   change: prevChanges.cpa,        higherIsBad: true  },
+            { label: 'Investimento Total', value: fmtBRL(summary.investment),       desc: periodLabel,                    change: prevChanges.investment, higherIsBad: true  },
+            { label: 'Receita Gerada',    value: fmtBRL(summary.revenue),          desc: periodLabel,                    change: prevChanges.revenue,    higherIsBad: false },
+            { label: 'ROAS Médio',        value: `${summary.roas.toFixed(1)}×`,    desc: 'Retorno sobre investimento',   change: prevChanges.roas,       higherIsBad: false },
+            { label: 'CPA Médio',         value: fmtBRL(summary.cpa),              desc: 'Custo por aquisição',          change: prevChanges.cpa,        higherIsBad: true  },
           ].map(({ label, value, desc, change, higherIsBad }) => (
             <div key={label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-2">
               <p className="text-zinc-400 text-sm">{label}</p>
@@ -705,11 +705,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
       {/* Funnel chart */}
       {(() => {
         const funnelChannelLabel =
-          channel === 'google'    ? 'Google Ads'   :
-          channel === 'facebook'  ? 'Facebook'     :
-          channel === 'instagram' ? 'Instagram'    :
-          channel === 'meta'      ? 'Meta Ads'     :
-          'All channels'
+          channel === 'google'    ? 'Google Ads'      :
+          channel === 'facebook'  ? 'Facebook'        :
+          channel === 'instagram' ? 'Instagram'       :
+          channel === 'meta'      ? 'Meta Ads'        :
+          'Todos os canais'
 
         const googleAccountLabel = selectedGoogleId !== ALL_ACCOUNTS
           ? (googleAccounts.find(a => a.account_id === selectedGoogleId)?.account_name ?? selectedGoogleId)
@@ -723,8 +723,8 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
           : funnelChannelLabel
 
         const scopeNote =
-          channel === 'meta' ? 'Facebook + Instagram combined' :
-          channel === 'all'  ? 'Google Ads + Meta Ads combined' :
+          channel === 'meta' ? 'Facebook + Instagram combinados' :
+          channel === 'all'  ? 'Google Ads + Meta Ads combinados' :
           undefined
 
         return loading
@@ -746,7 +746,7 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
         ) : (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
             <p className="text-sm font-medium text-zinc-300 mb-5">
-              ROAS Evolution — {periodLabel}
+              Evolução do ROAS — {periodLabel}
             </p>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={roasData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
@@ -787,16 +787,16 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-800">
             <p className="text-sm font-medium text-zinc-300">
-              Campaigns
+              Campanhas
               <span className="ml-2 text-xs text-zinc-500 font-normal">
-                {campaigns.length} found
+                {campaigns.length} encontradas
               </span>
             </p>
           </div>
 
           {isConnected && campaigns.length === 0 ? (
             <p className="px-6 py-8 text-center text-zinc-500 text-sm">
-              No campaigns found for the selected period.
+              Nenhuma campanha encontrada para o período selecionado.
             </p>
           ) : !isConnected ? null : (
             <div className="overflow-x-auto">
@@ -804,14 +804,14 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                 <thead>
                   <tr className="border-b border-zinc-800">
                     <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap">
-                      Campaign
+                      Campanha
                     </th>
                     {hasAccountNames && (
                       <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap">
-                        Account
+                        Conta
                       </th>
                     )}
-                    {['Status', 'Impressions', 'Clicks', 'CTR', 'Avg. CPC', 'Cost', 'Conversions', 'Conv. Rate', 'ROAS'].map(col => (
+                    {['Status', 'Impressões', 'Cliques', 'CTR', 'CPC Médio', 'Custo', 'Conversões', 'Taxa de Conv.', 'ROAS'].map(col => (
                       <th
                         key={col}
                         className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap"
@@ -857,11 +857,11 @@ export default function RelatoriosClient({ googleAccounts, metaAccounts }: Props
                         <td className="px-4 py-3 whitespace-nowrap">
                           {c.status === 'active' ? (
                             <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-green-500/15 text-green-400 px-2 py-0.5 rounded-full">
-                              <span className="size-1.5 rounded-full bg-green-400" />Active
+                              <span className="size-1.5 rounded-full bg-green-400" />Ativo
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-zinc-700/50 text-zinc-400 px-2 py-0.5 rounded-full">
-                              <span className="size-1.5 rounded-full bg-zinc-500" />Paused
+                              <span className="size-1.5 rounded-full bg-zinc-500" />Pausado
                             </span>
                           )}
                         </td>

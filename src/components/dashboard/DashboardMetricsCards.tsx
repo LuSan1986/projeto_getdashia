@@ -86,13 +86,13 @@ export default function DashboardMetricsCards({
     source === 'meta' && metaPlatform === 'facebook'  ? 'Facebook Ads' :
     source === 'meta' && metaPlatform === 'instagram' ? 'Instagram Ads' :
     source === 'meta' ? 'Meta Ads' : ''
-  const cardDesc = connected ? `Last 30 days — ${platformLabel}` : 'Channel not connected'
+  const cardDesc = connected ? `Últimos 30 dias — ${platformLabel}` : 'Canal não conectado'
 
   const cards = [
-    { label: 'Total Cost',    value: connected ? fmtBRL(totals.cost)       : fmtBRL(0)  },
-    { label: 'Clicks',        value: connected ? fmtInt(totals.clicks)      : '0'        },
-    { label: 'Conversions',   value: connected ? fmtInt(totals.conversions) : '0'        },
-    { label: 'Impressions',   value: connected ? fmtInt(totals.impressions) : '0'        },
+    { label: 'Custo Total',   value: connected ? fmtBRL(totals.cost)       : fmtBRL(0)  },
+    { label: 'Cliques',       value: connected ? fmtInt(totals.clicks)      : '0'        },
+    { label: 'Conversões',    value: connected ? fmtInt(totals.conversions) : '0'        },
+    { label: 'Impressões',    value: connected ? fmtInt(totals.impressions) : '0'        },
   ]
 
   return (

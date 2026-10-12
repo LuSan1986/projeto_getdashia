@@ -14,23 +14,23 @@ const geistMono = Geist_Mono({
 });
 
 const descricao =
-  "Centralize Google Ads, Meta Ads and e-commerce in a single dashboard. See which channel actually drove each sale and stop wasting time on manual reports.";
+  "Centralize Google Ads, Meta Ads e e-commerce em um painel único. Veja qual canal realmente gerou cada venda e pare de perder tempo com relatórios manuais.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://getdashia.com.br"),
-  title: "GetDashia — Multi-channel attribution and dashboards",
+  title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
   description: descricao,
   openGraph: {
-    title: "GetDashia — Multi-channel attribution and dashboards",
+    title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
     description: descricao,
     url: "https://getdashia.com.br",
     siteName: "GetDashia",
-    locale: "en_US",
+    locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GetDashia — Multi-channel attribution and dashboards",
+    title: "GetDashia — Atribuição multi-canal para gestores de tráfego",
     description: descricao,
   },
 };

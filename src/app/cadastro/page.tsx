@@ -41,9 +41,9 @@ export default function CadastroPage() {
     return (
       <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
         <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-8 border border-zinc-800 text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Check your email</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Verifique seu e-mail</h1>
           <p className="text-zinc-400 text-sm">
-            We sent a confirmation link to <span className="text-white">{email}</span>. Click it to activate your account.
+            Enviamos um link de confirmação para <span className="text-white">{email}</span>. Clique nele para ativar sua conta.
           </p>
         </div>
       </main>
@@ -53,12 +53,12 @@ export default function CadastroPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
-        <h1 className="text-2xl font-bold text-white mb-2">Create account</h1>
-        <p className="text-zinc-400 mb-6 text-sm">Start using GetDashia for free</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Criar conta</h1>
+        <p className="text-zinc-400 mb-6 text-sm">Comece a usar o GetDashia gratuitamente</p>
 
         <form onSubmit={handleSignUp} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm text-zinc-300 mb-1 block">Email</label>
+            <label className="text-sm text-zinc-300 mb-1 block">E-mail</label>
             <input
               type="email"
               value={email}
@@ -69,7 +69,7 @@ export default function CadastroPage() {
           </div>
 
           <div>
-            <label className="text-sm text-zinc-300 mb-1 block">Password</label>
+            <label className="text-sm text-zinc-300 mb-1 block">Senha</label>
             <input
               type="password"
               value={password}
@@ -87,14 +87,14 @@ export default function CadastroPage() {
             disabled={loading}
             className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Criando conta...' : 'Criar conta'}
           </button>
         </form>
 
         <p className="text-zinc-500 text-sm mt-6 text-center">
-          Already have an account?{' '}
+          Já tem conta?{' '}
           <Link href="/login" className="text-indigo-400 hover:underline">
-            Sign in
+            Entrar
           </Link>
         </p>
       </div>

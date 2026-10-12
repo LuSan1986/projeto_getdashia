@@ -238,7 +238,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
 
       {/* Area — Total Revenue (selectable period) */}
       <ChartCard
-        title={`Total Revenue — last ${revDays} days`}
+        title={`Receita Total — últimos ${revDays} dias`}
         headerRight={
           <div className="flex gap-1">
             {([7, 15, 30] as const).map(d => (
@@ -276,7 +276,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
               {...tooltipProps}
               formatter={(v: unknown) => {
                 const num = typeof v === 'number' ? v : 0
-                return [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(num), 'Revenue']
+                return [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'BRL' }).format(num), 'Receita']
               }}
             />
             <Area
@@ -293,7 +293,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
       </ChartCard>
 
       {/* Bars — Clicks by channel, last 6 months */}
-      <ChartCard title="Clicks by Channel — last 6 months">
+      <ChartCard title="Cliques por Canal — últimos 6 meses">
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={clicksData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
@@ -319,7 +319,7 @@ export default function Charts({ source = 'none', accountId, metaPlatform }: { s
       </ChartCard>
 
       {/* Pie — Conversions by source */}
-      <ChartCard title="Conversions by Source">
+      <ChartCard title="Conversões por Fonte">
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie
