@@ -44,9 +44,32 @@ O PRD completo está em `docs/PRD_GetDashia.md` no repositório.
 
 ## 4. ESTADO ATUAL
 
-### Resumo do estado do projeto (atualizado 05/10/2026)
+### Resumo do estado do projeto (atualizado 12/10/2026)
 
-O GetDashia está em fase de teste beta real, com cadastro aberto direto (sem mais captura de waitlist) e uma campanha paga rodando no Meta Ads para gerar os primeiros usuários reais. As integrações com Google Ads e Meta Ads já buscam dados reais (não mock) e agora suportam múltiplas contas de anúncio conectadas por cliente, com seletor no dashboard. O e-mail automático de boas-vindas (Resend) está funcionando na confirmação de cadastro. O dashboard recebeu tema visual cyberpunk (cores/tipografia, sem elementos decorativos extras) e métricas voltadas a gestores de tráfego (CPC médio, taxa de conversão, comparativo com período anterior). A UI foi traduzida para inglês para o Meta App Review. **Em 05/10/2026 reenviamos o pedido de revisão somente para `ads_read` — status: "Análise em andamento" (prazo típico de até 20 dias).** Páginas legais (/privacidade, /termos, /exclusao-de-dados) atualizadas com operador MEI/CNPJ, citação da OpenAI e outros ajustes de conformidade.
+O GetDashia está em fase de teste beta real, com cadastro aberto direto e integrações reais com Google Ads e Meta Ads (múltiplas contas por cliente, com seletor no dashboard). **O Meta App Review foi aprovado em 08/10/2026** (`ads_read`, Marketing API Access Tier, `public_profile`). A UI do dashboard voltou para pt-BR após a aprovação, com formatação correta de moeda/números, menu mobile funcionando e campo configurável de "valor por conversão" por conta (mostra Receita Estimada/ROAS Estimado quando a plataforma reporta R$1 padrão ou período misto). Páginas legais atualizadas, endpoint de diagnóstico temporário removido. Próximos focos: teste com gestor não-admin, Pixel do Meta, alerta de novos cadastros e estabilização do rastreamento de conversão do Google Ads.
+
+### Sessão 16 — concluído em 2026-10-12
+
+**Meta App Review aprovado (8/out/2026)** ✅
+- `ads_read` aprovado; Marketing API Access Tier e `public_profile` renovados. `business_management` não foi solicitado/aprovado — risco: contas de clientes acessíveis só via Business Manager podem não aparecer no seletor para usuários que não são admin do app. Teste com gestor não-admin ainda pendente.
+
+**Landing page alinhada com o produto real** ✅ (3 rodadas)
+- Removidas/ajustadas promessas de TikTok, e-commerce, Google Analytics, multi-touch, PDF agendado, white-label, trial de 7 dias e limites de plano (nada disso é aplicado no código). Recursos futuros marcados "Em breve". Planos sem limites, com nota "durante o beta, todos os recursos estão liberados"; /precos aponta para /cadastro (Stripe segue em modo teste). FAQ, footer (removidos /sobre e /blog; Contato = mailto) e passos da Hero corrigidos; "Cancele quando quiser" → "Sem compromisso."
+
+**Dashboard de volta para português do Brasil** ✅
+- O commit `727e611` havia traduzido dashboard/auth/onboarding para inglês (provavelmente para o screencast da Meta); revertido para pt-BR preservando toda a lógica atual.
+- Formatação pt-BR (`src/lib/format.ts`: R$ 300,92, 1.081, 46,6%), datas e meses em português nos gráficos e em Integrações.
+- Aviso "Valor de conversão não configurado" no lugar de Receita/ROAS enganosos.
+- Nome da conta (`account_name`) exibido em Integrações.
+
+**Menu mobile** ✅ — `DashboardShell.tsx` com botão hambúrguer e drawer lateral (`lg:hidden`), sidebar desktop inalterada. Obs.: um deploy falhou com "Git information retrieval failed" (problema da Vercel, não do código); resolvido com Redeploy. Quando o push não dispara o deploy, um commit vazio resolve.
+
+**Valor por conversão e Receita/ROAS estimados** ✅
+- Coluna `integrations.conversion_value`; campo "Valor por conversão (R$)" em cada conta em Integrações (rota `/api/integrations/update-conversion-value`).
+- Regra: se a plataforma informa valor real, usa; se o valor médio por conversão da plataforma for menor que o configurado (inclui o padrão de R$ 1 e o caso misto), usa conversões × valor configurado, rotulado "Receita Estimada / ROAS Estimado". Também aplicado ao Funil, aos gráficos, à Visão Geral e à comparação "vs. período anterior".
+- ConectaWeb: valor por conversão configurado em R$ 10 no GetDashia e também no Google Ads (ação "Clique de saída", 12/10/2026, vale só para conversões novas).
+
+**Segurança:** endpoint temporário `/api/google-ads/debug-mcc` removido (confirmado 404 em produção).
 
 ### Sessão 15 — concluído em 2026-10-05
 
@@ -226,25 +249,24 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## Pendente (ordem sugerida)
 
-1. Aguardar resultado do App Review (nova submissão 05/10/2026, somente `ads_read`) — não alterar telas, textos nem o fluxo do Facebook durante a revisão; responder rápido se a Meta pedir algo.
-2. Manter conta de teste do GetDashia funcionando durante a revisão; trocar a senha após a aprovação.
-3. Desligar o lembrete diário (scheduled task) do Meta Ads.
-4. Após aprovação: testar com pessoa de fora (outra conta do Facebook) e com conta de agência/Business Manager para verificar limitação do business_management.
-5. Acompanhar renovação periódica de acesso da Meta (Data Use Checklist) para não perder a permissão.
-6. Melhorias opcionais: adicionar parâmetro `state` no OAuth; corrigir landing page que mostra TikTok como "Conectado"; revisar afirmação sobre contratos de proteção de dados na política de privacidade.
-7. Investigar por que o menu lateral do dashboard (Relatórios/Integrações/Configurações) não aparece no navegador mobile real (a confirmar com print tirado direto do celular)
-8. Confirmar se as mensagens de contato já foram enviadas aos 5 leads reais identificados no waitlist
-9. Decidir o que fazer com a campanha duplicada em 428-562-3921 (pausar ou excluir)
-10. Considerar criar alerta (e-mail/WhatsApp) para avisar sobre novos cadastros confirmados no GetDashia
-11. Instalar o Pixel do Meta no site (adiado deliberadamente até agora)
-12. Retomar/concluir o conector Supermetrics Facebook Ads (FA) — ficou autenticado mas com 503 persistente; útil para criar campanhas futuras direto no Claude
-13. Corrigir logos na seção "Ferramentas" da landing page — Google Ads e TikTok Ads não aparecem
-14. Redesign das seções restantes da landing page: Preços, FAQ, Footer
-15. TikTok Ads API — avaliar depois que Meta for aprovado
-16. Adicionar gestor de tráfego como Testador no Meta Developer Portal
-17. Migrar Stripe para produção com CNPJ do MEI antes de cobrar de verdade — nesse momento, também migrar hosting do plano Vercel Hobby (gratuito, uso comercial não permitido) para o plano Pro (~$20/mês) e revisar limites gratuitos de Supabase/Resend caso o volume cresça
-18. Remover card "Plano Grátis" após período de testes beta
-19. Concluir verificação de anunciante da conta Google Ads GetDashia (530-781-4497), pausada por prazo vencido — botão "Corrigir" disponível no Google Ads Manager
+1. Teste com gestor não-admin do app Meta — convite e post em grupo de gestores já redigidos; confirmar se contas de clientes conectadas via Business Manager aparecem corretamente no seletor.
+2. Conferir em 2–3 dias (a partir de 12/10/2026) se Receita/ROAS nos cards ficam coerentes: o Google Ads agora rastreia "Clique de saída" a R$ 10 por conversão, então o período misto vai desaparecer gradualmente.
+3. Campanha do Meta Ads encerrada em 21/08 — sem campanha ativa de divulgação no momento; decidir quando retomar.
+4. Criar alerta de novos cadastros (e-mail/WhatsApp para o Luciano quando um usuário confirma e-mail).
+5. Instalar o Pixel do Meta no site.
+6. Gráfico "Receita Total" na Visão Geral: quando não configurado, mostrar aviso em vez de gráfico com R$0; corrigir eixo Y que exibe "R$0k"/"0k" para valores pequenos.
+7. Aviso "campanha limitada pelo orçamento" — ideia futura de alerta no dashboard.
+8. Verificação de anunciante pendente na conta Google Ads GetDashia (530-781-4497, pausada) — botão "Corrigir" disponível no Google Ads Manager.
+9. Migrar Stripe para produção + Vercel Pro antes de cobrar de verdade e aplicar os limites dos planos.
+10. Desligar o lembrete diário (scheduled task) do Meta Ads.
+11. Trocar a senha da conta de teste (`teste@getdashia.com.br`) — criada para o App Review da Meta.
+12. Acompanhar renovação periódica de acesso da Meta (Data Use Checklist) para não perder as permissões.
+13. Confirmar se as mensagens de contato já foram enviadas aos 5 leads reais identificados no waitlist.
+14. Decidir o que fazer com a campanha duplicada na conta 428-562-3921 (pausar ou excluir).
+15. Melhorias opcionais: adicionar parâmetro `state` no OAuth; corrigir landing page que mostra TikTok como "Conectado"; revisar afirmação sobre contratos de proteção de dados na política de privacidade.
+16. Corrigir logos na seção "Ferramentas" da landing page — Google Ads e TikTok Ads não aparecem corretamente.
+17. TikTok Ads API — avaliar após estabilizar Meta Ads.
+18. Remover card "Plano Grátis" após período de testes beta.
 
 ## 5. CREDENCIAIS E CONTAS IMPORTANTES
 
@@ -290,11 +312,11 @@ Redesign cyberpunk da landing page — estilo tech escuro com traços PCB, efeit
 
 ## 8. PRÓXIMO PASSO IMEDIATO
 
-1. Acompanhar o App Review (nova submissão 05/10/2026, somente `ads_read`) — não alterar nada durante a análise
-2. Após aprovação: testar com conta externa (outra conta do Facebook) e com conta de agência/Business Manager
-3. Desligar o lembrete diário (scheduled task) do Meta Ads
-4. Investigar menu lateral não aparecendo no mobile real (pedir print direto do celular)
-5. Corrigir logos na seção "Funciona com as ferramentas" da landing page (Google Ads e TikTok Ads não aparecem)
+1. Teste com gestor não-admin: enviar convite para o Meta Developer Portal (Testador) e publicar post no grupo de gestores para recrutar voluntário.
+2. Conferir em 2–3 dias (a partir de 12/10/2026) se Receita/ROAS nos cards estão coerentes — Google Ads agora rastreia R$ 10/conversão.
+3. Criar alerta de novos cadastros (e-mail/WhatsApp).
+4. Instalar Pixel do Meta no site.
+5. Corrigir gráfico "Receita Total" na Visão Geral (aviso quando não configurado; eixo Y sem "0k" para valores pequenos).
 
 ## 9. NOTAS E APRENDIZADOS
 
