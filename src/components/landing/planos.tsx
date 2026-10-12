@@ -126,7 +126,7 @@ export default function Planos() {
             background: "linear-gradient(90deg, transparent 0%, #06B6D4 30%, #E879F9 70%, transparent 100%)",
           }}/>
           <p className="mt-5 text-lg" style={{ color: "#94A3B8" }}>
-            Sem taxa de setup. Cancele quando quiser.
+            Sem taxa de setup. Sem compromisso.
           </p>
         </div>
 

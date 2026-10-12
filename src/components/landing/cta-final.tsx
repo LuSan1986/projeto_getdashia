@@ -90,7 +90,7 @@ export default function CtaFinal() {
         </div>
 
         <p className="mt-4 text-sm" style={{ color: "#475569" }}>
-          Sem cartão de crédito. Cancele quando quiser.
+          Sem cartão de crédito. Sem compromisso.
         </p>
       </div>
 

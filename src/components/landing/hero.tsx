@@ -410,8 +410,8 @@ export function HowItWorksStrip() {
         </svg>
       ),
       color: '#A855F7',
-      title: 'Personalize',
-      desc: 'Seus relatórios e dashboards no jeito que você precisa.',
+      title: 'Filtre',
+      desc: 'Escolha o período (7, 30 ou 90 dias) e o canal que quer analisar.',
     },
     {
       icon: (
@@ -423,8 +423,8 @@ export function HowItWorksStrip() {
         </svg>
       ),
       color: '#06B6D4',
-      title: 'Compartilhe',
-      desc: 'Com sua equipe e clientes em poucos cliques.',
+      title: 'Compare',
+      desc: 'Veja cada canal e a variação em relação ao período anterior.',
     },
   ]
 
